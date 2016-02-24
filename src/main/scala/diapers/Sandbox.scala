@@ -1,7 +1,7 @@
 package diapers
 
 import com.softwaremill.quicklens._
-import AsData._
+import AsTree._
 
 object Sandbox extends App {
   case class Street(name: String, house: Int)
@@ -15,14 +15,14 @@ object Sandbox extends App {
   val list2 = List(-1, -2) ++ list1.drop(2)
 
   println(AsciiPlotter.plot(
-    person1.asData,
-    person2.asData
+    person1.tree,
+    person2.tree
   ))
 
   println(DotPlotter.plot(
-    list1.asData,
-    list2.asData,
-    person1.asData,
-    person2.asData
+    list1.tree,
+    list2.tree,
+    person1.tree,
+    person2.tree
   ))
 }

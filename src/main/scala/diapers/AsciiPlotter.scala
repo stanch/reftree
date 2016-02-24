@@ -8,31 +8,31 @@ object AsciiPlotter {
     override def toString = text
   }
 
-  def plot(data: Data*) = {
-    def vertex(ref: Data.Ref) = {
-      val cells = ref.data.collect {
-        case Data.Ref(name, _, _) ⇒ s"<$name>"
-        case Data.Val(v) ⇒ v.toString
+  def plot(trees: Tree*) = {
+    def vertex(ref: Tree.Ref) = {
+      val cells = ref.children.collect {
+        case Tree.Ref(name, _, _) ⇒ s"<$name>"
+        case Tree.Val(v) ⇒ v.toString
       }.mkString(" (", " | ", ")")
       Vertex(ref.id, ref.name + cells)
     }
 
     val vertices = {
-      def inner(x: Data): Set[Data.Ref] = x match {
-        case r: Data.Ref ⇒ r.data.flatMap(inner).toSet + r
+      def inner(tree: Tree): Set[Tree.Ref] = tree match {
+        case r: Tree.Ref ⇒ r.children.flatMap(inner).toSet + r
         case _ ⇒ Set.empty
       }
-      data.flatMap(inner).toSet.map(vertex)
+      trees.flatMap(inner).toSet.map(vertex)
     }
 
     val edges = {
-      def inner(x: Data): Seq[(Data.Ref, Data.Ref)] = x match {
-        case r: Data.Ref ⇒ r.data
-          .collect { case rr: Data.Ref ⇒ rr }
+      def inner(tree: Tree): Seq[(Tree.Ref, Tree.Ref)] = tree match {
+        case r: Tree.Ref ⇒ r.children
+          .collect { case rr: Tree.Ref ⇒ rr }
           .flatMap(rr ⇒ inner(rr) :+ (r → rr))
         case _ ⇒ Seq.empty
       }
-      data.flatMap(inner).map { case (x, y) ⇒ vertex(x) → vertex(y) }.toList
+      trees.flatMap(inner).map { case (x, y) ⇒ vertex(x) → vertex(y) }.toList
     }
 
     GraphLayout.renderGraph(Graph(vertices, edges))

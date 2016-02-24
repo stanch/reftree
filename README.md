@@ -14,15 +14,15 @@ $ sbt run
 #### Lists
 
 ```scala
-import diapers.AsData._
+import diapers.AsTree._
 import diapers.DotPlotter
 
 val list1 = List(1, 2, 3, 4, 5)
 val list2 = List(-1, -2) ++ list1.drop(2)
 
 DotPlotter.plot(
-  list1.asData,
-  list2.asData
+  list1.tree,
+  list2.tree
 )
 ```
 
@@ -31,7 +31,7 @@ DotPlotter.plot(
 #### Case classes
 
 ```scala
-import diapers.AsData._
+import diapers.AsTree._
 import diapers.DotPlotter
 import com.softwaremill.quicklens._
 
@@ -43,8 +43,8 @@ val person1 = Person(Address(Street("Functional Rd.", 1), "London"), 35)
 val person2 = person1.modify(_.address.street.house).using(_ + 3)
 
 DotPlotter.plot(
-  person1.asData,
-  person2.asData
+  person1.tree,
+  person2.tree
 )
 ```
 
