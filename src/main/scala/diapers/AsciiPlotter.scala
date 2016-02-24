@@ -12,7 +12,8 @@ object AsciiPlotter {
     def vertex(ref: Tree.Ref) = {
       val cells = ref.children.collect {
         case Tree.Ref(name, _, _) ⇒ s"<$name>"
-        case Tree.Val(v) ⇒ v.toString
+        case Tree.Val(v: Int, Some(Tree.Val.Hex)) ⇒ v.toBinaryString
+        case Tree.Val(v, _) ⇒ v.toString
       }.mkString(" (", " | ", ")")
       Vertex(ref.id, ref.name + cells)
     }

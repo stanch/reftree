@@ -28,6 +28,20 @@ DotPlotter.plot(
 
 ![Lists example](example-lists.png)
 
+#### HashSets
+
+```scala
+import diapers.AsTree._
+import diapers.DotPlotter
+import scala.collection.immutable.HashSet
+
+val set = HashSet(1L, 2L + 2L * Int.MaxValue, 3L, 4L)
+
+DotPlotter.plot(set.tree)
+```
+
+![HashSets example](example-collision.png)
+
 #### Case classes
 
 ```scala
