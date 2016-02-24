@@ -12,7 +12,7 @@ object Data {
     def apply(value: AnyRef, data: Seq[Data]): Ref =
       Ref(
         value.getClass.getSimpleName,
-        s"${value.getClass.getName}-${System.identityHashCode(value)}",
+        s"${value.getClass.getName.replace("$", "").replace(".", "")}${System.identityHashCode(value)}",
         data
       )
   }
