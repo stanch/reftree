@@ -3,39 +3,43 @@ package diapers
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 
+import ToRefTree._
+
 object AsciiPlotter {
-  case class Vertex(id: String, text: String) {
+  private case class Vertex(id: String, text: String) {
     override def toString = text
   }
 
-  def plot(trees: Tree*) = {
-    def vertex(ref: Tree.Ref) = {
-      val cells = ref.children.collect {
-        case Tree.Ref(name, _, _) ⇒ s"<$name>"
-        case Tree.Val(v: Int, Some(Tree.Val.Hex)) ⇒ v.toBinaryString
-        case Tree.Val(v, _) ⇒ v.toString
-      }.mkString(" (", " | ", ")")
-      Vertex(ref.id, ref.name + cells)
-    }
+  private def vertex(ref: RefTree.Ref) = {
+    val cells = ref.children.collect {
+      case RefTree.Ref(name, _, _) ⇒ s"<$name>"
+      case RefTree.Val(v: Int, Some(RefTree.Val.Bin)) ⇒ v.toBinaryString
+      case RefTree.Val(v, _) ⇒ v.toString
+    }.mkString(" (", " | ", ")")
+    Vertex(ref.id, ref.name + cells)
+  }
 
+  def graph[A <: AnyRef: ToRefTree](objects: A*) = {
     val vertices = {
-      def inner(tree: Tree): Set[Tree.Ref] = tree match {
-        case r: Tree.Ref ⇒ r.children.flatMap(inner).toSet + r
+      def inner(tree: RefTree): Set[RefTree.Ref] = tree match {
+        case r: RefTree.Ref ⇒ r.children.flatMap(inner).toSet + r
         case _ ⇒ Set.empty
       }
-      trees.flatMap(inner).toSet.map(vertex)
+      objects.map(_.refTree).flatMap(inner).toSet.map(vertex)
     }
 
     val edges = {
-      def inner(tree: Tree): Seq[(Tree.Ref, Tree.Ref)] = tree match {
-        case r: Tree.Ref ⇒ r.children
-          .collect { case rr: Tree.Ref ⇒ rr }
+      def inner(tree: RefTree): Seq[(RefTree.Ref, RefTree.Ref)] = tree match {
+        case r: RefTree.Ref ⇒ r.children
+          .collect { case rr: RefTree.Ref ⇒ rr }
           .flatMap(rr ⇒ inner(rr) :+ (r → rr))
         case _ ⇒ Seq.empty
       }
-      trees.flatMap(inner).map { case (x, y) ⇒ vertex(x) → vertex(y) }.toList
+      objects.map(_.refTree).flatMap(inner).map { case (x, y) ⇒ vertex(x) → vertex(y) }.toList
     }
 
     GraphLayout.renderGraph(Graph(vertices, edges))
   }
+
+  def plot[A <: AnyRef: ToRefTree](objects: A*) = println(graph(objects: _*))
 }

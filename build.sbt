@@ -18,3 +18,7 @@ libraryDependencies ++= Seq(
 initialCommands in (Test, console) := """ammonite.repl.Main.run(""); System.exit(0)"""
 
 addCommandAlias("amm", "test:console")
+
+tutSettings
+
+tutTargetDirectory := baseDirectory.value

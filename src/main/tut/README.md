@@ -9,35 +9,16 @@ There are two visualization backends: `AsciiPlotter` and `DotPlotter`, which use
 
 First let’s look at the output from `AsciiPlotter`:
 
-```scala
-scala> import diapers.AsciiPlotter
+```tut
 import diapers.AsciiPlotter
 
-scala> AsciiPlotter.plot(List(1, 2, 3))
- ┌─────────────────┐
- │Cons (1 | <Cons>)│
- └────────┬────────┘
-          │         
-          v         
- ┌─────────────────┐
- │Cons (2 | <Cons>)│
- └────────┬────────┘
-          │         
-          v         
- ┌────────────────┐ 
- │Cons (3 | <Nil>)│ 
- └────────┬───────┘ 
-          │         
-          v         
-      ┌──────┐      
-      │Nil ()│      
-      └──────┘      
+AsciiPlotter.plot(List(1, 2, 3))
 ```
 
 Not bad, huh? Still, I guess most people will prefer to use `DotPlotter`.
 
 The following examples will assume these imports:
-```scala
+```tut:silent
 import scala.collection.immutable._
 import java.nio.file.Paths
 import diapers.DotPlotter
@@ -48,7 +29,7 @@ you can find the resulting images in the `examples` directory.
 
 #### Lists
 
-```scala
+```tut:silent
 val list1 = List(1, 2, 3, 4, 5)
 val list2 = List(-1, -2) ++ list1.drop(2)
 
@@ -59,7 +40,7 @@ DotPlotter(Paths.get("examples", "lists.png")).plot(list1, list2)
 
 #### Queues
 
-```scala
+```tut:silent
 val queue = Queue(1, 2) :+ 3 :+ 4
 
 DotPlotter(Paths.get("examples", "queue.png")).plot(queue)
@@ -69,7 +50,7 @@ DotPlotter(Paths.get("examples", "queue.png")).plot(queue)
 
 #### HashSets
 
-```scala
+```tut:silent
 val set = HashSet(1L, 2L + 2L * Int.MaxValue, 3L, 4L)
 
 DotPlotter(Paths.get("examples", "hashset.png")).plot(set)
@@ -83,7 +64,7 @@ Arbitrary case classes are supported automatically via
 [shapeless’ Generic](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes),
 as long as the types or their fields are supported.
 
-```scala
+```tut:silent
 import com.softwaremill.quicklens._
 
 case class Street(name: String, house: Int)
