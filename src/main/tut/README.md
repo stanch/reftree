@@ -48,6 +48,16 @@ DotPlotter(Paths.get("examples", "queue.png")).plot(queue)
 
 <img src="examples/queue.png" height="500px" alt="Queue example" />
 
+#### Vectors
+
+```tut:silent
+ val vector = 1 +: Vector(10 to 42: _*) :+ 50
+
+ DotPlotter(Paths.get("examples", "vector.png"), verticalSpacing = 2).plot(vector)
+```
+
+<img src="examples/vector.png" alt="Vector example" />
+
 #### HashSets
 
 ```tut:silent
@@ -77,4 +87,4 @@ val person2 = person1.modify(_.address.street.house).using(_ + 3)
 DotPlotter(Paths.get("examples", "case-classes.png")).plot(person1, person2)
 ```
 
-<img src="examples/case-classes.png" height="500px" alt="case classes example" />
+<img src="examples/case-classes.png" alt="case classes example" />

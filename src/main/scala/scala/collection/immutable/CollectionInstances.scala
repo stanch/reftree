@@ -31,6 +31,33 @@ trait CollectionInstances {
     }
   }
 
+  private def vectorArrayRefTree[A: ToRefTree](value: Array[AnyRef], depth: Int): RefTree = {
+    RefTree.Ref(value, value map { x ⇒
+      if (x == null) RefTree.Null
+      else if (depth > 0) vectorArrayRefTree[A](x.asInstanceOf[Array[AnyRef]], depth - 1)
+      else x.asInstanceOf[A].refTree
+    }).copy(name = "Array")
+  }
+
+  implicit def `Vector RefTree`[A: ToRefTree]: ToRefTree[Vector[A]] = new ToRefTree[Vector[A]] {
+    def refTree(value: Vector[A]): RefTree = {
+      val focus = value.privateField[Int]("focus")
+      val binFocus = RefTree.Val(focus, Some(RefTree.Val.Bin))
+      val layers = Seq(
+        value.display0, value.display1,
+        value.display2, value.display3,
+        value.display4, value.display5
+      ).zipWithIndex.map {
+        case (layer, depth) if depth < value.depth ⇒ vectorArrayRefTree[A](layer, depth)
+        case (layer, _) ⇒ RefTree.Null
+      }
+      RefTree.Ref(
+        value,
+        Seq(value.startIndex.refTree, value.endIndex.refTree, binFocus, value.depth.refTree) ++ layers
+      )
+    }
+  }
+
   implicit def `ListSet RefTree`[A: ToRefTree]: ToRefTree[ListSet[A]] = new ToRefTree[ListSet[A]] {
     // Technically this is cheating, but there is too much private stuff in ListSet
     // to construct the tree representation by direct introspection.

@@ -12,6 +12,9 @@ object RefTree {
     def apply(value: AnyVal): Val = Val(value, None)
   }
 
+  case object Null extends RefTree
+  case object Undefined extends RefTree
+
   case class Ref(name: String, id: String, children: Seq[RefTree]) extends RefTree
   object Ref {
     def apply(value: AnyRef, children: Seq[RefTree]): Ref = Ref(
