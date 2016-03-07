@@ -27,15 +27,31 @@ object RefTree {
   }
 }
 
+case class LabeledRefTree(label: String, tree: RefTree)
+
+object LabeledRefTree {
+  import scala.language.implicitConversions
+  import scala.language.experimental.macros
+  import scala.reflect.macros.blackbox
+
+  implicit def fromTuple[A: ToRefTree](pair: (String, A)): LabeledRefTree =
+    LabeledRefTree(pair._1, pair._2.refTree)
+
+  implicit def fromValue[A](value: A)(implicit toRefTree: ToRefTree[A]): LabeledRefTree =
+    macro fromValueMacro[A]
+
+  def fromValueMacro[A](c: blackbox.Context)(value: c.Expr[A])(toRefTree: c.Expr[ToRefTree[A]]) = {
+    import c.universe._
+    val source = q"_root_.sourcecode.Text($value)"
+    q"_root_.diapers.LabeledRefTree($source.source, $toRefTree.refTree($value))"
+  }
+}
+
 trait ToRefTree[-A] {
   def refTree(value: A): RefTree
 }
 
 object ToRefTree extends CollectionInstances with GenericInstances {
-  implicit class Syntax[A: ToRefTree](value: A) {
-    def refTree = implicitly[ToRefTree[A]].refTree(value)
-  }
-
   implicit def `AnyVal RefTree`: ToRefTree[AnyVal] = new ToRefTree[AnyVal] {
     def refTree(value: AnyVal) = RefTree.Val(value)
   }

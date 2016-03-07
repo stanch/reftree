@@ -38,6 +38,22 @@ DotPlotter(Paths.get("examples", "lists.png")).plot(list1, list2)
 
 <img src="examples/lists.png" height="500px" alt="Lists example" />
 
+By default the trees will be labeled with the arguments passed to `plot`
+(using [sourcecode](https://github.com/lihaoyi/sourcecode)),
+but you can provide the labels explicitly:
+
+```tut:silent
+val list1 = List(1, 2, 3, 4, 5)
+val list2 = List(-1, -2) ++ list1.drop(2)
+
+DotPlotter(Paths.get("examples", "lists2.png")).plot(
+  "positive" → list1,
+  "negative" → list2
+)
+```
+
+<img src="examples/lists2.png" height="500px" alt="Lists example" />
+
 #### Queues
 
 ```tut:silent
@@ -82,9 +98,12 @@ case class Address(street: Street, city: String)
 case class Person(address: Address, age: Int)
 
 val person1 = Person(Address(Street("Functional Rd.", 1), "London"), 35)
-val person2 = person1.modify(_.address.street.house).using(_ + 3)
+val person2 = person1.modify(_.address.street.house).using(_ + 2)
 
-DotPlotter(Paths.get("examples", "case-classes.png")).plot(person1, person2)
+DotPlotter(Paths.get("examples", "case-classes.png")).plot(
+  person1,
+  "person next door" → person2
+)
 ```
 
 <img src="examples/case-classes.png" alt="case classes example" />

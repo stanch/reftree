@@ -5,11 +5,20 @@ import java.nio.file.{Paths, Path}
 import uk.co.turingatemyhamster.graphvizs.dsl._
 import uk.co.turingatemyhamster.graphvizs.exec._
 
-import diapers.ToRefTree._
-
 import scala.sys.process.{Process, ProcessIO}
 
 case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Double = 0.8) {
+  private def label(tree: LabeledRefTree): Seq[Statement] = tree match {
+    case LabeledRefTree(label, ref: RefTree.Ref) ⇒
+      val labelNodeId = s"${ref.id}-label"
+      Seq(
+        labelNodeId :| ("shape" := "plaintext", "label" := label),
+        NodeId(labelNodeId, Some(Port(None, Some(CompassPt.S)))) -->
+        NodeId(ref.id, Some(Port(Some("n"), Some(CompassPt.N))))
+      )
+    case _ ⇒ Seq.empty
+  }
+
   private def node(ref: RefTree.Ref): NodeStatement = {
     val cells = ref.children.map(cell)
     val label = (s"<n>${ref.name}" +: cells).mkString("|")
@@ -32,7 +41,8 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
     case _ ⇒ None
   }
 
-  def plot[A <: AnyRef: ToRefTree](objects: A*) = {
+  def plot(trees: LabeledRefTree*) = {
+    trees.foreach(t ⇒ println(t.label))
     val graphAttrs = "graph" :| ("ranksep" := verticalSpacing)
     val nodeAttrs = "node" :| ("shape" := "Mrecord")
     val statements: Seq[Statement] = Seq(graphAttrs, nodeAttrs) ++ {
@@ -42,7 +52,7 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
         case _ ⇒
           Seq.empty
       }
-      objects.map(_.refTree).flatMap(inner)
+      trees.flatMap(label) ++ trees.map(_.tree).flatMap(inner)
     }
 
     val graph = StrictDigraph("g", statements: _*)

@@ -2,8 +2,6 @@ package diapers
 
 import shapeless._
 
-import ToRefTree.Syntax
-
 trait GenericInstances {
   implicit val `HNil RefTree`: ToRefTree[HNil] = new ToRefTree[HNil] {
     def refTree(value: HNil) = RefTree.Ref(value, Seq.empty)

@@ -3,8 +3,6 @@ package diapers
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 
-import ToRefTree._
-
 object AsciiPlotter {
   private case class Vertex(id: String, text: String) {
     override def toString = text
@@ -21,13 +19,19 @@ object AsciiPlotter {
     Vertex(ref.id, ref.name + cells)
   }
 
-  def graph[A <: AnyRef: ToRefTree](objects: A*) = {
+  private def label(tree: LabeledRefTree) = tree match {
+    case LabeledRefTree(label, ref: RefTree.Ref) ⇒ Some(Vertex(s"${ref.id}-label", label))
+    case _ ⇒ None
+  }
+
+  // TODO: this is somewhat ugly and inefficient
+  def graph(trees: LabeledRefTree*) = {
     val vertices = {
       def inner(tree: RefTree): Set[RefTree.Ref] = tree match {
         case r: RefTree.Ref ⇒ r.children.flatMap(inner).toSet + r
         case _ ⇒ Set.empty
       }
-      objects.map(_.refTree).flatMap(inner).toSet.map(vertex)
+      trees.map(_.tree).flatMap(inner).toSet.map(vertex) ++ trees.flatMap(label)
     }
 
     val edges = {
@@ -37,11 +41,12 @@ object AsciiPlotter {
           .flatMap(rr ⇒ inner(rr) :+ (r → rr))
         case _ ⇒ Seq.empty
       }
-      objects.map(_.refTree).flatMap(inner).map { case (x, y) ⇒ vertex(x) → vertex(y) }.toList
+      trees.map(_.tree).flatMap(inner).map { case (x, y) ⇒ vertex(x) → vertex(y) }.toList ++
+      trees.collect { case l @ LabeledRefTree(_, r: RefTree.Ref) ⇒ label(l).get → vertex(r) }.toList
     }
 
     GraphLayout.renderGraph(Graph(vertices, edges))
   }
 
-  def plot[A <: AnyRef: ToRefTree](objects: A*) = println(graph(objects: _*))
+  def plot(trees: LabeledRefTree*) = println(graph(trees: _*))
 }

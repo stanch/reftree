@@ -14,6 +14,11 @@ scala> import diapers.AsciiPlotter
 import diapers.AsciiPlotter
 
 scala> AsciiPlotter.plot(List(1, 2, 3))
+  ┌─────────────┐   
+  │List(1, 2, 3)│   
+  └───────┬─────┘   
+          │         
+          v         
  ┌─────────────────┐
  │Cons (1 | <Cons>)│
  └────────┬────────┘
@@ -57,6 +62,22 @@ DotPlotter(Paths.get("examples", "lists.png")).plot(list1, list2)
 
 <img src="examples/lists.png" height="500px" alt="Lists example" />
 
+By default the trees will be labeled with the arguments passed to `plot`
+(using [sourcecode](https://github.com/lihaoyi/sourcecode)),
+but you can provide the labels explicitly:
+
+```scala
+val list1 = List(1, 2, 3, 4, 5)
+val list2 = List(-1, -2) ++ list1.drop(2)
+
+DotPlotter(Paths.get("examples", "lists2.png")).plot(
+  "positive" → list1,
+  "negative" → list2
+)
+```
+
+<img src="examples/lists2.png" height="500px" alt="Lists example" />
+
 #### Queues
 
 ```scala
@@ -70,12 +91,12 @@ DotPlotter(Paths.get("examples", "queue.png")).plot(queue)
 #### Vectors
 
 ```scala
- val vector = 1 +: Vector(10 to 43: _*) :+ 50
+ val vector = 1 +: Vector(10 to 42: _*) :+ 50
 
  DotPlotter(Paths.get("examples", "vector.png"), verticalSpacing = 2).plot(vector)
 ```
 
-<img src="examples/vector.png" alt="Vectors example" />
+<img src="examples/vector.png" alt="Vector example" />
 
 #### HashSets
 
@@ -101,9 +122,12 @@ case class Address(street: Street, city: String)
 case class Person(address: Address, age: Int)
 
 val person1 = Person(Address(Street("Functional Rd.", 1), "London"), 35)
-val person2 = person1.modify(_.address.street.house).using(_ + 3)
+val person2 = person1.modify(_.address.street.house).using(_ + 2)
 
-DotPlotter(Paths.get("examples", "case-classes.png")).plot(person1, person2)
+DotPlotter(Paths.get("examples", "case-classes.png")).plot(
+  person1,
+  "person next door" → person2
+)
 ```
 
 <img src="examples/case-classes.png" alt="case classes example" />
