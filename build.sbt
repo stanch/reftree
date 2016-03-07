@@ -1,4 +1,4 @@
-name := "diapers"
+name := "reftree"
 
 scalaVersion := "2.11.7"
 

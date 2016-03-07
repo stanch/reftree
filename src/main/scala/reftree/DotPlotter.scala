@@ -1,4 +1,4 @@
-package diapers
+package reftree
 
 import java.nio.file.{Paths, Path}
 

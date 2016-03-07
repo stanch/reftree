@@ -1,4 +1,4 @@
-## Diapers — automatically generating DIAgrams of PERistent data Structures
+## reftree — automatic object tree diagrams for immutable data
 
 This project aims to provide visualizations for common functional data structures used in Scala.
 The visualizations are generated automatically from code, which allows to use them in an interactive fashion.
@@ -10,8 +10,8 @@ There are two visualization backends: `AsciiPlotter` and `DotPlotter`, which use
 First let’s look at the output from `AsciiPlotter`:
 
 ```scala
-scala> import diapers.AsciiPlotter
-import diapers.AsciiPlotter
+scala> import reftree.AsciiPlotter
+import reftree.AsciiPlotter
 
 scala> AsciiPlotter.plot(List(1, 2, 3))
   ┌─────────────┐   
@@ -45,7 +45,7 @@ The following examples will assume these imports:
 ```scala
 import scala.collection.immutable._
 import java.nio.file.Paths
-import diapers.DotPlotter
+import reftree.DotPlotter
 ```
 
 Since all the example code is actually run by [tut](https://github.com/tpolecat/tut),

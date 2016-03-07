@@ -1,6 +1,6 @@
 package scala.collection.immutable
 
-import diapers.{RefTree, ToRefTree, RefTreeSyntax}
+import reftree.{RefTree, ToRefTree, RefTreeSyntax}
 
 trait CollectionInstances {
   implicit class PrivateFields[A](value: A) {

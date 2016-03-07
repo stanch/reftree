@@ -1,4 +1,4 @@
-package diapers
+package reftree
 
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._

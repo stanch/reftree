@@ -1,4 +1,4 @@
-package diapers
+package reftree
 
 import shapeless._
 

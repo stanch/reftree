@@ -1,4 +1,4 @@
-package diapers
+package reftree
 
 import scala.collection.immutable.CollectionInstances
 
@@ -43,7 +43,7 @@ object LabeledRefTree {
   def fromValueMacro[A](c: blackbox.Context)(value: c.Expr[A])(toRefTree: c.Expr[ToRefTree[A]]) = {
     import c.universe._
     val source = q"_root_.sourcecode.Text($value)"
-    q"_root_.diapers.LabeledRefTree($source.source, $toRefTree.refTree($value))"
+    q"_root_.reftree.LabeledRefTree($source.source, $toRefTree.refTree($value))"
   }
 }
 

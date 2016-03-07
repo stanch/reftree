@@ -1,4 +1,4 @@
-package diapers
+package reftree
 
 import org.scalatest.{Inside, Matchers, FlatSpec}
 import ToRefTree._
