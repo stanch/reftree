@@ -12,17 +12,17 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
     case LabeledRefTree(label, ref: RefTree.Ref) ⇒
       val labelNodeId = s"${ref.id}-label"
       Seq(
-        labelNodeId :| ("shape" := "plaintext", "label" := label),
+        labelNodeId :| ("shape" := "plaintext", "label" := label, "fontname" := "consolas italic"),
         NodeId(labelNodeId, Some(Port(None, Some(CompassPt.S)))) -->
         NodeId(ref.id, Some(Port(Some("n"), Some(CompassPt.N))))
       )
     case _ ⇒ Seq.empty
   }
 
-  private def node(ref: RefTree.Ref): NodeStatement = {
+  private def node(ref: RefTree.Ref, color: String): NodeStatement = {
     val cells = ref.children.map(cell)
     val label = (s"<n>${ref.name}" +: cells).mkString("|")
-    ref.id :| ("label" := label)
+    ref.id :| ("label" := label, "color" := color, "fontcolor" := color)
   }
 
   private def cell(tree: RefTree): String = tree match {
@@ -33,10 +33,10 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
     case RefTree.Ref(_, id, _) ⇒ s"<$id>&middot;"
   }
 
-  private def link(id: String, tree: RefTree): Option[EdgeStatement] = tree match {
+  private def link(id: String, tree: RefTree, color: String): Option[EdgeStatement] = tree match {
     case RefTree.Ref(_, linkId, _) ⇒ Some(
       NodeId(id, Some(Port(Some(linkId), Some(CompassPt.S)))) -->
-      NodeId(linkId, Some(Port(Some("n"), Some(CompassPt.N))))
+      NodeId(linkId, Some(Port(Some("n"), Some(CompassPt.N)))) :| ("color" := color)
     )
     case _ ⇒ None
   }
@@ -44,15 +44,18 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
   def plot(trees: LabeledRefTree*) = {
     trees.foreach(t ⇒ println(t.label))
     val graphAttrs = "graph" :| ("ranksep" := verticalSpacing)
-    val nodeAttrs = "node" :| ("shape" := "Mrecord")
+    val nodeAttrs = "node" :| ("shape" := "Mrecord", "fontname" := "consolas")
     val statements: Seq[Statement] = Seq(graphAttrs, nodeAttrs) ++ {
-      def inner(tree: RefTree): Seq[Statement] = tree match {
+      def inner(tree: RefTree, color: String): Seq[Statement] = tree match {
         case r @ RefTree.Ref(_, id, children) ⇒
-          Seq(node(r)) ++ children.flatMap(inner) ++ children.flatMap(link(id, _))
+          Seq(node(r, color)) ++ children.flatMap(inner(_, color)) ++ children.flatMap(link(id, _, color))
         case _ ⇒
           Seq.empty
       }
-      trees.flatMap(label) ++ trees.map(_.tree).flatMap(inner)
+      val colors = Array("dodgerblue4", "forestgreen", "coral3")
+      trees.flatMap(label) ++ trees.map(_.tree).zipWithIndex.reverse.flatMap {
+        case (tree, i) ⇒ inner(tree, colors(i % colors.length))
+      }
     }
 
     val graph = StrictDigraph("g", statements: _*)

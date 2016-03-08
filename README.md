@@ -81,12 +81,13 @@ DotPlotter(Paths.get("examples", "lists2.png")).plot(
 #### Queues
 
 ```scala
-val queue = Queue(1, 2) :+ 3 :+ 4
+val queue1 = Queue(1, 2) :+ 3 :+ 4
+val queue2 = (queue1 :+ 5).tail
 
-DotPlotter(Paths.get("examples", "queue.png")).plot(queue)
+DotPlotter(Paths.get("examples", "queues.png"), verticalSpacing = 1.2).plot(queue1, queue2)
 ```
 
-<img src="examples/queue.png" height="500px" alt="Queue example" />
+<img src="examples/queues.png" height="500px" alt="Queue example" />
 
 #### Vectors
 
