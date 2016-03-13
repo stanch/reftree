@@ -140,7 +140,7 @@ This project is intended for educational purposes and therefore is licensed unde
 You can depend on it by adding these lines to your `build.sbt`:
 
 ```scala
-resolvers += Resolver.bintray("stanch", "maven")
+resolvers += Resolver.bintrayRepo("stanch", "maven")
 
-libraryDependencies += "org.stanch" %% "reftree" % "0.1.0"
+libraryDependencies += "org.stanch" %% "reftree" % "0.1.1"
 ```

@@ -59,4 +59,11 @@ object ToRefTree extends CollectionInstances with GenericInstances {
   implicit def `String RefTree`: ToRefTree[String] = new ToRefTree[String] {
     def refTree(value: String) = RefTree.Ref(value, value.map(RefTree.Val.apply))
   }
+
+  implicit def `Option RefTree`[A: ToRefTree]: ToRefTree[Option[A]] = new ToRefTree[Option[A]] {
+    def refTree(value: Option[A]) = value match {
+      case Some(a) ⇒ RefTree.Ref(value, Seq(a.refTree))
+      case None ⇒ RefTree.Ref(value, Seq.empty).copy(name = "None")
+    }
+  }
 }
