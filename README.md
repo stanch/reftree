@@ -132,3 +132,15 @@ DotPlotter(Paths.get("examples", "case-classes.png")).plot(
 ```
 
 <img src="examples/case-classes.png" alt="case classes example" />
+
+
+### Usage
+
+This project is intended for educational purposes and therefore is licensed under GPL 3.0.
+You can depend on it by adding these lines to your `build.sbt`:
+
+```scala
+resolvers += Resolver.bintray("stanch", "maven")
+
+libraryDependencies += "org.stanch" %% "reftree" % "0.1.0"
+```

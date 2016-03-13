@@ -1,4 +1,10 @@
+organization := "org.stanch"
+
 name := "reftree"
+
+version := "0.1.0"
+
+licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
 
 scalaVersion := "2.11.7"
 
