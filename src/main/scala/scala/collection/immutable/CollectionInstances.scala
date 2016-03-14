@@ -85,4 +85,19 @@ trait CollectionInstances {
         RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).copy(name = "HashSet.HashTrieSet")
     }
   }
+
+  object Actual {
+    implicit def list[A: ToRefTree]: ToRefTree[List[A]] = `List RefTree`[A]
+  }
+
+  object Simple {
+    class Nil
+
+    implicit def list[A: ToRefTree]: ToRefTree[List[A]] = new ToRefTree[List[A]] {
+      def refTree(value: List[A]): RefTree = value match {
+        case Nil ⇒ RefTree.Null
+        case _ ⇒ RefTree.Ref(value, value.map(_.refTree)).copy(name = "List")
+      }
+    }
+  }
 }
