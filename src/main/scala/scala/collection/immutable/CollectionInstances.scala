@@ -22,7 +22,7 @@ trait CollectionInstances {
     }
   }
 
-  implicit def `Queue RefTree`[A: ToRefTree]: ToRefTree[Queue[A]] = new ToRefTree[Queue[A]] {
+  implicit def `Queue RefTree`[A: ToRefTree](implicit list: ToRefTree[List[A]]): ToRefTree[Queue[A]] = new ToRefTree[Queue[A]] {
     def refTree(value: Queue[A]): RefTree = {
       val in = value.privateField[List[A]]("in")
       val out = value.privateField[List[A]]("out")

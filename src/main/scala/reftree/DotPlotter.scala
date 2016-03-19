@@ -29,7 +29,7 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
     case RefTree.Val(value: Int, Some(RefTree.Val.Bin)) ⇒ value.toBinaryString
     case RefTree.Val(value, _) ⇒ value.toString.replace(" ", "_")
     case RefTree.Null ⇒ "&empty;"
-    case RefTree.Undefined ⇒ "&#9617;"
+    case RefTree.Elided ⇒ "&hellip;"
     case RefTree.Ref(_, id, _) ⇒ s"<$id-$i>&middot;"
   }
 

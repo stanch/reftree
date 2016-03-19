@@ -14,7 +14,7 @@ object AsciiPlotter {
       case RefTree.Val(v: Int, Some(RefTree.Val.Bin)) ⇒ v.toBinaryString
       case RefTree.Val(v, _) ⇒ v.toString
       case RefTree.Null ⇒ "∅"
-      case RefTree.Undefined ⇒ "░"
+      case RefTree.Elided ⇒ "…"
     }.mkString(" (", " | ", ")")
     Vertex(ref.id, ref.name + cells)
   }

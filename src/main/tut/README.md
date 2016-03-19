@@ -65,6 +65,21 @@ DotPlotter(Paths.get("examples", "queues.png"), verticalSpacing = 1.2).plot(queu
 
 <img src="examples/queues.png" height="500px" alt="Queue example" />
 
+To reduce visual noise from `Cons` and `Nil`, the visualization of lists can be simplified.
+Note however that this option also hides structural sharing:
+
+```tut:silent
+import reftree.ToRefTree.Simple.list
+
+val queue1 = Queue(1, 2) :+ 3 :+ 4
+val queue2 = (queue1 :+ 5).tail
+
+DotPlotter(Paths.get("examples", "queues2.png")).plot(queue1, queue2)
+```
+
+<img src="examples/queues2.png" alt="Queue example" />
+
+
 #### Vectors
 
 ```tut:silent

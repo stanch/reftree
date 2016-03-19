@@ -13,7 +13,7 @@ object RefTree {
   }
 
   case object Null extends RefTree
-  case object Undefined extends RefTree
+  case object Elided extends RefTree
 
   case class Ref(name: String, id: String, children: Seq[RefTree]) extends RefTree
   object Ref {
