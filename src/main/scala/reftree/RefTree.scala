@@ -47,8 +47,15 @@ object LabeledRefTree {
   }
 }
 
-trait ToRefTree[-A] {
+trait ToRefTree[-A] { self ⇒
   def refTree(value: A): RefTree
+
+  def suppressField(index: Int) = new ToRefTree[A] {
+    def refTree(value: A) = self.refTree(value) match {
+      case r: RefTree.Ref ⇒ r.copy(children = r.children.updated(index, RefTree.Elided))
+      case t ⇒ t
+    }
+  }
 }
 
 object ToRefTree extends CollectionInstances with GenericInstances {

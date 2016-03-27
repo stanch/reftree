@@ -157,5 +157,5 @@ You can depend on it by adding these lines to your `build.sbt`:
 ```scala
 resolvers += Resolver.bintrayRepo("stanch", "maven")
 
-libraryDependencies += "org.stanch" %% "reftree" % "0.1.2"
+libraryDependencies += "org.stanch" %% "reftree" % "0.1.3"
 ```
