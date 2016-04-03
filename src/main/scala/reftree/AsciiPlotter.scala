@@ -10,11 +10,12 @@ object AsciiPlotter {
 
   private def vertex(ref: RefTree.Ref) = {
     val cells = ref.children.collect {
-      case RefTree.Ref(name, _, _) ⇒ s"<$name>"
-      case RefTree.Val(v: Int, Some(RefTree.Val.Bin)) ⇒ v.toBinaryString
-      case RefTree.Val(v, _) ⇒ v.toString
-      case RefTree.Null ⇒ "∅"
-      case RefTree.Elided ⇒ "…"
+      case RefTree.Ref(name, _, _, _) ⇒ s"<$name>"
+      case RefTree.Val(v: Int, hints, _) ⇒
+        if (hints.contains(RefTree.Val.Bin)) v.toBinaryString
+        else v.toString
+      case _: RefTree.Null ⇒ "∅"
+      case _: RefTree.Elided ⇒ "…"
     }.mkString(" (", " | ", ")")
     Vertex(ref.id, ref.name + cells)
   }

@@ -11,6 +11,13 @@ trait CollectionInstances {
     }
   }
 
+  implicit def `Option RefTree`[A: ToRefTree]: ToRefTree[Option[A]] = new ToRefTree[Option[A]] {
+    def refTree(value: Option[A]) = value match {
+      case Some(a) ⇒ RefTree.Ref(value, Seq(a.refTree))
+      case None ⇒ RefTree.Ref(value, Seq.empty).copy(name = "None")
+    }
+  }
+
   implicit def `Array RefTree`[A: ToRefTree]: ToRefTree[Array[A]] = new ToRefTree[Array[A]] {
     def refTree(value: Array[A]): RefTree = RefTree.Ref(value, value.map(_.refTree)).copy(name = "Array")
   }
@@ -32,7 +39,7 @@ trait CollectionInstances {
 
   private def vectorArrayRefTree[A: ToRefTree](value: Array[AnyRef], depth: Int): RefTree = {
     RefTree.Ref(value, value map { x ⇒
-      if (x == null) RefTree.Null
+      if (x == null) RefTree.Null()
       else if (depth > 0) vectorArrayRefTree[A](x.asInstanceOf[Array[AnyRef]], depth - 1)
       else x.asInstanceOf[A].refTree
     }).copy(name = "Array")
@@ -41,14 +48,14 @@ trait CollectionInstances {
   implicit def `Vector RefTree`[A: ToRefTree]: ToRefTree[Vector[A]] = new ToRefTree[Vector[A]] {
     def refTree(value: Vector[A]): RefTree = {
       val focus = value.privateField[Int]("focus")
-      val binFocus = RefTree.Val(focus, Some(RefTree.Val.Bin))
+      val binFocus = RefTree.Val(focus, Some(RefTree.Val.Bin), highlight = false)
       val layers = Seq(
         value.display0, value.display1,
         value.display2, value.display3,
         value.display4, value.display5
       ).zipWithIndex.map {
         case (layer, depth) if depth < value.depth ⇒ vectorArrayRefTree[A](layer, depth)
-        case (layer, _) ⇒ RefTree.Null
+        case (layer, _) ⇒ RefTree.Null()
       }
       RefTree.Ref(
         value,
@@ -81,21 +88,26 @@ trait CollectionInstances {
         val size = trie.privateField[Int]("size0")
         val bitmap = trie.privateField[Int]("bitmap")
         val elems = trie.privateField[Array[HashSet[A]]]("elems")
-        val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin))
+        val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false)
         RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).copy(name = "HashSet.HashTrieSet")
     }
   }
 
   object Actual {
+    implicit def option[A: ToRefTree]: ToRefTree[Option[A]] = `Option RefTree`[A]
     implicit def list[A: ToRefTree]: ToRefTree[List[A]] = `List RefTree`[A]
   }
 
   object Simple {
-    class Nil
-
+    implicit def option[A: ToRefTree]: ToRefTree[Option[A]] = new ToRefTree[Option[A]] {
+      def refTree(value: Option[A]): RefTree = value match {
+        case None ⇒ RefTree.Null()
+        case Some(v) ⇒ v.refTree
+      }
+    }
     implicit def list[A: ToRefTree]: ToRefTree[List[A]] = new ToRefTree[List[A]] {
       def refTree(value: List[A]): RefTree = value match {
-        case Nil ⇒ RefTree.Null
+        case Nil ⇒ RefTree.Null()
         case _ ⇒ RefTree.Ref(value, value.map(_.refTree)).copy(name = "List")
       }
     }

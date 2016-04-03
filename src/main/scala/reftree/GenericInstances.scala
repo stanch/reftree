@@ -9,7 +9,7 @@ trait GenericInstances {
 
   implicit def `HCons RefTree`[H: ToRefTree, T <: HList: ToRefTree]: ToRefTree[H :: T] = new ToRefTree[H :: T] {
     def refTree(value: H :: T): RefTree = RefTree.Ref(value, value.head.refTree +: (value.tail.refTree match {
-      case RefTree.Ref(_, _, children) ⇒ children
+      case RefTree.Ref(_, _, children, _) ⇒ children
       case x ⇒ Seq(x)
     }))
   }

@@ -12,10 +12,20 @@ class ToRefTreeSpec extends FlatSpec with Matchers {
       case RefTree.Ref(
         "Person", _,
         Seq(
-          RefTree.Val(3, None),
+          RefTree.Val(3, None, false),
           RefTree.Ref(
             "String", _,
-            Seq(RefTree.Val('N', None), RefTree.Val('i', None), RefTree.Val('c', None), RefTree.Val('k', None))))) ⇒
+            Seq(
+              RefTree.Val('N', None, false),
+              RefTree.Val('i', None, false),
+              RefTree.Val('c', None, false),
+              RefTree.Val('k', None, false)
+            ),
+            false
+          )
+        ),
+        false
+      ) ⇒
     }
   }
 }

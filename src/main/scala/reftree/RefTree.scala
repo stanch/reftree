@@ -2,27 +2,30 @@ package reftree
 
 import scala.collection.immutable.CollectionInstances
 
-sealed trait RefTree
+sealed trait RefTree {
+  def highlight: Boolean
+}
 
 object RefTree {
-  case class Val(value: AnyVal, hint: Option[Val.Hint]) extends RefTree
+  case class Val(value: AnyVal, hint: Option[Val.Hint], highlight: Boolean) extends RefTree
   object Val {
     sealed trait Hint
     case object Bin extends Hint
-    def apply(value: AnyVal): Val = Val(value, None)
+    def apply(value: AnyVal): Val = Val(value, None, highlight = false)
   }
 
-  case object Null extends RefTree
-  case object Elided extends RefTree
+  case class Null(highlight: Boolean = false) extends RefTree
+  case class Elided(highlight: Boolean = false) extends RefTree
 
-  case class Ref(name: String, id: String, children: Seq[RefTree]) extends RefTree
+  case class Ref(name: String, id: String, children: Seq[RefTree], highlight: Boolean) extends RefTree
   object Ref {
     def apply(value: AnyRef, children: Seq[RefTree]): Ref = Ref(
       // getSimpleName sometimes does not work, see https://issues.scala-lang.org/browse/SI-5425
       try { value.getClass.getSimpleName }
       catch { case _: InternalError ⇒ value.getClass.getName.replaceAll("^.+\\$", "") },
       s"${value.getClass.getName}${System.identityHashCode(value)}",
-      children
+      children,
+      highlight = false
     )
   }
 }
@@ -52,7 +55,7 @@ trait ToRefTree[-A] { self ⇒
 
   def suppressField(index: Int) = new ToRefTree[A] {
     def refTree(value: A) = self.refTree(value) match {
-      case r: RefTree.Ref ⇒ r.copy(children = r.children.updated(index, RefTree.Elided))
+      case r: RefTree.Ref ⇒ r.copy(children = r.children.updated(index, RefTree.Elided()))
       case t ⇒ t
     }
   }
@@ -65,12 +68,5 @@ object ToRefTree extends CollectionInstances with GenericInstances {
 
   implicit def `String RefTree`: ToRefTree[String] = new ToRefTree[String] {
     def refTree(value: String) = RefTree.Ref(value, value.map(RefTree.Val.apply))
-  }
-
-  implicit def `Option RefTree`[A: ToRefTree]: ToRefTree[Option[A]] = new ToRefTree[Option[A]] {
-    def refTree(value: Option[A]) = value match {
-      case Some(a) ⇒ RefTree.Ref(value, Seq(a.refTree))
-      case None ⇒ RefTree.Ref(value, Seq.empty).copy(name = "None")
-    }
   }
 }
