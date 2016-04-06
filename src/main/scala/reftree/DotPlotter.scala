@@ -20,22 +20,31 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
   }
 
   private def node(ref: RefTree.Ref, color: String): NodeStatement = {
+    val title = s"""<td port="n">${ref.name}</td>"""
     val cells = ref.children.zipWithIndex map { case (c, i) ⇒ cell(c, i) }
-    val label = (s"<n>${ref.name}" +: cells).mkString("|")
-    val highlight = if (ref.highlight) Some("penwidth" := 2) else None
-    ref.id :| ("label" := label, "color" := color, "fontcolor" := color) :| (highlight.toSeq: _*)
+    val highlight = if (ref.highlight) """bgcolor="cornsilk"""" else ""
+    val style = s"""style="rounded" cellspacing="0" cellpadding="6" cellborder="0" columns="*" $highlight"""
+    val label = s"""<<table $style><tr>${(title +: cells).mkString}</tr></table>>"""
+    ref.id :| (AttributeAssignment("label", ID.Identifier(label)), "color" := color, "fontcolor" := color)
   }
 
   private def cell(tree: RefTree, i: Int): String = {
-    // TODO: use HTML nodes to do proper highlighting
     val label = tree match {
       case RefTree.Val(value: Int, Some(RefTree.Val.Bin), _) ⇒ value.toBinaryString
       case RefTree.Val(value, _, _) ⇒ value.toString.replace(" ", "_")
       case _: RefTree.Null ⇒ "&empty;"
       case _: RefTree.Elided ⇒ "&hellip;"
-      case RefTree.Ref(_, id, _, _) ⇒ s"<$id-$i>&middot;"
+      case RefTree.Ref(_, id, _, _) ⇒ "&middot;"
     }
-    if (tree.highlight && !tree.isInstanceOf[RefTree.Ref]) s"[$label]" else label
+    val port = tree match {
+      case RefTree.Ref(_, id, _, _) ⇒ s"""PORT="$id-$i""""
+      case _ ⇒ ""
+    }
+    val highlight = (tree, tree.highlight) match {
+      case (_, false) | (_: RefTree.Ref, _) ⇒ ""
+      case _ ⇒ """bgcolor="cornsilk""""
+    }
+    s"""<td $port $highlight>$label</td>"""
   }
 
   private def link(id: String, tree: RefTree, i: Int, color: String): Option[EdgeStatement] = tree match {
@@ -65,8 +74,9 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
 
   def plot(trees: LabeledRefTree*) = {
     val graphAttrs = "graph" :| ("ranksep" := verticalSpacing)
-    val nodeAttrs = "node" :| ("shape" := "Mrecord", "fontname" := "consolas")
-    val statements: Seq[Statement] = Seq(graphAttrs, nodeAttrs) ++ {
+    val nodeAttrs = "node" :| ("shape" := "plaintext", "fontname" := "consolas")
+    val edgeAttrs = "edge" :| ("arrowsize" := "0.7")
+    val statements: Seq[Statement] = Seq(graphAttrs, nodeAttrs, edgeAttrs) ++ {
       def inner(tree: RefTree, color: String): Seq[Statement] = tree match {
         case r @ RefTree.Ref(_, id, children, _) ⇒
           Seq(node(r, color)) ++
