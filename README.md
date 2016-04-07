@@ -2,50 +2,18 @@
 
 This project aims to provide visualizations for common functional data structures used in Scala.
 The visualizations are generated automatically from code, which allows to use them in an interactive fashion.
-There are two visualization backends: `AsciiPlotter` and `DotPlotter`, which use ASCII art and graphviz respectively.
+To use this library you will need to have [GraphViz](http://www.graphviz.org/) installed.
 
 
 ### Examples
 
-First let’s look at the output from `AsciiPlotter`:
-
-```scala
-scala> import reftree.AsciiPlotter
-import reftree.AsciiPlotter
-
-scala> AsciiPlotter.plot(List(1, 2, 3))
-  ┌─────────────┐   
-  │List(1, 2, 3)│   
-  └───────┬─────┘   
-          │         
-          v         
- ┌─────────────────┐
- │Cons (1 | <Cons>)│
- └────────┬────────┘
-          │         
-          v         
- ┌─────────────────┐
- │Cons (2 | <Cons>)│
- └────────┬────────┘
-          │         
-          v         
- ┌────────────────┐ 
- │Cons (3 | <Nil>)│ 
- └────────┬───────┘ 
-          │         
-          v         
-      ┌──────┐      
-      │Nil ()│      
-      └──────┘      
-```
-
-Not bad, huh? Still, I guess most people will prefer to use `DotPlotter`.
-
-The following examples will assume these imports:
+The following examples will assume these declarations:
 ```scala
 import scala.collection.immutable._
 import java.nio.file.Paths
-import reftree.DotPlotter
+import reftree.Diagram
+
+def name(n: String) = Paths.get("examples", s"$n.png")
 ```
 
 Since all the example code is actually run by [tut](https://github.com/tpolecat/tut),
@@ -57,7 +25,7 @@ you can find the resulting images in the `examples` directory.
 val list1 = List(1, 2, 3, 4, 5)
 val list2 = List(-1, -2) ++ list1.drop(2)
 
-DotPlotter(Paths.get("examples", "lists.png")).plot(list1, list2)
+Diagram(name("lists")).show(list1, list2)
 ```
 
 <img src="examples/lists.png" height="500px" alt="Lists example" />
@@ -70,7 +38,7 @@ but you can provide the labels explicitly:
 val list1 = List(1, 2, 3, 4, 5)
 val list2 = List(-1, -2) ++ list1.drop(2)
 
-DotPlotter(Paths.get("examples", "lists2.png")).plot(
+Diagram(name("lists2")).show(
   "positive" → list1,
   "negative" → list2
 )
@@ -84,7 +52,7 @@ DotPlotter(Paths.get("examples", "lists2.png")).plot(
 val queue1 = Queue(1, 2) :+ 3 :+ 4
 val queue2 = (queue1 :+ 5).tail
 
-DotPlotter(Paths.get("examples", "queues.png"), verticalSpacing = 1.2).plot(queue1, queue2)
+Diagram(name("queues"), verticalSpacing = 1.2).show(queue1, queue2)
 ```
 
 <img src="examples/queues.png" height="500px" alt="Queue example" />
@@ -98,7 +66,7 @@ import reftree.ToRefTree.Simple.list
 val queue1 = Queue(1, 2) :+ 3 :+ 4
 val queue2 = (queue1 :+ 5).tail
 
-DotPlotter(Paths.get("examples", "queues2.png")).plot(queue1, queue2)
+Diagram(name("queues2")).show(queue1, queue2)
 ```
 
 <img src="examples/queues2.png" alt="Queue example" />
@@ -109,7 +77,7 @@ DotPlotter(Paths.get("examples", "queues2.png")).plot(queue1, queue2)
 ```scala
  val vector = 1 +: Vector(10 to 42: _*) :+ 50
 
- DotPlotter(Paths.get("examples", "vector.png"), verticalSpacing = 2).plot(vector)
+ Diagram(name("vector"), verticalSpacing = 2).show(vector)
 ```
 
 <img src="examples/vector.png" alt="Vector example" />
@@ -119,7 +87,7 @@ DotPlotter(Paths.get("examples", "queues2.png")).plot(queue1, queue2)
 ```scala
 val set = HashSet(1L, 2L + 2L * Int.MaxValue, 3L, 4L)
 
-DotPlotter(Paths.get("examples", "hashset.png")).plot(set)
+Diagram(name("hashset")).show(set)
 ```
 
 <img src="examples/hashset.png" height="500px" alt="HashSet example" />
@@ -140,7 +108,7 @@ case class Person(address: Address, age: Int)
 val person1 = Person(Address(Street("Functional Rd.", 1), "London"), 35)
 val person2 = person1.modify(_.address.street.house).using(_ + 2)
 
-DotPlotter(Paths.get("examples", "case-classes.png")).plot(
+Diagram(name("case-classes")).show(
   person1,
   "person next door" → person2
 )
@@ -152,10 +120,19 @@ DotPlotter(Paths.get("examples", "case-classes.png")).plot(
 ### Usage
 
 This project is intended for educational purposes and therefore is licensed under GPL 3.0.
-You can depend on it by adding these lines to your `build.sbt`:
+
+To try it interactively:
+
+```
+$ sbt amm
+@ show(List(1, 2, 3))
+// display diagram.png with your favorite image viewer
+```
+
+You can depend on the library by adding these lines to your `build.sbt`:
 
 ```scala
 resolvers += Resolver.bintrayRepo("stanch", "maven")
 
-libraryDependencies += "org.stanch" %% "reftree" % "0.2.1"
+libraryDependencies += "org.stanch" %% "reftree" % "0.3.0"
 ```

@@ -7,7 +7,7 @@ import uk.co.turingatemyhamster.graphvizs.exec._
 
 import scala.sys.process.{Process, ProcessIO}
 
-case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Double = 0.8) {
+case class Diagram(output: Path = Paths.get("diagram.png"), verticalSpacing: Double = 0.8) {
   private def label(tree: LabeledRefTree): Seq[Statement] = tree match {
     case LabeledRefTree(label, ref: RefTree.Ref) ⇒
       val labelNodeId = s"${ref.id}-label"
@@ -22,7 +22,7 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
   private def node(ref: RefTree.Ref, color: String): NodeStatement = {
     val title = s"""<td port="n">${ref.name}</td>"""
     val cells = ref.children.zipWithIndex map { case (c, i) ⇒ cell(c, i) }
-    val highlight = if (ref.highlight) """bgcolor="cornsilk"""" else ""
+    val highlight = if (ref.highlight) """bgcolor="bisque"""" else ""
     val style = s"""style="rounded" cellspacing="0" cellpadding="6" cellborder="0" columns="*" $highlight"""
     val label = s"""<<table $style><tr>${(title +: cells).mkString}</tr></table>>"""
     ref.id :| (AttributeAssignment("label", ID.Identifier(label)), "color" := color, "fontcolor" := color)
@@ -42,7 +42,7 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
     }
     val highlight = (tree, tree.highlight) match {
       case (_, false) | (_: RefTree.Ref, _) ⇒ ""
-      case _ ⇒ """bgcolor="cornsilk""""
+      case _ ⇒ """bgcolor="bisque""""
     }
     s"""<td $port $highlight>$label</td>"""
   }
@@ -72,7 +72,7 @@ case class DotPlotter(output: Path = Paths.get("graph.png"), verticalSpacing: Do
     }
   }
 
-  def plot(trees: LabeledRefTree*) = {
+  def show(trees: LabeledRefTree*) = {
     val graphAttrs = "graph" :| ("ranksep" := verticalSpacing)
     val nodeAttrs = "node" :| ("shape" := "plaintext", "fontname" := "consolas")
     val edgeAttrs = "edge" :| ("arrowsize" := "0.7")

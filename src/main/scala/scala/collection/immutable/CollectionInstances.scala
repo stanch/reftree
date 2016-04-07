@@ -33,7 +33,7 @@ trait CollectionInstances {
     def refTree(value: Queue[A]): RefTree = {
       val in = value.privateField[List[A]]("in")
       val out = value.privateField[List[A]]("out")
-      RefTree.Ref(value, Seq(in.refTree, out.refTree))
+      RefTree.Ref(value, Seq(out.refTree, in.refTree))
     }
   }
 
