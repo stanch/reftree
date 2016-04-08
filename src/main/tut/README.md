@@ -28,7 +28,7 @@ val list2 = List(-1, -2) ++ list1.drop(2)
 Diagram(name("lists")).show(list1, list2)
 ```
 
-<img src="examples/lists.png" height="500px" alt="Lists example" />
+<p align="center"><img src="examples/lists.png" width="40%" /></p>
 
 By default the trees will be labeled with the arguments passed to `plot`
 (using [sourcecode](https://github.com/lihaoyi/sourcecode)),
@@ -44,7 +44,7 @@ Diagram(name("lists2")).show(
 )
 ```
 
-<img src="examples/lists2.png" height="500px" alt="Lists example" />
+<p align="center"><img src="examples/lists2.png" width="40%" /></p>
 
 #### Queues
 
@@ -55,7 +55,7 @@ val queue2 = (queue1 :+ 5).tail
 Diagram(name("queues"), verticalSpacing = 1.2).show(queue1, queue2)
 ```
 
-<img src="examples/queues.png" height="500px" alt="Queue example" />
+<p align="center"><img src="examples/queues.png" width="40%" /></p>
 
 To reduce visual noise from `Cons` and `Nil`, the visualization of lists can be simplified.
 Note however that this option also hides structural sharing:
@@ -69,7 +69,7 @@ val queue2 = (queue1 :+ 5).tail
 Diagram(name("queues2")).show(queue1, queue2)
 ```
 
-<img src="examples/queues2.png" alt="Queue example" />
+<p align="center"><img src="examples/queues2.png" width="50%" /></p>
 
 
 #### Vectors
@@ -80,7 +80,7 @@ Diagram(name("queues2")).show(queue1, queue2)
  Diagram(name("vector"), verticalSpacing = 2).show(vector)
 ```
 
-<img src="examples/vector.png" alt="Vector example" />
+<p align="center"><img src="examples/vector.png" width="100%" /></p>
 
 #### HashSets
 
@@ -90,7 +90,7 @@ val set = HashSet(1L, 2L + 2L * Int.MaxValue, 3L, 4L)
 Diagram(name("hashset")).show(set)
 ```
 
-<img src="examples/hashset.png" height="500px" alt="HashSet example" />
+<p align="center"><img src="examples/hashset.png" width="100%" /></p>
 
 #### Case classes
 
@@ -114,7 +114,7 @@ Diagram(name("case-classes")).show(
 )
 ```
 
-<img src="examples/case-classes.png" alt="case classes example" />
+<p align="center"><img src="examples/case-classes.png" width="70%" /></p>
 
 
 ### Usage
