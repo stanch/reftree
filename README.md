@@ -132,7 +132,10 @@ $ sbt amm
 You can depend on the library by adding these lines to your `build.sbt`:
 
 ```scala
-resolvers += Resolver.bintrayRepo("stanch", "maven")
+resolvers ++= Seq(
+  Resolver.bintrayRepo("stanch", "maven"),
+  Resolver.bintrayRepo("drdozer", "maven")
+)
 
 libraryDependencies += "org.stanch" %% "reftree" % "0.3.0"
 ```
