@@ -101,7 +101,7 @@ case class Diagram(output: Path = Paths.get("diagram.png"), verticalSpacing: Dou
       Some(DotLayout.dot), Some(DotFormat.png), Some(output.toFile),
       Seq("-Gdpi=300")
     )
-    val process = Process(dotBinary.getAbsolutePath, opts.generate)
+    val process = Process("dot", opts.generate)
     val io = new ProcessIO(
       GraphInputHandler.handle(graph), Function.const(()), Function.const(()), false
     )
