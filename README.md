@@ -2,8 +2,9 @@
 
 This project aims to provide visualizations for common functional data structures used in Scala.
 The visualizations are generated automatically from code, which allows to use them in an interactive fashion.
-To use this library you will need to have [GraphViz](http://www.graphviz.org/) installed.
+To use this library you will need to have [GraphViz](http://www.graphviz.org/) installed (and have `dot` on your `PATH`).
 
+For more examples see the [materials for my talk “Unzipping Immutability”](https://github.com/stanch/unzimm).
 
 ### Examples
 
@@ -132,7 +133,10 @@ $ sbt amm
 You can depend on the library by adding these lines to your `build.sbt`:
 
 ```scala
-resolvers += Resolver.bintrayRepo("stanch", "maven")
+resolvers ++= Seq(
+  Resolver.bintrayRepo("stanch", "maven"),
+  Resolver.bintrayRepo("drdozer", "maven")
+)
 
-libraryDependencies += "org.stanch" %% "reftree" % "0.3.0"
+libraryDependencies += "org.stanch" %% "reftree" % "0.3.1"
 ```
