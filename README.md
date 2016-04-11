@@ -1,5 +1,7 @@
 ## reftree — automatic object tree diagrams for immutable data
 
+[![Join the chat at https://gitter.im/stanch/reftree](https://badges.gitter.im/stanch/reftree.svg)](https://gitter.im/stanch/reftree?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This project aims to provide visualizations for common functional data structures used in Scala.
 The visualizations are generated automatically from code, which allows to use them in an interactive fashion.
 To use this library you will need to have [GraphViz](http://www.graphviz.org/) installed (and have `dot` on your `PATH`).
