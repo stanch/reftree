@@ -24,7 +24,7 @@ object Diagram {
     color: String = "dodgerblue4"
   ) {
     def toOptions = {
-      val palette = (50 to 80 by (49 / onionSkin)).take(onionSkin).map(i ⇒ s"gray$i").reverse :+ color
+      val palette = if (onionSkin > 0) (50 to 80 by (49 / onionSkin)).take(onionSkin).map(i ⇒ s"gray$i").reverse :+ color else Seq(color)
       Options(verticalSpacing, palette, labels = false, commonNodesBelongToLastTree = true)
     }
   }
@@ -148,7 +148,7 @@ object Diagram {
     val svgFile = File.createTempFile("frame", ".svg")
     val pngFile = File.createTempFile("frame", ".png")
     xml.XML.save(svgFile.getAbsolutePath, svg, "UTF-8", xmlDecl = true)
-    val args = Seq("-z", "-b", "white", "-d", "300", "-e", pngFile.getAbsolutePath, svgFile.getAbsolutePath)
+    val args = Seq("-z", "-b", "white", "-d", "100", "-e", pngFile.getAbsolutePath, svgFile.getAbsolutePath)
     val process = Process("inkscape", args)
     process.run().exitValue()
     svgFile.delete()
@@ -176,7 +176,7 @@ object Diagram {
     val frames = graphFrames(options)(trees)
     val svgs = frames.map(produceSvg)
     val ids = trees.map(_.tree) collect { case RefTree.Ref(_, id, _, _) ⇒ id }
-    val anchors = if (options.onionSkin > 0) ids.dropRight(1) else ids.drop(1)
+    val anchors = if (options.onionSkin > 0) (ids zip ids.dropRight(1)).toSeq else (ids zip ids.drop(1)).toSeq
     val adjustedSvgs = SvgMagic.adjust(svgs, anchors)
     val files = adjustedSvgs.map(svgToPng)
     stitchFiles(files.map(_.toPath), output, options)

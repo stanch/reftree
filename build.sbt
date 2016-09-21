@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
 val predef = Seq(
   "import reftree._",
   "import scala.collection.immutable._",
-  "import Diagram.{showDefault => show}"
+  "import Diagram.{showDefault => show, Options, AnimationOptions}"
 ).mkString(";")
 
 initialCommands in (Test, console) := s"""ammonite.Main("$predef").run(); System.exit(0)"""

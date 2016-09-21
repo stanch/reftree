@@ -90,11 +90,11 @@ object SvgMagic {
     }
   }
 
-  def adjust(svgs: Seq[xml.Node], anchors: Seq[String]) = {
+  def adjust(svgs: Seq[xml.Node], anchors: Seq[(String, String)]) = {
     val data = svgs.map(SvgData.apply)
     val deltas = (data.sliding(2).toSeq zip anchors) map {
-      case (Seq(prev, next), anchorId) ⇒
-        prev.anchorPosition(anchorId) - next.anchorPosition(anchorId)
+      case (Seq(prev, next), (prevAnchorId, nextAnchorId)) ⇒
+        prev.anchorPosition(prevAnchorId) - next.anchorPosition(nextAnchorId)
     }
     val accumulatedDeltas = deltas.inits.toSeq.reverse.map(Point.sum)
     val translated = (data zip accumulatedDeltas) map {
