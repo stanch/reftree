@@ -1,5 +1,7 @@
 ## reftree — automatic object tree diagrams for immutable data
 
+[![Join the chat at https://gitter.im/stanch/reftree](https://badges.gitter.im/stanch/reftree.svg)](https://gitter.im/stanch/reftree?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This project aims to provide visualizations for common functional data structures used in Scala.
 The visualizations are generated automatically from code, which allows to use them in an interactive fashion.
 To use this library you will need to have [GraphViz](http://www.graphviz.org/) installed (and have `dot` on your `PATH`).
@@ -13,6 +15,7 @@ The following examples will assume these declarations:
 import scala.collection.immutable._
 import java.nio.file.Paths
 import reftree.Diagram
+import reftree.Diagram.Options
 
 def name(n: String) = Paths.get("examples", s"$n.png")
 ```
@@ -26,7 +29,7 @@ you can find the resulting images in the `examples` directory.
 val list1 = List(1, 2, 3, 4, 5)
 val list2 = List(-1, -2) ++ list1.drop(2)
 
-Diagram(name("lists")).show(list1, list2)
+Diagram.show(name("lists"))(list1, list2)
 ```
 
 <p align="center"><img src="examples/lists.png" width="40%" /></p>
@@ -39,7 +42,7 @@ but you can provide the labels explicitly:
 val list1 = List(1, 2, 3, 4, 5)
 val list2 = List(-1, -2) ++ list1.drop(2)
 
-Diagram(name("lists2")).show(
+Diagram.show(name("lists2"))(
   "positive" → list1,
   "negative" → list2
 )
@@ -53,7 +56,7 @@ Diagram(name("lists2")).show(
 val queue1 = Queue(1, 2) :+ 3 :+ 4
 val queue2 = (queue1 :+ 5).tail
 
-Diagram(name("queues"), verticalSpacing = 1.2).show(queue1, queue2)
+Diagram.show(name("queues"), Options(verticalSpacing = 1.2))(queue1, queue2)
 ```
 
 <p align="center"><img src="examples/queues.png" width="40%" /></p>
@@ -67,7 +70,7 @@ import reftree.ToRefTree.Simple.list
 val queue1 = Queue(1, 2) :+ 3 :+ 4
 val queue2 = (queue1 :+ 5).tail
 
-Diagram(name("queues2")).show(queue1, queue2)
+Diagram.show(name("queues2"))(queue1, queue2)
 ```
 
 <p align="center"><img src="examples/queues2.png" width="50%" /></p>
@@ -78,7 +81,7 @@ Diagram(name("queues2")).show(queue1, queue2)
 ```tut:silent
  val vector = 1 +: Vector(10 to 42: _*) :+ 50
 
- Diagram(name("vector"), verticalSpacing = 2).show(vector)
+ Diagram.show(name("vector"), Options(verticalSpacing = 2))(vector)
 ```
 
 <p align="center"><img src="examples/vector.png" width="100%" /></p>
@@ -88,7 +91,7 @@ Diagram(name("queues2")).show(queue1, queue2)
 ```tut:silent
 val set = HashSet(1L, 2L + 2L * Int.MaxValue, 3L, 4L)
 
-Diagram(name("hashset")).show(set)
+Diagram.show(name("hashset"))(set)
 ```
 
 <p align="center"><img src="examples/hashset.png" width="100%" /></p>
@@ -109,7 +112,7 @@ case class Person(address: Address, age: Int)
 val person1 = Person(Address(Street("Functional Rd.", 1), "London"), 35)
 val person2 = person1.modify(_.address.street.house).using(_ + 2)
 
-Diagram(name("case-classes")).show(
+Diagram.show(name("case-classes"))(
   person1,
   "person next door" → person2
 )
@@ -117,6 +120,24 @@ Diagram(name("case-classes")).show(
 
 <p align="center"><img src="examples/case-classes.png" width="70%" /></p>
 
+#### Animations
+
+You can generate animations using `Diagram.animate`.
+For this you will need [Inkscape](https://inkscape.org/en/) and [ImageMagick](http://www.imagemagick.org/) installed
+(and have `inkscape` and `convert` on your `PATH`).
+
+Here is an example:
+
+```tut:silent
+import reftree.Utils
+import reftree.ToRefTree.Actual.list
+
+Diagram.animate(Paths.get("examples", "animated-list.gif"))(
+  Utils.iterate(List(1))(2 :: _, 3 :: _, 4 :: _)
+)
+```
+
+<p align="center"><img src="examples/animated-list.gif" width="30%" /></p>
 
 ### Usage
 
@@ -130,7 +151,9 @@ $ sbt amm
 // display diagram.png with your favorite image viewer
 ```
 
-You can depend on the library by adding these lines to your `build.sbt`:
+You can depend on the library by adding these lines to your `build.sbt`
+(the latest version can be found here:
+[ ![Download](https://api.bintray.com/packages/stanch/maven/reftree/images/download.svg) ](https://bintray.com/stanch/maven/reftree/_latestVersion)):
 
 ```scala
 resolvers ++= Seq(
@@ -138,5 +161,5 @@ resolvers ++= Seq(
   Resolver.bintrayRepo("drdozer", "maven")
 )
 
-libraryDependencies += "org.stanch" %% "reftree" % "0.3.1"
+libraryDependencies += "org.stanch" %% "reftree" % "latest-version"
 ```
