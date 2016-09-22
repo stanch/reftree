@@ -2,7 +2,7 @@ organization := "org.stanch"
 
 name := "reftree"
 
-version := "0.4.0-SNAPSHOT"
+version := "0.4.0"
 
 licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
 
