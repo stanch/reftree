@@ -1,12 +1,8 @@
 package reftree
 
-import java.io.{StringWriter, File}
 import java.nio.file.{Paths, Path}
 
 import uk.co.turingatemyhamster.graphvizs.dsl._
-import uk.co.turingatemyhamster.graphvizs.exec._
-
-import scala.sys.process.{BasicIO, Process}
 
 object Diagram {
   case class Options(
@@ -17,14 +13,17 @@ object Diagram {
   )
 
   case class AnimationOptions(
-    onionSkin: Int = 1,
     delay: Int = 100,
     loop: Boolean = true,
+    onionSkin: Int = 1,
+    anchoring: Boolean = true,
+    diffAccent: Boolean = false,
     verticalSpacing: Double = 0.8,
-    color: String = "dodgerblue4"
+    color: String = "dodgerblue4",
+    accentColor: String = "forestgreen"
   ) {
     def toOptions = {
-      val palette = if (onionSkin > 0) (50 to 80 by (49 / onionSkin)).take(onionSkin).map(i ⇒ s"gray$i").reverse :+ color else Seq(color)
+      val palette = if (onionSkin > 0) (50 to 80 by (30 / onionSkin)).take(onionSkin).map(i ⇒ s"gray$i").reverse :+ color else Seq(color)
       Options(verticalSpacing, palette, labels = false, commonNodesBelongToLastTree = true)
     }
   }
@@ -32,8 +31,9 @@ object Diagram {
   private def label(tree: LabeledRefTree): Seq[Statement] = tree match {
     case LabeledRefTree(label, ref: RefTree.Ref) ⇒
       val labelNodeId = s"${ref.id}-label"
+      val labelAttribute = AttributeAssignment("label", ID.Identifier(s"<<i>$label</i>>"))
       Seq(
-        labelNodeId :| ("shape" := "plaintext", "label" := label, "fontname" := "consolas italic"),
+        labelNodeId :| ("shape" := "plaintext", labelAttribute, "fontname" := "consolas"),
         NodeId(labelNodeId, Some(Port(None, Some(CompassPt.S)))) -->
         NodeId(ref.id, Some(Port(Some("n"), Some(CompassPt.N))))
       )
@@ -122,64 +122,54 @@ object Diagram {
     NonStrictDigraph("g", distinct: _*)
   }
 
+  private def accentuateDiff(graph1: Graph, graph2: Graph, accentColor: String) = {
+    val previous = graph1.statements.map(ColorlessStatement).toSet
+    graph2.copy(statements = graph2.statements map {
+      case n: NodeStatement if !previous(ColorlessStatement(n)) ⇒
+        n.copy(attributes = n.attributes.map(_ ++ Seq("color" := accentColor, "fontcolor" := accentColor)))
+      case e: EdgeStatement if !previous(ColorlessStatement(e)) ⇒
+        e.copy(attributes = e.attributes.map(_ ++ Seq("color" := accentColor)))
+      case s ⇒ s
+    })
+  }
+
   private def graphFrames(options: AnimationOptions)(trees: Seq[LabeledRefTree]): Seq[Graph] = {
     val prefix = Seq.fill(options.onionSkin)(trees.head)
-    (prefix ++ trees).sliding(options.onionSkin + 1).map(graph(options.toOptions)).toSeq
+    val frames = (prefix ++ trees).sliding(options.onionSkin + 1).map(graph(options.toOptions)).toSeq
+    if (!options.diffAccent) frames else {
+      val accentuated = frames.sliding(2).map {
+        case Seq(prev, next) ⇒ accentuateDiff(prev, next, options.accentColor)
+      }.toSeq
+      frames.head +: accentuated
+    }
   }
 
-  private def writePng(graph: Graph, output: Path): Unit = {
-    val opts = DotOpts(Some(DotLayout.dot), Some(DotFormat.png), Some(output.toFile), Seq("-Gdpi=300"))
-    val process = Process("dot", opts.generate)
-    val io = BasicIO.standard(GraphInputHandler.handle(graph) _)
-    (process run io).exitValue()
-    ()
-  }
+  def renderDefault(trees: LabeledRefTree*): Unit =
+    renderSvg(Paths.get("diagram.svg"))(trees: _*)
 
-  private def produceSvg(graph: Graph): xml.Node = {
-    val opts = DotOpts(Some(DotLayout.dot), Some(DotFormat.svg))
-    val process = Process("dot", opts.generate)
-    val output = new StringWriter
-    val io = BasicIO.standard(GraphInputHandler.handle(graph) _).withOutput(BasicIO.processFully(output))
-    (process run io).exitValue()
-    xml.XML.loadString(output.toString)
-  }
+  def renderPng(
+    output: Path,
+    options: Options = Options(),
+    density: Int = 100
+  )(trees: LabeledRefTree*): Unit = Output.renderPng(graph(options)(trees), output, density)
 
-  private def svgToPng(svg: xml.Node): File = {
-    val svgFile = File.createTempFile("frame", ".svg")
-    val pngFile = File.createTempFile("frame", ".png")
-    xml.XML.save(svgFile.getAbsolutePath, svg, "UTF-8", xmlDecl = true)
-    val args = Seq("-z", "-b", "white", "-d", "100", "-e", pngFile.getAbsolutePath, svgFile.getAbsolutePath)
-    val process = Process("inkscape", args)
-    process.run().exitValue()
-    svgFile.delete()
-    pngFile
-  }
+  def renderSvg(
+    output: Path,
+    options: Options = Options()
+  )(trees: LabeledRefTree*): Unit = Output.renderSvg(graph(options)(trees), output)
 
-  private def stitchFiles(files: Seq[Path], output: Path, options: AnimationOptions): Unit = {
-    val args = Seq(
-      "-delay", options.delay.toString,
-      "-loop", if (options.loop) "0" else "1",
-      "-verbose"
-    ) ++ files.map(_.toString) :+ output.toString
-    val process = Process("convert", args)
-    process.run().exitValue()
-  }
-
-  def show(output: Path, options: Options = Options())(trees: LabeledRefTree*): Unit =
-    writePng(graph(options)(trees), output)
-
-  def showDefault(trees: LabeledRefTree*): Unit =
-    writePng(graph(Options())(trees), Paths.get("diagram.png"))
-
-  def animate[A: ToRefTree](output: Path, options: AnimationOptions = AnimationOptions())(data: Seq[A]) = {
-    val trees = data.map(d ⇒ LabeledRefTree("", d.refTree))
+  def renderAnimatedGif[A: ToRefTree](
+    output: Path,
+    options: AnimationOptions = AnimationOptions(),
+    density: Int = 100,
+    silent: Boolean = true
+  )(data: Seq[A]): Unit = {
+    require(data.length > 1, "at least two frames should be provided")
+    val trees = data.map(d ⇒ LabeledRefTree(d.toString, d.refTree))
     val frames = graphFrames(options)(trees)
-    val svgs = frames.map(produceSvg)
+    val svgs = frames.map(Output.renderSvg)
     val ids = trees.map(_.tree) collect { case RefTree.Ref(_, id, _, _) ⇒ id }
-    val anchors = if (options.onionSkin > 0) (ids zip ids.dropRight(1)).toSeq else (ids zip ids.drop(1)).toSeq
-    val adjustedSvgs = SvgMagic.adjust(svgs, anchors)
-    val files = adjustedSvgs.map(svgToPng)
-    stitchFiles(files.map(_.toPath), output, options)
-    files.foreach(_.delete())
+    val adjustedSvgs = SvgMagic.adjust(svgs, ids, options.anchoring)
+    Output.renderAnimatedGif(adjustedSvgs, output, options, density, silent)
   }
 }

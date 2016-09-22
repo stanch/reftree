@@ -1,5 +1,6 @@
 package reftree
 
+import scala.util.Try
 import scala.xml.{UnprefixedAttribute, Elem}
 import scala.xml.transform.{RuleTransformer, RewriteRule}
 
@@ -90,11 +91,17 @@ object SvgMagic {
     }
   }
 
-  def adjust(svgs: Seq[xml.Node], anchors: Seq[(String, String)]) = {
+  def adjust(svgs: Seq[xml.Node], anchorIds: Seq[String], anchoring: Boolean) = {
     val data = svgs.map(SvgData.apply)
-    val deltas = (data.sliding(2).toSeq zip anchors) map {
-      case (Seq(prev, next), (prevAnchorId, nextAnchorId)) ⇒
-        prev.anchorPosition(prevAnchorId) - next.anchorPosition(nextAnchorId)
+    val deltas = (data.sliding(2).toSeq zip anchorIds.sliding(2).toSeq) map {
+      case (Seq(prev, next), Seq(prevAnchorId, nextAnchorId)) ⇒
+        val nextAnchor = if (anchoring) {
+          // TODO: allow auto-anchoring through secondary nodes
+          Try(next.anchorPosition(prevAnchorId)) getOrElse next.anchorPosition(nextAnchorId)
+        } else {
+          next.anchorPosition(nextAnchorId)
+        }
+        prev.anchorPosition(prevAnchorId) - nextAnchor
     }
     val accumulatedDeltas = deltas.inits.toSeq.reverse.map(Point.sum)
     val translated = (data zip accumulatedDeltas) map {

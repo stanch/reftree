@@ -23,9 +23,10 @@ libraryDependencies ++= Seq(
 )
 
 val predef = Seq(
+  "import java.nio.file.Paths",
   "import reftree._",
   "import scala.collection.immutable._",
-  "import Diagram.{showDefault => show, Options, AnimationOptions}"
+  "import Diagram.{renderDefault ⇒ show, Options, AnimationOptions}"
 ).mkString(";")
 
 initialCommands in (Test, console) := s"""ammonite.Main("$predef").run(); System.exit(0)"""
