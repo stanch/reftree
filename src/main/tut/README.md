@@ -96,6 +96,16 @@ Diagram.renderPng(name("hashset"))(set)
 
 <p align="center"><img src="examples/hashset.png" width="100%" /></p>
 
+#### TreeSets
+
+```tut:silent
+val set = TreeSet(1 to 14: _*)
+
+Diagram.renderPng(name("treeset"), Options(highlightColor = "coral1"))(set)
+```
+
+<p align="center"><img src="examples/treeset.png" width="100%" /></p>
+
 #### Case classes
 
 Arbitrary case classes are supported automatically via

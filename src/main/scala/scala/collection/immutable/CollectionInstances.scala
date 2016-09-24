@@ -75,21 +75,46 @@ trait CollectionInstances {
   }
 
   implicit def `HashSet RefTree`[A: ToRefTree]: ToRefTree[HashSet[A]] = new ToRefTree[HashSet[A]] {
-    def refTree(value: HashSet[A]): RefTree = value match {
-      case leaf: HashSet.HashSet1[A] ⇒
-        val hash = leaf.privateField[Int]("hash")
-        val key = leaf.privateField[A]("key")
-        RefTree.Ref(leaf, Seq(hash.refTree, key.refTree)).copy(name = "HashSet.HashSet1")
-      case collision: HashSet.HashSetCollision1[A] ⇒
-        val hash = collision.privateField[Int]("hash")
-        val ks = collision.privateField[ListSet[A]]("ks")
-        RefTree.Ref(collision, Seq(hash.refTree, ks.refTree)).copy(name = "HashSet.HashSetCollision1")
-      case trie: HashSet.HashTrieSet[A] ⇒
-        val size = trie.privateField[Int]("size0")
-        val bitmap = trie.privateField[Int]("bitmap")
-        val elems = trie.privateField[Array[HashSet[A]]]("elems")
-        val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false)
-        RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).copy(name = "HashSet.HashTrieSet")
+    def refTree(value: HashSet[A]): RefTree = {
+      if (value.isEmpty) {
+        RefTree.Ref(value, Seq.empty).copy(name = "HashSet.EmptyHashSet")
+      } else value match {
+        case leaf: HashSet.HashSet1[A] ⇒
+          val hash = leaf.privateField[Int]("hash")
+          val key = leaf.privateField[A]("key")
+          RefTree.Ref(leaf, Seq(hash.refTree, key.refTree)).copy(name = "HashSet.HashSet1")
+        case collision: HashSet.HashSetCollision1[A] ⇒
+          val hash = collision.privateField[Int]("hash")
+          val ks = collision.privateField[ListSet[A]]("ks")
+          RefTree.Ref(collision, Seq(hash.refTree, ks.refTree)).copy(name = "HashSet.HashSetCollision1")
+        case trie: HashSet.HashTrieSet[A] ⇒
+          val size = trie.privateField[Int]("size0")
+          val bitmap = trie.privateField[Int]("bitmap")
+          val elems = trie.privateField[Array[HashSet[A]]]("elems")
+          val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false)
+          RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).copy(name = "HashSet.HashTrieSet")
+      }
+    }
+  }
+
+  implicit def `RedBlackTree RefTree`[A: ToRefTree]: ToRefTree[RedBlackTree.Tree[A, Unit]] =
+    new ToRefTree[RedBlackTree.Tree[A, Unit]] {
+      def refTree(value: RedBlackTree.Tree[A, Unit]): RefTree = {
+        if (value == null) RefTree.Null() else {
+          RefTree.Ref(value, Seq(value.key.refTree, value.left.refTree, value.right.refTree))
+            .copy(highlight = value.isInstanceOf[RedBlackTree.RedTree[A, Unit]])
+        }
+      }
+    }
+
+  implicit def `TreeSet RefTree`[A: ToRefTree]: ToRefTree[TreeSet[A]] = new ToRefTree[TreeSet[A]] {
+    def refTree(value: TreeSet[A]): RefTree = {
+      if (value.isEmpty) {
+        RefTree.Ref(value, Seq.empty)
+      } else {
+        val underlying = value.privateField[RedBlackTree.Tree[A, Unit]]("tree")
+        RefTree.Ref(value, underlying.refTree.asInstanceOf[RefTree.Ref].children)
+      }
     }
   }
 

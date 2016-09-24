@@ -8,6 +8,7 @@ object Diagram {
   case class Options(
     verticalSpacing: Double = 0.8,
     palette: Seq[String] = Array("dodgerblue4", "forestgreen", "coral3"),
+    highlightColor: String = "bisque",
     labels: Boolean = true,
     commonNodesBelongToLastTree: Boolean = false
   )
@@ -20,30 +21,30 @@ object Diagram {
     diffAccent: Boolean = false,
     verticalSpacing: Double = 0.8,
     color: String = "dodgerblue4",
-    accentColor: String = "forestgreen"
+    accentColor: String = "forestgreen",
+    highlightColor: String = "bisque"
   ) {
     def toOptions = {
       val palette = if (onionSkin > 0) (50 to 80 by (30 / onionSkin)).take(onionSkin).map(i ⇒ s"gray$i").reverse :+ color else Seq(color)
-      Options(verticalSpacing, palette, labels = false, commonNodesBelongToLastTree = true)
+      Options(verticalSpacing, palette, highlightColor, labels = false, commonNodesBelongToLastTree = true)
     }
   }
 
   private def label(tree: LabeledRefTree): Seq[Statement] = tree match {
     case LabeledRefTree(label, ref: RefTree.Ref) ⇒
       val labelNodeId = s"${ref.id}-label"
-      val labelAttribute = AttributeAssignment("label", ID.Identifier(s"<<i>$label</i>>"))
       Seq(
-        labelNodeId :| ("shape" := "plaintext", labelAttribute, "fontname" := "consolas"),
+        labelNodeId :| AttributeAssignment("label", ID.Identifier(s"<<i>$label</i>>")),
         NodeId(labelNodeId, Some(Port(None, Some(CompassPt.S)))) -->
         NodeId(ref.id, Some(Port(Some("n"), Some(CompassPt.N))))
       )
     case _ ⇒ Seq.empty
   }
 
-  private def node(ref: RefTree.Ref, color: String): NodeStatement = {
+  private def node(ref: RefTree.Ref, color: String, options: Options): NodeStatement = {
     val title = s"""<td port="n">${ref.name}</td>"""
     val cells = ref.children.zipWithIndex map { case (c, i) ⇒ cell(c, i) }
-    val highlight = if (ref.highlight) """bgcolor="bisque"""" else ""
+    val highlight = if (ref.highlight) s"""bgcolor="${options.highlightColor}"""" else ""
     val style = s"""style="rounded" cellspacing="0" cellpadding="6" cellborder="0" columns="*" $highlight"""
     val label = s"""<<table $style><tr>${(title +: cells).mkString}</tr></table>>"""
     val labelAttribute = AttributeAssignment("label", ID.Identifier(label))
@@ -105,7 +106,7 @@ object Diagram {
     val statements: Seq[Statement] = Seq(graphAttrs, nodeAttrs, edgeAttrs) ++ labels ++ {
       def inner(tree: RefTree, color: String): Seq[Statement] = tree match {
         case r @ RefTree.Ref(_, id, children, _) ⇒
-          Seq(node(r, color)) ++
+          Seq(node(r, color, options)) ++
             children.flatMap(inner(_, color)) ++
             children.zipWithIndex.flatMap { case (c, i) ⇒ link(id, c, i, color) }
         case _ ⇒
