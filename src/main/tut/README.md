@@ -15,9 +15,11 @@ The following examples will assume these declarations:
 import scala.collection.immutable._
 import java.nio.file.Paths
 import reftree.Diagram
-import reftree.Diagram.Options
 
-def name(n: String) = Paths.get("examples", s"$n.png")
+val diagram = Diagram(
+  defaultOptions = Diagram.Options(density = 100),
+  defaultDirectory = Paths.get("examples")
+)
 ```
 
 Since all the example code is actually run by [tut](https://github.com/tpolecat/tut),
@@ -29,12 +31,12 @@ you can find the resulting images in the `examples` directory.
 val list1 = List(1, 2, 3, 4, 5)
 val list2 = List(-1, -2) ++ list1.drop(2)
 
-Diagram.renderPng(name("lists"))(list1, list2)
+diagram.render("lists")(list1, list2)
 ```
 
 <p align="center"><img src="examples/lists.png" width="40%" /></p>
 
-By default the trees will be labeled with the arguments passed to `plot`
+By default the trees will be labeled with the arguments passed to `render`
 (using [sourcecode](https://github.com/lihaoyi/sourcecode)),
 but you can provide the labels explicitly:
 
@@ -42,7 +44,7 @@ but you can provide the labels explicitly:
 val list1 = List(1, 2, 3, 4, 5)
 val list2 = List(-1, -2) ++ list1.drop(2)
 
-Diagram.renderPng(name("lists2"))(
+diagram.render("lists2")(
   "positive" → list1,
   "negative" → list2
 )
@@ -56,7 +58,7 @@ Diagram.renderPng(name("lists2"))(
 val queue1 = Queue(1, 2) :+ 3 :+ 4
 val queue2 = (queue1 :+ 5).tail
 
-Diagram.renderPng(name("queues"), Options(verticalSpacing = 1.2))(queue1, queue2)
+diagram.render("queues", tweakOptions = _.copy(verticalSpacing = 1.2))(queue1, queue2)
 ```
 
 <p align="center"><img src="examples/queues.png" width="40%" /></p>
@@ -70,7 +72,7 @@ import reftree.ToRefTree.Simple.list
 val queue1 = Queue(1, 2) :+ 3 :+ 4
 val queue2 = (queue1 :+ 5).tail
 
-Diagram.renderPng(name("queues2"))(queue1, queue2)
+diagram.render("queues2")(queue1, queue2)
 ```
 
 <p align="center"><img src="examples/queues2.png" width="50%" /></p>
@@ -81,7 +83,7 @@ Diagram.renderPng(name("queues2"))(queue1, queue2)
 ```tut:silent
  val vector = 1 +: Vector(10 to 42: _*) :+ 50
 
- Diagram.renderPng(name("vector"), Options(verticalSpacing = 2))(vector)
+ diagram.render("vector", tweakOptions = _.copy(verticalSpacing = 2))(vector)
 ```
 
 <p align="center"><img src="examples/vector.png" width="100%" /></p>
@@ -91,7 +93,7 @@ Diagram.renderPng(name("queues2"))(queue1, queue2)
 ```tut:silent
 val set = HashSet(1L, 2L + 2L * Int.MaxValue, 3L, 4L)
 
-Diagram.renderPng(name("hashset"))(set)
+diagram.render("hashset")(set)
 ```
 
 <p align="center"><img src="examples/hashset.png" width="100%" /></p>
@@ -101,7 +103,7 @@ Diagram.renderPng(name("hashset"))(set)
 ```tut:silent
 val set = TreeSet(1 to 14: _*)
 
-Diagram.renderPng(name("treeset"), Options(highlightColor = "coral1"))(set)
+diagram.render("treeset", tweakOptions = _.copy(highlightColor = "coral1"))(set)
 ```
 
 <p align="center"><img src="examples/treeset.png" width="100%" /></p>
@@ -115,7 +117,7 @@ import reftree.contrib.FingerTreeInstances._
 implicit val measure = Measure.Indexed
 val tree = FingerTree(1 to 22: _*)
 
-Diagram.renderPng(name("fingertree"), Options(verticalSpacing = 1.2))(tree)
+diagram.render("fingertree", tweakOptions = _.copy(verticalSpacing = 1.2))(tree)
 ```
 
 <p align="center"><img src="examples/fingertree.png" width="100%" /></p>
@@ -136,7 +138,7 @@ case class Person(address: Address, age: Int)
 val person1 = Person(Address(Street("Functional Rd.", 1), "London"), 35)
 val person2 = person1.modify(_.address.street.house).using(_ + 2)
 
-Diagram.renderPng(name("case-classes"))(
+diagram.render("case-classes")(
   person1,
   "person next door" → person2
 )
@@ -146,7 +148,7 @@ Diagram.renderPng(name("case-classes"))(
 
 #### Animations
 
-You can generate animations using `Diagram.renderAnimatedGif`.
+You can generate animations using `diagram.renderAnimation`.
 For this you will need [Inkscape](https://inkscape.org/en/) and [ImageMagick](http://www.imagemagick.org/) installed
 (and have `inkscape` and `convert` on your `PATH`).
 
@@ -155,17 +157,16 @@ Here is an example:
 ```tut:silent
 import reftree.Utils
 import reftree.ToRefTree.Actual.list
-import reftree.Diagram.AnimationOptions
 
-Diagram.renderAnimatedGif(
-  Paths.get("examples", "list-prepend.gif"),
-  AnimationOptions(diffAccent = true))(
+diagram.renderAnimation(
+  "list-prepend",
+  tweakOptions = _.copy(diffAccent = true))(
   Utils.iterate(List(1))(2 :: _, 3 :: _, 4 :: _)
 )
 
-Diagram.renderAnimatedGif(
-  Paths.get("examples", "list-append.gif"),
-  AnimationOptions(onionSkin = 3))(
+diagram.renderAnimation(
+  "list-append",
+  tweakOptions = _.copy(onionSkin = 3))(
   Utils.iterate(List(1))(_ :+ 2, _ :+ 3, _ :+ 4)
 )
 ```
@@ -175,6 +176,9 @@ Diagram.renderAnimatedGif(
   <img src="examples/list-append.gif" width="52%" />
 </p>
 
+If you prefer to navigate between the animation frames interactively,
+take a look at `renderSequence`, which will render each frame into its own file.
+
 ### Usage
 
 This project is intended for educational purposes and therefore is licensed under GPL 3.0.
@@ -183,8 +187,8 @@ To try it interactively:
 
 ```
 $ sbt amm
-@ show(List(1, 2, 3))
-// display diagram.svg with your favorite image viewer
+@ render(List(1, 2, 3))
+// display diagram.png with your favorite image viewer
 ```
 
 You can depend on the library by adding these lines to your `build.sbt`

@@ -2,7 +2,7 @@ organization := "org.stanch"
 
 name := "reftree"
 
-version := "0.4.1-SNAPSHOT"
+version := "0.5.0"
 
 licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
 
@@ -24,10 +24,12 @@ libraryDependencies ++= Seq(
 )
 
 val predef = Seq(
-  "import java.nio.file.Paths",
-  "import reftree._",
   "import scala.collection.immutable._",
-  "import Diagram.{renderDefault ⇒ show, Options, AnimationOptions}"
+  "import de.sciss.fingertree._",
+  "import reftree._",
+  "import reftree.contrib.FingerTreeInstances._",
+  "val diagram = Diagram()",
+  "import diagram.{renderDefault ⇒ render}"
 ).mkString(";")
 
 initialCommands in (Test, console) := s"""ammonite.Main("$predef").run(); System.exit(0)"""

@@ -4,7 +4,7 @@ import scala.util.Try
 import scala.xml.{UnprefixedAttribute, Elem}
 import scala.xml.transform.{RuleTransformer, RewriteRule}
 
-object SvgMagic {
+object Svgs {
   private case class Point(x: Double, y: Double) {
     def +(delta: Point) = Point(x + delta.x, y + delta.y)
     def -(delta: Point) = Point(x - delta.x, y - delta.y)
