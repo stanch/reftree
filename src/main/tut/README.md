@@ -106,6 +106,20 @@ Diagram.renderPng(name("treeset"), Options(highlightColor = "coral1"))(set)
 
 <p align="center"><img src="examples/treeset.png" width="100%" /></p>
 
+#### FingerTrees (using https://github.com/Sciss/FingerTree)
+
+```tut:silent
+import de.sciss.fingertree.{FingerTree, Measure}
+import reftree.contrib.FingerTreeInstances._
+
+implicit val measure = Measure.Indexed
+val tree = FingerTree(1 to 22: _*)
+
+Diagram.renderPng(name("fingertree"), Options(verticalSpacing = 1.2))(tree)
+```
+
+<p align="center"><img src="examples/fingertree.png" width="100%" /></p>
+
 #### Case classes
 
 Arbitrary case classes are supported automatically via

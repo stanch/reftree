@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %% "sourcecode" % "0.1.2",
   "uk.co.turingatemyhamster" %% "gv-core" % "0.3.2",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
+  "de.sciss" %% "fingertree" % "1.5.2" % Provided,
   "com.softwaremill.quicklens" %% "quicklens" % "1.4.7" % Provided,
   "org.scalatest" %% "scalatest" % "3.0.0" % Test,
   "com.lihaoyi" % "ammonite" % "0.7.7" % Test cross CrossVersion.full

@@ -1,16 +1,9 @@
 package scala.collection.immutable
 
 import reftree.{RefTree, ToRefTree, RefTreeSyntax}
+import reftree.Utils.PrivateFields
 
 trait CollectionInstances {
-  implicit class PrivateFields[A](value: A) {
-    def privateField[B](name: String) = {
-      val field = value.getClass.getDeclaredField(name)
-      field.setAccessible(true)
-      field.get(value).asInstanceOf[B]
-    }
-  }
-
   implicit def `Option RefTree`[A: ToRefTree]: ToRefTree[Option[A]] = new ToRefTree[Option[A]] {
     def refTree(value: Option[A]) = value match {
       case Some(a) ⇒ RefTree.Ref(value, Seq(a.refTree))
