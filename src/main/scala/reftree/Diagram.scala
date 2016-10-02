@@ -15,9 +15,10 @@ object Diagram {
   case class AnimationOptions(
     delay: Int = 100,
     loop: Boolean = true,
-    onionSkin: Int = 1,
+    onionSkinLayers: Int = 1,
     anchoring: Boolean = true,
     diffAccent: Boolean = false,
+    interpolationFrames: Int = 10,
     density: Int = 100,
     verticalSpacing: Double = 0.8,
     color: String = "dodgerblue4",
@@ -26,8 +27,8 @@ object Diagram {
     silent: Boolean = true
   ) {
     def toOptions = {
-      val palette = if (onionSkin == 0) Seq(color) else {
-        (50 to 80 by (30 / onionSkin)).take(onionSkin).map(i ⇒ s"gray$i").reverse :+ color
+      val palette = if (onionSkinLayers == 0) Seq(color) else {
+        (50 to 80 by (30 / onionSkinLayers)).take(onionSkinLayers).map(i ⇒ s"gray$i").reverse :+ color
       }
       Options(
         density, verticalSpacing, palette, highlightColor,
@@ -67,7 +68,7 @@ case class Diagram(
     val frames = Graphs.graphFrames(options)(trees)
     val svgs = frames.map(Output.renderSvg)
     val ids = trees.map(_.tree) collect { case RefTree.Ref(_, id, _, _) ⇒ id }
-    Svgs.adjust(svgs, ids, options.anchoring)
+    Svgs.animate(svgs, ids, options)
   }
 
   def renderSequence[A: ToRefTree](
@@ -76,10 +77,10 @@ case class Diagram(
     directory: Path = defaultDirectory
   )(data: Seq[A]): Unit = {
     val tweakedOptions = tweakOptions(defaultAnimationOptions)
-    val adjustedSvgs = processFrames(tweakOptions(defaultAnimationOptions))(data)
-    val indexWidth = adjustedSvgs.length.toString.length
+    val processedFrames = processFrames(tweakOptions(defaultAnimationOptions))(data)
+    val indexWidth = processedFrames.length.toString.length
     def padding(index: Int) = index.toString.reverse.padTo(indexWidth, '0').reverse
-    adjustedSvgs.zipWithIndex foreach { case (svg, i) ⇒
+    processedFrames.zipWithIndex.par foreach { case (svg, i) ⇒
       Output.renderPng(svg, directory.resolve(s"$baseName-${padding(i + 1)}.png"), tweakedOptions)
     }
   }
@@ -90,7 +91,7 @@ case class Diagram(
     directory: Path = defaultDirectory
   )(data: Seq[A]): Unit = {
     val tweakedOptions = tweakOptions(defaultAnimationOptions)
-    val adjustedSvgs = processFrames(tweakedOptions)(data)
-    Output.renderAnimatedGif(adjustedSvgs, directory.resolve(s"$name.gif"), tweakedOptions)
+    val processedFrames = processFrames(tweakedOptions)(data)
+    Output.renderAnimatedGif(processedFrames, directory.resolve(s"$name.gif"), tweakedOptions)
   }
 }

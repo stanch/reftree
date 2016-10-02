@@ -109,8 +109,8 @@ object Graphs {
   }
 
   def graphFrames(options: AnimationOptions)(trees: Seq[LabeledRefTree]): Seq[Graph] = {
-    val prefix = Seq.fill(options.onionSkin)(trees.head)
-    val frames = (prefix ++ trees).sliding(options.onionSkin + 1).map(graph(options.toOptions)).toSeq
+    val prefix = Seq.fill(options.onionSkinLayers)(trees.head)
+    val frames = (prefix ++ trees).sliding(options.onionSkinLayers + 1).map(graph(options.toOptions)).toSeq
     if (!options.diffAccent) frames else {
       val accentuated = frames.sliding(2).map {
         case Seq(prev, next) ⇒ accentuateDiff(prev, next, options.accentColor)

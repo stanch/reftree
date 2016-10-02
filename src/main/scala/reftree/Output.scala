@@ -63,7 +63,7 @@ object Output {
     }
     val verboseArg = if (options.silent) Seq.empty else Seq("-verbose")
     val args = Seq(
-      "-delay", options.delay.toString,
+      "-delay", Math.max(options.delay / Math.max(options.interpolationFrames, 1), 1).toString,
       "-loop", if (options.loop) "0" else "1"
     ) ++ verboseArg ++ pngFiles.map(_.getAbsolutePath) :+ output.toString
     val process = Process("convert", args)
