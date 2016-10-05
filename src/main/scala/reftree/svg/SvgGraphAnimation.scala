@@ -29,28 +29,28 @@ object SvgGraphAnimation {
     }
 
   private val interpolation: Interpolation[xml.Node] = {
-    val opacity = Interpolation.double.lensBefore(SvgLens.opacity)
-    val fadeIn = opacity.mapTime(_ * 3 - 2).withBefore(SvgLens.opacity.set(0.0))
-    val fadeOut = opacity.mapTime(_ * 3).withAfter(SvgLens.opacity.set(0.0))
+    val opacity = Interpolation.double.lensLeft(SvgLens.opacity)
+    val fadeIn = opacity.mapTime(_ * 3 - 2).withLeft(SvgLens.opacity.set(0.0))
+    val fadeOut = opacity.mapTime(_ * 3).withRight(SvgLens.opacity.set(0.0))
 
     val nodeOption = Interpolation.option(
-      fadeOut, fadeIn, Interpolation.foldLeftBefore(
+      fadeOut, fadeIn, Interpolation.combineLeft(
         opacity,
-        Point.interpolation.lensBefore(SvgGraphLens.nodePosition)
+        Point.interpolation.lensLeft(SvgGraphLens.nodePosition)
       ).mapTime(_ * 3 - 1)
     )
 
     val edgeOption = Interpolation.option(
-      fadeOut, fadeIn, Interpolation.foldLeftBefore(
+      fadeOut, fadeIn, Interpolation.combineLeft(
         opacity,
-        Polyline.interpolation.lensBefore(SvgGraphLens.edgeArrow),
-        Path.interpolation.lensBefore(SvgGraphLens.edgePath)
+        Polyline.interpolation.lensLeft(SvgGraphLens.edgeArrow),
+        Path.interpolation.lensLeft(SvgGraphLens.edgePath)
       ).mapTime(_ * 3 - 1)
     )
 
-    Interpolation.foldLeftBefore(
-      Interpolation.map(nodeOption).lensBefore(SvgGraphLens.nodes),
-      Interpolation.map(edgeOption).lensBefore(SvgGraphLens.edges)
+    Interpolation.combineLeft(
+      Interpolation.map(nodeOption).lensLeft(SvgGraphLens.nodes),
+      Interpolation.map(edgeOption).lensLeft(SvgGraphLens.edges)
     )
   }
 

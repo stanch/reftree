@@ -26,13 +26,13 @@ object Point {
     Point(x, y)
   }
 
-  val interpolation = Interpolation[Point]((b, a, t) ⇒ b * (1 - t) + a * t)
+  val interpolation = Interpolation[Point]((l, r, t) ⇒ l * (1 - t) + r * t)
 
-  def bezierInterpolation(c1: Point, c2: Point) = Interpolation[Point] { (b, a, t) ⇒
-    b * Math.pow(1 - t, 3) +
+  def bezierInterpolation(c1: Point, c2: Point) = Interpolation[Point] { (l, r, t) ⇒
+    l * Math.pow(1 - t, 3) +
     c1 * 3 * Math.pow(1 - t, 2) * t +
-    c2   * 3 * (1 - t) * Math.pow(t, 2) +
-    a * Math.pow(t, 3)
+    c2 * 3 * Math.pow(t, 2) * (1 - t) +
+    r * Math.pow(t, 3)
   }
 }
 
@@ -54,7 +54,7 @@ object Polyline {
     }
   }
 
-  val interpolation = Interpolation.seq(Point.interpolation).lensBefore(GenLens[Polyline](_.points))
+  val interpolation = Interpolation.seq(Point.interpolation).lensLeft(GenLens[Polyline](_.points))
 }
 
 case class Rectangle(topLeft: Point, bottomRight: Point) {

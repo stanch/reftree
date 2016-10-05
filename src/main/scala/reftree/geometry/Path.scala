@@ -114,7 +114,7 @@ object Path {
     cycle(Path.empty, acc ⇒ move(acc) | line(acc) | bezier(acc))
   }
 
-  val interpolation = Polyline.interpolation.lensBefore {
+  val interpolation = Polyline.interpolation.lensLeft {
     Iso[Path, Polyline](_.simplify(100))(fromPolyline).asLens
   }
 }
