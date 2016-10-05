@@ -6,7 +6,7 @@ This project aims to provide visualizations for common functional data structure
 The visualizations are generated automatically from code, which allows to use them in an interactive fashion.
 To use this library you will need to have [GraphViz](http://www.graphviz.org/) installed (and have `dot` on your `PATH`).
 
-For more examples see the [materials for my talk “Unzipping Immutability”](https://github.com/stanch/unzimm).
+For more examples see the [materials for my talk “Unzipping Immutability”](DEMO.md).
 
 ### Examples
 
@@ -18,12 +18,12 @@ import reftree.Diagram
 
 val diagram = Diagram(
   defaultOptions = Diagram.Options(density = 100),
-  defaultDirectory = Paths.get("examples")
+  defaultDirectory = Paths.get("images", "data")
 )
 ```
 
 Since all the example code is actually run by [tut](https://github.com/tpolecat/tut),
-you can find the resulting images in the `examples` directory.
+you can find the resulting images in the `images` directory.
 
 #### Lists
 
@@ -34,7 +34,7 @@ val list2 = List(-1, -2) ++ list1.drop(2)
 diagram.render("lists")(list1, list2)
 ```
 
-<p align="center"><img src="examples/lists.png" width="40%" /></p>
+<p align="center"><img src="images/data/lists.png" width="40%" /></p>
 
 By default the trees will be labeled with the arguments passed to `render`
 (using [sourcecode](https://github.com/lihaoyi/sourcecode)),
@@ -50,7 +50,7 @@ diagram.render("lists2")(
 )
 ```
 
-<p align="center"><img src="examples/lists2.png" width="40%" /></p>
+<p align="center"><img src="images/data/lists2.png" width="40%" /></p>
 
 #### Queues
 
@@ -61,7 +61,7 @@ val queue2 = (queue1 :+ 5).tail
 diagram.render("queues", tweakOptions = _.copy(verticalSpacing = 1.2))(queue1, queue2)
 ```
 
-<p align="center"><img src="examples/queues.png" width="40%" /></p>
+<p align="center"><img src="images/data/queues.png" width="40%" /></p>
 
 To reduce visual noise from `Cons` and `Nil`, the visualization of lists can be simplified.
 Note however that this option also hides structural sharing:
@@ -75,7 +75,7 @@ val queue2 = (queue1 :+ 5).tail
 diagram.render("queues2")(queue1, queue2)
 ```
 
-<p align="center"><img src="examples/queues2.png" width="50%" /></p>
+<p align="center"><img src="images/data/queues2.png" width="50%" /></p>
 
 
 #### Vectors
@@ -86,7 +86,7 @@ diagram.render("queues2")(queue1, queue2)
  diagram.render("vector", tweakOptions = _.copy(verticalSpacing = 2))(vector)
 ```
 
-<p align="center"><img src="examples/vector.png" width="100%" /></p>
+<p align="center"><img src="images/data/vector.png" width="100%" /></p>
 
 #### HashSets
 
@@ -96,7 +96,7 @@ val set = HashSet(1L, 2L + 2L * Int.MaxValue, 3L, 4L)
 diagram.render("hashset")(set)
 ```
 
-<p align="center"><img src="examples/hashset.png" width="100%" /></p>
+<p align="center"><img src="images/data/hashset.png" width="100%" /></p>
 
 #### TreeSets
 
@@ -106,7 +106,7 @@ val set = TreeSet(1 to 14: _*)
 diagram.render("treeset", tweakOptions = _.copy(highlightColor = "coral1"))(set)
 ```
 
-<p align="center"><img src="examples/treeset.png" width="100%" /></p>
+<p align="center"><img src="images/data/treeset.png" width="100%" /></p>
 
 #### FingerTrees (using https://github.com/Sciss/FingerTree)
 
@@ -120,7 +120,7 @@ val tree = FingerTree(1 to 22: _*)
 diagram.render("fingertree", tweakOptions = _.copy(verticalSpacing = 1.2))(tree)
 ```
 
-<p align="center"><img src="examples/fingertree.png" width="100%" /></p>
+<p align="center"><img src="images/data/fingertree.png" width="100%" /></p>
 
 #### Case classes
 
@@ -144,7 +144,7 @@ diagram.render("case-classes")(
 )
 ```
 
-<p align="center"><img src="examples/case-classes.png" width="70%" /></p>
+<p align="center"><img src="images/data/case-classes.png" width="70%" /></p>
 
 #### Animations
 
@@ -166,14 +166,14 @@ diagram.renderAnimation(
 
 diagram.renderAnimation(
   "list-append",
-  tweakOptions = _.copy(onionSkin = 3))(
+  tweakOptions = _.copy(onionSkinLayers = 3))(
   Utils.iterate(List(1))(_ :+ 2, _ :+ 3, _ :+ 4)
 )
 ```
 
 <p align="center">
-  <img src="examples/list-prepend.gif" width="30%" />
-  <img src="examples/list-append.gif" width="52%" />
+  <img src="images/data/list-prepend.gif" width="30%" />
+  <img src="images/data/list-append.gif" width="52%" />
 </p>
 
 If you prefer to navigate between the animation frames interactively,
@@ -186,7 +186,7 @@ This project is intended for educational purposes and therefore is licensed unde
 To try it interactively:
 
 ```
-$ sbt amm
+$ sbt demo
 @ render(List(1, 2, 3))
 // display diagram.png with your favorite image viewer
 ```
