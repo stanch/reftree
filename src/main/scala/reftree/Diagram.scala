@@ -2,6 +2,8 @@ package reftree
 
 import java.nio.file.{Paths, Path}
 
+import reftree.svg.SvgGraphAnimation
+
 object Diagram {
   case class Options(
     density: Int = 300,
@@ -68,7 +70,7 @@ case class Diagram(
     val frames = Graphs.graphFrames(options)(trees)
     val svgs = frames.map(Output.renderSvg)
     val ids = trees.map(_.tree) collect { case RefTree.Ref(_, id, _, _) ⇒ id }
-    Svgs.animate(svgs, ids, options)
+    SvgGraphAnimation.animate(svgs, ids, options)
   }
 
   def renderSequence[A: ToRefTree](

@@ -15,6 +15,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % "2.2.5",
   "com.lihaoyi" %% "sourcecode" % "0.1.2",
+  "com.lihaoyi" %% "fastparse" % "0.4.1",
   "uk.co.turingatemyhamster" %% "gv-core" % "0.3.2",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
   "com.github.julien-truffaut" %% "monocle-macro" % "1.2.2",
