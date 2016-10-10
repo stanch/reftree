@@ -1,7 +1,7 @@
 package reftree.svg
 
 import monocle.Lens
-import reftree.geometry.{Point, Polyline, Path}
+import reftree.geometry.{Color, Point, Polyline, Path}
 
 import scala.xml.UnprefixedAttribute
 
@@ -10,6 +10,12 @@ object SvgGraphLens {
   def node(id: String) = graph composeLens SvgLens.singleChild("g", Some("node"), Some(id))
   val nodes = graph composeLens SvgLens.childrenById("g", Some("node"))
   val edges = graph composeLens SvgLens.childrenById("g", Some("edge"))
+
+  val color = Lens[xml.Node, Color.RGBA] { nodeOrEdge ⇒
+    val path = (nodeOrEdge \\ "path").find(p ⇒ (p \ "@stroke").text != "none").head
+    val opacity = path.attribute("stroke-opacity").map(_.text.toDouble).getOrElse(1.0)
+    Color.RGBA.fromString((path \ "@stroke").text, opacity)
+  }(SvgLens.color.set)
 
   val nodePosition = Lens[xml.Node, Point] { node ⇒
     val translation = SvgLens.translation.get(node)

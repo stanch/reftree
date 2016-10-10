@@ -3,9 +3,15 @@ package reftree.svg
 import reftree.Diagram.AnimationOptions
 import reftree.geometry._
 
+import scala.collection.immutable.ListMap
 import scala.util.Try
 
 object SvgGraphAnimation {
+  private def fixTextColor(svg: xml.Node) = SvgGraphLens.nodes.modify { nodes ⇒
+    // Graphviz does not set the fill-opacity attribute on text
+    nodes map { case (id, node) ⇒ id → SvgGraphLens.color.modify(identity)(node) }
+  }(svg)
+
   private def align(prev: xml.Node, next: xml.Node, prevAnchorId: String, nextAnchorId: String) = Try {
     val prevPosition =
       SvgGraphLens.node(prevAnchorId) composeLens
@@ -35,17 +41,19 @@ object SvgGraphAnimation {
 
     val nodeOption = Interpolation.option(
       fadeOut, fadeIn, Interpolation.combineLeft(
-        opacity,
-        Point.interpolation.lensLeft(SvgGraphLens.nodePosition)
-      ).mapTime(_ * 3 - 1)
+        opacity.mapTime(_ * 3 - 1),
+        Color.RGBA.interpolation.lensLeft(SvgGraphLens.color).mapTime(_ * 1.5 - 0.5),
+        Point.interpolation.lensLeft(SvgGraphLens.nodePosition).mapTime(_ * 3 - 1)
+      )
     )
 
     val edgeOption = Interpolation.option(
       fadeOut, fadeIn, Interpolation.combineLeft(
-        opacity,
-        Polyline.interpolation.lensLeft(SvgGraphLens.edgeArrow),
-        Path.interpolation.lensLeft(SvgGraphLens.edgePath)
-      ).mapTime(_ * 3 - 1)
+        opacity.mapTime(_ * 3 - 1),
+        Color.RGBA.interpolation.lensLeft(SvgGraphLens.color).mapTime(_ * 1.5 - 0.5),
+        Polyline.interpolation.lensLeft(SvgGraphLens.edgeArrow).mapTime(_ * 3 - 1),
+        Path.interpolation.lensLeft(SvgGraphLens.edgePath).mapTime(_ * 3 - 1)
+      )
     )
 
     Interpolation.combineLeft(
@@ -63,7 +71,8 @@ object SvgGraphAnimation {
       }
 
   def animate(svgs: Seq[xml.Node], anchorIds: Seq[String], options: AnimationOptions) = {
-    val aligned = alignPairwise(svgs, anchorIds, options)
+    val colored = svgs.map(fixTextColor)
+    val aligned = alignPairwise(colored, anchorIds, options)
     val maxViewBox = Rectangle.union(aligned.map(SvgLens.viewBox.get))
     val resized = aligned.map(SvgLens.viewBox.set(maxViewBox))
     interpolatePairwise(resized, options)

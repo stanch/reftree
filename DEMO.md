@@ -66,10 +66,10 @@ case class Employee(
 
 ```scala
 scala> val employee = employees.sample.get
-employee: reftree.demo.Data.Employee = Employee(Jamar,1795)
+employee: reftree.demo.Data.Employee = Employee(Hattie,1618)
 
 scala> val raisedEmployee = employee.copy(salary = employee.salary + 10)
-raisedEmployee: reftree.demo.Data.Employee = Employee(Jamar,1805)
+raisedEmployee: reftree.demo.Data.Employee = Employee(Hattie,1628)
 ```
 
 However once composition comes into play, the resulting nested immutable data structures
@@ -90,14 +90,14 @@ case class Startup(
 
 ```scala
 scala> val startup = startups.sample.get
-startup: reftree.demo.Data.Startup = Startup(Lehner-King,Employee(Samir,4535),List(Employee(Ervin,1310), Employee(Larry,1559), Employee(Violet,1662), Employee(Lilla,1222)))
+startup: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3389),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
 
 scala> val raisedCeo = startup.copy(
      |   ceo = startup.ceo.copy(
      |     salary = startup.ceo.salary + 10
      |   )
      | )
-raisedCeo: reftree.demo.Data.Startup = Startup(Lehner-King,Employee(Samir,4545),List(Employee(Ervin,1310), Employee(Larry,1559), Employee(Violet,1662), Employee(Lilla,1222)))
+raisedCeo: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3399),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
 ```
 
 ```scala
@@ -131,13 +131,13 @@ import monocle.macros.GenLens
 
 scala> val salaryLens = GenLens[Employee](_.salary)
 warning: there was one feature warning; re-run with -feature for details
-salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@38a6ff15
+salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@204fc1e7
 
 scala> salaryLens.get(startup.ceo)
-res4: Long = 4535
+res4: Long = 3389
 
 scala> salaryLens.modify(s => s + 10)(startup.ceo)
-res5: reftree.demo.Data.Employee = Employee(Samir,4545)
+res5: reftree.demo.Data.Employee = Employee(Carmel,3399)
 ```
 
 ```scala
@@ -151,10 +151,10 @@ We can also define a lens that focuses on the startup’s CEO:
 ```scala
 scala> val ceoLens = GenLens[Startup](_.ceo)
 warning: there was one feature warning; re-run with -feature for details
-ceoLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@3c4ea118
+ceoLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@19bb0b36
 
 scala> ceoLens.get(startup)
-res7: reftree.demo.Data.Employee = Employee(Samir,4535)
+res7: reftree.demo.Data.Employee = Employee(Carmel,3389)
 ```
 
 ```scala
@@ -167,13 +167,13 @@ It’s not apparent yet how this would help, but the trick is that lenses can be
 
 ```scala
 scala> val ceoSalaryLens = ceoLens composeLens salaryLens
-ceoSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@3bb9d624
+ceoSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@6b5b2499
 
 scala> ceoSalaryLens.get(startup)
-res9: Long = 4535
+res9: Long = 3389
 
 scala> ceoSalaryLens.modify(s => s + 10)(startup)
-res10: reftree.demo.Data.Startup = Startup(Lehner-King,Employee(Samir,4545),List(Employee(Ervin,1310), Employee(Larry,1559), Employee(Violet,1662), Employee(Lilla,1222)))
+res10: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3399),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
 ```
 
 ```scala
@@ -196,13 +196,13 @@ We can use it to give our CEO a funny name:
 ```scala
 scala> val employeeNameLens = GenLens[Employee](_.name)
 warning: there was one feature warning; re-run with -feature for details
-employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@1ee31d20
+employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@6d65b256
 
 scala> val ceoVowelLens = ceoLens composeLens employeeNameLens composeTraversal vowelLens
-ceoVowelLens: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@40feb650
+ceoVowelLens: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@6516f26a
 
 scala> ceoVowelLens.modify(v => v.toUpper)(startup)
-res13: reftree.demo.Data.Startup = Startup(Lehner-King,Employee(SAmIr,4535),List(Employee(Ervin,1310), Employee(Larry,1559), Employee(Violet,1662), Employee(Lilla,1222)))
+res13: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(CArmEl,3389),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
 ```
 
 ```scala
@@ -222,7 +222,7 @@ scala> import com.softwaremill.quicklens._
 import com.softwaremill.quicklens._
 
 scala> val raisedCeo = startup.modify(_.ceo.salary).using(s => s + 10)
-raisedCeo: reftree.demo.Data.Startup = Startup(Lehner-King,Employee(Samir,4545),List(Employee(Ervin,1310), Employee(Larry,1559), Employee(Violet,1662), Employee(Lilla,1222)))
+raisedCeo: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3399),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
 ```
 
 You might think this is approaching the syntax for updating mutable data,
@@ -231,7 +231,7 @@ but actually we have already surpassed it, since lenses are much more flexible:
 
 ```scala
 scala> val raisedEveryone = startup.modifyAll(_.ceo.salary, _.team.each.salary).using(s => s + 10)
-raisedEveryone: reftree.demo.Data.Startup = Startup(Lehner-King,Employee(Samir,4545),List(Employee(Ervin,1320), Employee(Larry,1569), Employee(Violet,1672), Employee(Lilla,1232)))
+raisedEveryone: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3399),List(Employee(Martin,1416), Employee(Aniya,1745), Employee(Arne,1881), Employee(Nick,1625)))
 ```
 
 

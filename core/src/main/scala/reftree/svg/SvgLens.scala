@@ -1,7 +1,7 @@
 package reftree.svg
 
-import monocle.{Iso, Lens}
-import reftree.geometry.{Point, Rectangle}
+import monocle.{Iso, Lens, Optional}
+import reftree.geometry.{Color, Point, Rectangle}
 
 import scala.collection.immutable.ListMap
 import scala.xml.UnprefixedAttribute
@@ -38,6 +38,26 @@ object SvgLens {
 
   val opacity = attr("opacity") composeIso
     Iso[Option[String], Double](_.fold(1.0)(_.toDouble))(o ⇒ Some(o.toString))
+
+  val color = Optional[xml.Node, Color.RGBA](Function.const(None)) { color ⇒ svg ⇒
+    new RuleTransformer(new RewriteRule {
+      val fill = xml.MetaData.concatenate(
+        new UnprefixedAttribute("fill", color.toString, xml.Null),
+        new UnprefixedAttribute("fill-opacity", color.a.toString, xml.Null)
+      )
+      val stroke = xml.MetaData.concatenate(
+        new UnprefixedAttribute("stroke", color.toString, xml.Null),
+        new UnprefixedAttribute("stroke-opacity", color.a.toString, xml.Null)
+      )
+      override def transform(n: xml.Node): Seq[xml.Node] = n match {
+        case e @ xml.Elem(_, "text", attrs, _, _*) ⇒ e.asInstanceOf[xml.Elem] % fill
+        case e @ xml.Elem(_, "polygon", attrs, _, _*) ⇒ e.asInstanceOf[xml.Elem] % fill % stroke
+        case e @ xml.Elem(_, "path", attrs, _, _*)
+          if !e.attribute("stroke").map(_.text).contains("none") ⇒ e.asInstanceOf[xml.Elem] % stroke
+        case other ⇒ other
+      }
+    }).apply(svg)
+  }
 
   def singleChild(
     elem: String,

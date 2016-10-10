@@ -2,6 +2,7 @@ package reftree
 
 import java.nio.file.{Paths, Path}
 
+import reftree.geometry.Interpolation
 import reftree.svg.SvgGraphAnimation
 
 object Diagram {
@@ -24,13 +25,15 @@ object Diagram {
     density: Int = 100,
     verticalSpacing: Double = 0.8,
     color: String = "dodgerblue4",
-    accentColor: String = "forestgreen",
+    onionSkinBaseColor: String = "#898988",
+    accentColor: String = "#228B22",
     highlightColor: String = "bisque",
     silent: Boolean = true
   ) {
     def toOptions = {
       val palette = if (onionSkinLayers == 0) Seq(color) else {
-        (50 to 80 by (30 / onionSkinLayers)).take(onionSkinLayers).map(i ⇒ s"gray$i").reverse :+ color
+        Interpolation.double.sample(0, 255, onionSkinLayers, inclusive = false)
+          .map(o ⇒ f"$onionSkinBaseColor${o.toInt}%02x") :+ color
       }
       Options(
         density, verticalSpacing, palette, highlightColor,

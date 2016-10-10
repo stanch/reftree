@@ -18,7 +18,8 @@ val core = project.settings(commonSettings: _*).settings(
     "com.github.julien-truffaut" %% "monocle-macro" % "1.2.2",
     "de.sciss" %% "fingertree" % "1.5.2",
     "com.softwaremill.quicklens" %% "quicklens" % "1.4.7",
-    "org.scalatest" %% "scalatest" % "3.0.0" % Test
+    "org.scalatest" %% "scalatest" % "3.0.0" % Test,
+    "org.scalacheck" %% "scalacheck" % "1.13.2" % Test
   )
 )
 
