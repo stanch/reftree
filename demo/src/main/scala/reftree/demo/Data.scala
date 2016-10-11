@@ -14,15 +14,24 @@ object Data {
     salary: Long
   )
 
+  val employee = Employee("Michael", 4000)
+
   case class Startup(
     name: String,
-    ceo: Employee,
+    founder: Employee,
     team: List[Employee]
   )
 
+  val startup = Startup("Acme", employee, List(
+    Employee("Adam", 2100),
+    Employee("Bella", 2100),
+    Employee("Chad", 1980),
+    Employee("Delia", 1850)
+  ))
+
   case class Hierarchy(
     employee: Employee,
-    team: List[Hierarchy]
+    team: List[Hierarchy] = List.empty
   )
 
   case class Company(
@@ -30,9 +39,30 @@ object Data {
     hierarchy: Hierarchy
   )
 
+  val company = Company("Acme Corp", Hierarchy(
+    Employee("Michael", 6000), List(
+      Hierarchy(
+        Employee("Adam", 3200), List(
+          Hierarchy(Employee("Anna", 1600)),
+          Hierarchy(Employee("Alex", 1500))
+        )
+      ),
+      Hierarchy(
+        Employee("Bella", 3100), List(
+          Hierarchy(Employee("Brad", 1500)),
+          Hierarchy(Employee("Betty", 1400))
+        )
+      )
+    )
+  ))
+
+  val newHire = Hierarchy(Employee("Bert", 1300))
+
   case class Tree(x: Int, c: List[Tree] = Nil)
 
-  val vowelLens = new PTraversal[String, String, Char, Char] {
+  val simpleTree = Tree(1, List(Tree(2), Tree(3), Tree(4), Tree(5, List(Tree(6), Tree(7)))))
+
+  val vowelTraversal = new PTraversal[String, String, Char, Char] {
     override def modifyF[F[_]: Applicative](f: Char ⇒ F[Char])(s: String): F[String] = {
       Applicative[F].sequence(s.toList map {
         case v @ ('A' | 'E' | 'I' | 'O' | 'U' | 'a' | 'e' | 'i' | 'o' | 'u') ⇒ f(v)

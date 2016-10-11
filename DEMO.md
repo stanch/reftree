@@ -24,7 +24,7 @@ declarations (each section might add its own):
 
 ```scala
 import reftree._
-import reftree.demo.Data._, reftree.demo.Generators._
+import reftree.demo.Data._
 import scala.collection.immutable._
 import java.nio.file.Paths
 
@@ -65,11 +65,11 @@ case class Employee(
 ```
 
 ```scala
-scala> val employee = employees.sample.get
-employee: reftree.demo.Data.Employee = Employee(Hattie,1618)
+scala> employee
+res1: reftree.demo.Data.Employee = Employee(Michael,4000)
 
 scala> val raisedEmployee = employee.copy(salary = employee.salary + 10)
-raisedEmployee: reftree.demo.Data.Employee = Employee(Hattie,1628)
+raisedEmployee: reftree.demo.Data.Employee = Employee(Michael,4010)
 ```
 
 However once composition comes into play, the resulting nested immutable data structures
@@ -83,26 +83,26 @@ case class Employee(
 
 case class Startup(
   name: String,
-  ceo: Employee,
+  founder: Employee,
   team: List[Employee]
 )
 ```
 
 ```scala
-scala> val startup = startups.sample.get
-startup: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3389),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
+scala> startup
+res2: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
 
-scala> val raisedCeo = startup.copy(
-     |   ceo = startup.ceo.copy(
-     |     salary = startup.ceo.salary + 10
+scala> val raisedFounder = startup.copy(
+     |   founder = startup.founder.copy(
+     |     salary = startup.founder.salary + 10
      |   )
      | )
-raisedCeo: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3399),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
+raisedFounder: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
 ```
 
 ```scala
 // extra declarations for this section
-import reftree.ToRefTree.Simple.list
+import reftree.contrib.SimplifiedInstances.list
 import reftree.contrib.LensInstances._
 
 val diagram = Diagram(
@@ -112,7 +112,7 @@ val diagram = Diagram(
 ```
 
 ```scala
-diagram.render("startup")(startup, raisedCeo)
+diagram.render("startup")(startup, raisedFounder)
 ```
 
 <p align="center"><img src="images/lenses/startup.png" width="100%" /></p>
@@ -131,85 +131,85 @@ import monocle.macros.GenLens
 
 scala> val salaryLens = GenLens[Employee](_.salary)
 warning: there was one feature warning; re-run with -feature for details
-salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@204fc1e7
+salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@61911f7e
 
-scala> salaryLens.get(startup.ceo)
-res4: Long = 3389
+scala> salaryLens.get(startup.founder)
+res6: Long = 4000
 
-scala> salaryLens.modify(s => s + 10)(startup.ceo)
-res5: reftree.demo.Data.Employee = Employee(Carmel,3399)
+scala> salaryLens.modify(s => s + 10)(startup.founder)
+res7: reftree.demo.Data.Employee = Employee(Michael,4010)
 ```
 
 ```scala
-diagram.render("salaryLens")(salaryLens → startup.ceo)
+diagram.render("salaryLens")(salaryLens → startup.founder)
 ```
 
 <p align="center"><img src="images/lenses/salaryLens.png" width="40%" /></p>
 
-We can also define a lens that focuses on the startup’s CEO:
+We can also define a lens that focuses on the startup’s founder:
 
 ```scala
-scala> val ceoLens = GenLens[Startup](_.ceo)
+scala> val founderLens = GenLens[Startup](_.founder)
 warning: there was one feature warning; re-run with -feature for details
-ceoLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@19bb0b36
+founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@15aed6b9
 
-scala> ceoLens.get(startup)
-res7: reftree.demo.Data.Employee = Employee(Carmel,3389)
+scala> founderLens.get(startup)
+res9: reftree.demo.Data.Employee = Employee(Michael,4000)
 ```
 
 ```scala
-diagram.render("ceoLens")(ceoLens → startup)
+diagram.render("founderLens")(founderLens → startup)
 ```
 
-<p align="center"><img src="images/lenses/ceoLens.png" width="100%" /></p>
+<p align="center"><img src="images/lenses/founderLens.png" width="100%" /></p>
 
 It’s not apparent yet how this would help, but the trick is that lenses can be composed:
 
 ```scala
-scala> val ceoSalaryLens = ceoLens composeLens salaryLens
-ceoSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@6b5b2499
+scala> val founderSalaryLens = founderLens composeLens salaryLens
+founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@611bd554
 
-scala> ceoSalaryLens.get(startup)
-res9: Long = 3389
+scala> founderSalaryLens.get(startup)
+res11: Long = 4000
 
-scala> ceoSalaryLens.modify(s => s + 10)(startup)
-res10: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3399),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
+scala> founderSalaryLens.modify(s => s + 10)(startup)
+res12: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
 ```
 
 ```scala
-diagram.render("ceoSalaryLens")(ceoSalaryLens → startup)
+diagram.render("founderSalaryLens")(founderSalaryLens → startup)
 ```
 
-<p align="center"><img src="images/lenses/ceoSalaryLens.png" width="100%" /></p>
+<p align="center"><img src="images/lenses/founderSalaryLens.png" width="100%" /></p>
 
 One interesting thing is that lenses can focus on anything, not just direct attributes of the data.
-Here is a lens that focuses on all vowels in a string:
+Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
 ```scala
-diagram.render("vowelLens")(vowelLens)
+diagram.render("vowelTraversal")(vowelTraversal → "example")
 ```
 
-<p align="center"><img src="images/lenses/vowelLens.png" width="40%" /></p>
+<p align="center"><img src="images/lenses/vowelTraversal.png" width="40%" /></p>
 
-We can use it to give our CEO a funny name:
+We can use it to give our founder a funny name:
 
 ```scala
 scala> val employeeNameLens = GenLens[Employee](_.name)
 warning: there was one feature warning; re-run with -feature for details
-employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@6d65b256
+employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@67c9f64d
 
-scala> val ceoVowelLens = ceoLens composeLens employeeNameLens composeTraversal vowelLens
-ceoVowelLens: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@6516f26a
+scala> val founderVowelLens = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
+founderVowelLens: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@c587f5f
 
-scala> ceoVowelLens.modify(v => v.toUpper)(startup)
-res13: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(CArmEl,3389),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
+scala> founderVowelLens.modify(v => v.toUpper)(startup)
+res15: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
 ```
 
 ```scala
-diagram.render("ceoVowelLens")(ceoVowelLens → startup)
+diagram.render("founderVowelLens")(founderVowelLens → startup)
 ```
 
-<p align="center"><img src="images/lenses/ceoVowelLens.png" width="100%" /></p>
+<p align="center"><img src="images/lenses/founderVowelLens.png" width="100%" /></p>
 
 So far we have replaced the `copy` boilerplate with a number of lens declarations.
 However most of the time our goal is just to update data.
@@ -221,8 +221,8 @@ that allows to do exactly that, creating all the necessary lenses under the hood
 scala> import com.softwaremill.quicklens._
 import com.softwaremill.quicklens._
 
-scala> val raisedCeo = startup.modify(_.ceo.salary).using(s => s + 10)
-raisedCeo: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3399),List(Employee(Martin,1406), Employee(Aniya,1735), Employee(Arne,1871), Employee(Nick,1615)))
+scala> val raisedCeo = startup.modify(_.founder.salary).using(s => s + 10)
+raisedCeo: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
 ```
 
 You might think this is approaching the syntax for updating mutable data,
@@ -230,8 +230,8 @@ but actually we have already surpassed it, since lenses are much more flexible:
 
 
 ```scala
-scala> val raisedEveryone = startup.modifyAll(_.ceo.salary, _.team.each.salary).using(s => s + 10)
-raisedEveryone: reftree.demo.Data.Startup = Startup(Bernier-Gutmann,Employee(Carmel,3399),List(Employee(Martin,1416), Employee(Aniya,1745), Employee(Arne,1881), Employee(Nick,1625)))
+scala> val raisedEveryone = startup.modifyAll(_.founder.salary, _.team.each.salary).using(s => s + 10)
+raisedEveryone: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2110), Employee(Bella,2110), Employee(Chad,1990), Employee(Delia,1860)))
 ```
 
 
@@ -258,12 +258,12 @@ case class Company(
 ```
 
 The `Hierarchy` class refers to itself.
-Let’s grab a random company object and display its hierarchy as a tree:
+Let’s grab a company object and display its hierarchy as a tree:
 
 ```scala
 // extra declarations for this section
 import zipper._
-import reftree.ToRefTree.Simple.option
+import reftree.contrib.SimplifiedInstances.option
 
 val diagram = Diagram(
   defaultOptions = Diagram.Options(density = 100),
@@ -272,12 +272,7 @@ val diagram = Diagram(
 ```
 
 ```scala
-val company = companies.sample.get
-val hierarchy = company.hierarchy
-```
-
-```scala
-diagram.render("company")(hierarchy)
+diagram.render("company")(company.hierarchy)
 ```
 
 <p align="center"><img src="images/zippers/company.png" width="100%" /></p>
@@ -295,12 +290,11 @@ All the changes made to the tree can be committed, yielding a new modified versi
 Here is how we would insert a new employee into the hierarchy:
 
 ```scala
-val newEmployee = Hierarchy(employees.sample.get, team = List.empty)
-val updatedHierarchy = Zipper(hierarchy).moveDownRight.moveDownRight.insertRight(newEmployee).commit
+val updatedHierarchy = Zipper(company.hierarchy).moveDownRight.moveDownRight.insertRight(newHire).commit
 ```
 
 ```scala
-diagram.render("updatedHierarchy")(hierarchy, updatedHierarchy)
+diagram.render("updatedHierarchy")(company.hierarchy, updatedHierarchy)
 ```
 
 <p align="center"><img src="images/zippers/updatedHierarchy.png" width="100%" /></p>
@@ -414,7 +408,7 @@ This link however prevents us from seeing the picture clearly.
 Let’s elide the parent field:
 
 ```scala
-import reftree.contrib.ZipperInstances.elideParent
+import reftree.contrib.SimplifiedInstances.zipper
 ```
 
 ```scala

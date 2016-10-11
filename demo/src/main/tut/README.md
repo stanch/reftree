@@ -67,12 +67,13 @@ To reduce visual noise from `Cons` and `Nil`, the visualization of lists can be 
 Note however that this option also hides structural sharing:
 
 ```tut:silent
-import reftree.ToRefTree.Simple.list
-
 val queue1 = Queue(1, 2) :+ 3 :+ 4
 val queue2 = (queue1 :+ 5).tail
 
-diagram.render("queues2")(queue1, queue2)
+{
+  import reftree.contrib.SimplifiedInstances.list
+  diagram.render("queues2")(queue1, queue2)
+}
 ```
 
 <p align="center"><img src="images/data/queues2.png" width="50%" /></p>
@@ -156,7 +157,6 @@ Here is an example:
 
 ```tut:silent
 import reftree.Utils
-import reftree.ToRefTree.Actual.list
 
 diagram.renderAnimation(
   "list-prepend",

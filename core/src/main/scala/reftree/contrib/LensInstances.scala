@@ -70,28 +70,12 @@ object LensInstances {
     }
   }
 
-  implicit def `Lens RefTree`[A, B](
-    implicit exampleA: Example[A], refTreeA: ToRefTree[A],
-    exampleB: Example[B], refTreeB: ToRefTree[B],
-    marker: Marker[B]
-  ): ToRefTree[Lens[A, B]] = new ToRefTree[Lens[A, B]] {
-    def refTree(value: Lens[A, B]): RefTree = lensRefTree(value.modify, exampleA.exemplify)
-  }
-
   implicit def `Lens+target RefTree`[A, B](
     implicit refTreeA: ToRefTree[A],
     exampleB: Example[B], refTreeB: ToRefTree[B],
     marker: Marker[B]
   ): ToRefTree[(Lens[A, B], A)] = new ToRefTree[(Lens[A, B], A)] {
     def refTree(value: (Lens[A, B], A)): RefTree = lensRefTree(value._1.modify, value._2)
-  }
-
-  implicit def `Traversal RefTree`[A, B](
-    implicit exampleA: Example[A], refTreeA: ToRefTree[A],
-    exampleB: Example[B], refTreeB: ToRefTree[B],
-    marker: Marker[B]
-  ): ToRefTree[Traversal[A, B]] = new ToRefTree[Traversal[A, B]] {
-    def refTree(value: Traversal[A, B]): RefTree = lensRefTree(value.modify, exampleA.exemplify)
   }
 
   implicit def `Traversal+target RefTree`[A, B](

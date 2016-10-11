@@ -24,7 +24,7 @@ declarations (each section might add its own):
 
 ```tut:silent
 import reftree._
-import reftree.demo.Data._, reftree.demo.Generators._
+import reftree.demo.Data._
 import scala.collection.immutable._
 import java.nio.file.Paths
 
@@ -65,7 +65,7 @@ case class Employee(
 ```
 
 ```tut
-val employee = employees.sample.get
+employee
 val raisedEmployee = employee.copy(salary = employee.salary + 10)
 ```
 
@@ -80,23 +80,23 @@ case class Employee(
 
 case class Startup(
   name: String,
-  ceo: Employee,
+  founder: Employee,
   team: List[Employee]
 )
 ```
 
 ```tut
-val startup = startups.sample.get
-val raisedCeo = startup.copy(
-  ceo = startup.ceo.copy(
-    salary = startup.ceo.salary + 10
+startup
+val raisedFounder = startup.copy(
+  founder = startup.founder.copy(
+    salary = startup.founder.salary + 10
   )
 )
 ```
 
 ```tut:silent
 // extra declarations for this section
-import reftree.ToRefTree.Simple.list
+import reftree.contrib.SimplifiedInstances.list
 import reftree.contrib.LensInstances._
 
 val diagram = Diagram(
@@ -106,7 +106,7 @@ val diagram = Diagram(
 ```
 
 ```tut:silent
-diagram.render("startup")(startup, raisedCeo)
+diagram.render("startup")(startup, raisedFounder)
 ```
 
 <p align="center"><img src="images/lenses/startup.png" width="100%" /></p>
@@ -124,68 +124,68 @@ import monocle.macros.GenLens
 
 val salaryLens = GenLens[Employee](_.salary)
 
-salaryLens.get(startup.ceo)
-salaryLens.modify(s => s + 10)(startup.ceo)
+salaryLens.get(startup.founder)
+salaryLens.modify(s => s + 10)(startup.founder)
 ```
 
 ```tut:silent
-diagram.render("salaryLens")(salaryLens → startup.ceo)
+diagram.render("salaryLens")(salaryLens → startup.founder)
 ```
 
 <p align="center"><img src="images/lenses/salaryLens.png" width="40%" /></p>
 
-We can also define a lens that focuses on the startup’s CEO:
+We can also define a lens that focuses on the startup’s founder:
 
 ```tut
-val ceoLens = GenLens[Startup](_.ceo)
+val founderLens = GenLens[Startup](_.founder)
 
-ceoLens.get(startup)
+founderLens.get(startup)
 ```
 
 ```tut:silent
-diagram.render("ceoLens")(ceoLens → startup)
+diagram.render("founderLens")(founderLens → startup)
 ```
 
-<p align="center"><img src="images/lenses/ceoLens.png" width="100%" /></p>
+<p align="center"><img src="images/lenses/founderLens.png" width="100%" /></p>
 
 It’s not apparent yet how this would help, but the trick is that lenses can be composed:
 
 ```tut
-val ceoSalaryLens = ceoLens composeLens salaryLens
+val founderSalaryLens = founderLens composeLens salaryLens
 
-ceoSalaryLens.get(startup)
-ceoSalaryLens.modify(s => s + 10)(startup)
+founderSalaryLens.get(startup)
+founderSalaryLens.modify(s => s + 10)(startup)
 ```
 
 ```tut:silent
-diagram.render("ceoSalaryLens")(ceoSalaryLens → startup)
+diagram.render("founderSalaryLens")(founderSalaryLens → startup)
 ```
 
-<p align="center"><img src="images/lenses/ceoSalaryLens.png" width="100%" /></p>
+<p align="center"><img src="images/lenses/founderSalaryLens.png" width="100%" /></p>
 
 One interesting thing is that lenses can focus on anything, not just direct attributes of the data.
-Here is a lens that focuses on all vowels in a string:
+Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
 ```tut:silent
-diagram.render("vowelLens")(vowelLens)
+diagram.render("vowelTraversal")(vowelTraversal → "example")
 ```
 
-<p align="center"><img src="images/lenses/vowelLens.png" width="40%" /></p>
+<p align="center"><img src="images/lenses/vowelTraversal.png" width="40%" /></p>
 
-We can use it to give our CEO a funny name:
+We can use it to give our founder a funny name:
 
 ```tut
 val employeeNameLens = GenLens[Employee](_.name)
-val ceoVowelLens = ceoLens composeLens employeeNameLens composeTraversal vowelLens
+val founderVowelLens = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
 
-ceoVowelLens.modify(v => v.toUpper)(startup)
+founderVowelLens.modify(v => v.toUpper)(startup)
 ```
 
 ```tut:silent
-diagram.render("ceoVowelLens")(ceoVowelLens → startup)
+diagram.render("founderVowelLens")(founderVowelLens → startup)
 ```
 
-<p align="center"><img src="images/lenses/ceoVowelLens.png" width="100%" /></p>
+<p align="center"><img src="images/lenses/founderVowelLens.png" width="100%" /></p>
 
 So far we have replaced the `copy` boilerplate with a number of lens declarations.
 However most of the time our goal is just to update data.
@@ -196,7 +196,7 @@ that allows to do exactly that, creating all the necessary lenses under the hood
 ```tut
 import com.softwaremill.quicklens._
 
-val raisedCeo = startup.modify(_.ceo.salary).using(s => s + 10)
+val raisedCeo = startup.modify(_.founder.salary).using(s => s + 10)
 ```
 
 You might think this is approaching the syntax for updating mutable data,
@@ -204,7 +204,7 @@ but actually we have already surpassed it, since lenses are much more flexible:
 
 
 ```tut
-val raisedEveryone = startup.modifyAll(_.ceo.salary, _.team.each.salary).using(s => s + 10)
+val raisedEveryone = startup.modifyAll(_.founder.salary, _.team.each.salary).using(s => s + 10)
 ```
 
 
@@ -231,12 +231,12 @@ case class Company(
 ```
 
 The `Hierarchy` class refers to itself.
-Let’s grab a random company object and display its hierarchy as a tree:
+Let’s grab a company object and display its hierarchy as a tree:
 
 ```tut:silent
 // extra declarations for this section
 import zipper._
-import reftree.ToRefTree.Simple.option
+import reftree.contrib.SimplifiedInstances.option
 
 val diagram = Diagram(
   defaultOptions = Diagram.Options(density = 100),
@@ -245,12 +245,7 @@ val diagram = Diagram(
 ```
 
 ```tut:silent
-val company = companies.sample.get
-val hierarchy = company.hierarchy
-```
-
-```tut:silent
-diagram.render("company")(hierarchy)
+diagram.render("company")(company.hierarchy)
 ```
 
 <p align="center"><img src="images/zippers/company.png" width="100%" /></p>
@@ -268,12 +263,11 @@ All the changes made to the tree can be committed, yielding a new modified versi
 Here is how we would insert a new employee into the hierarchy:
 
 ```tut:silent
-val newEmployee = Hierarchy(employees.sample.get, team = List.empty)
-val updatedHierarchy = Zipper(hierarchy).moveDownRight.moveDownRight.insertRight(newEmployee).commit
+val updatedHierarchy = Zipper(company.hierarchy).moveDownRight.moveDownRight.insertRight(newHire).commit
 ```
 
 ```tut:silent
-diagram.render("updatedHierarchy")(hierarchy, updatedHierarchy)
+diagram.render("updatedHierarchy")(company.hierarchy, updatedHierarchy)
 ```
 
 <p align="center"><img src="images/zippers/updatedHierarchy.png" width="100%" /></p>
@@ -387,7 +381,7 @@ This link however prevents us from seeing the picture clearly.
 Let’s elide the parent field:
 
 ```tut:silent
-import reftree.contrib.ZipperInstances.elideParent
+import reftree.contrib.SimplifiedInstances.zipper
 ```
 
 ```tut:silent

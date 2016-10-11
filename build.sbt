@@ -17,7 +17,6 @@ val core = project.settings(commonSettings: _*).settings(
     "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
     "com.github.julien-truffaut" %% "monocle-macro" % "1.2.2",
     "de.sciss" %% "fingertree" % "1.5.2",
-    "com.softwaremill.quicklens" %% "quicklens" % "1.4.7",
     "org.scalatest" %% "scalatest" % "3.0.0" % Test,
     "org.scalacheck" %% "scalacheck" % "1.13.2" % Test
   )
@@ -27,11 +26,6 @@ val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
   publishArtifact := false,
   libraryDependencies ++= Seq(
     "com.softwaremill.quicklens" %% "quicklens" % "1.4.7",
-    "it.justwrote" %% "scala-faker" % "0.3",
-    "org.scalacheck" %% "scalacheck" % "1.12.5",
-    "org.scalaz" %% "scalaz-scalacheck-binding" % "7.2.5",
-    "com.thoughtworks.each" %% "each" % "0.6.0",
-    "org.scalatest" %% "scalatest" % "3.0.0" % Test,
     "com.lihaoyi" % "ammonite" % "0.7.7" % Test cross CrossVersion.full
   ),
   initialCommands in (Test, console) := {
@@ -46,7 +40,6 @@ val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
       "import reftree.contrib.LensInstances._",
       "import reftree.contrib.ZipperInstances",
       "import reftree.demo.Data._",
-      "import reftree.demo.Generators._",
       "val diagram = Diagram()",
       "import diagram.{renderDefault ⇒ render}"
     ).mkString(";")
