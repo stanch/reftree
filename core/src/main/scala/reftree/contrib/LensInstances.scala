@@ -2,7 +2,6 @@ package reftree.contrib
 
 import monocle.{Traversal, Lens}
 import reftree._
-import zipper._
 
 object LensInstances {
   trait Example[A] {
@@ -59,17 +58,6 @@ object LensInstances {
     }
   }
 
-  implicit val `RefTree Unzip`: Unzip[RefTree] = new Unzip[RefTree] {
-    def unzip(node: RefTree): List[RefTree] = node match {
-      case RefTree.Ref(_, _, children, _) ⇒ children.toList
-      case _ ⇒ List.empty
-    }
-    def zip(node: RefTree, children: List[RefTree]): RefTree = node match {
-      case ref: RefTree.Ref ⇒ ref.copy(children = children)
-      case t ⇒ t
-    }
-  }
-
   implicit def `Lens+target RefTree`[A, B](
     implicit refTreeA: ToRefTree[A],
     exampleB: Example[B], refTreeB: ToRefTree[B],
@@ -90,34 +78,22 @@ object LensInstances {
     implicit refTreeA: ToRefTree[A],
     exampleB: Example[B], refTreeB: ToRefTree[B], marker: Marker[B]
   ) = {
-    // next node in the tree
-    def next[T](zipper: Zipper[T]): Zipper.MoveResult[T] =
-      zipper.tryMoveRight.orElse(_.tryMoveUp.flatMap(next))
-
-    // first child node (if any), or next node in the tree
-    def childOrNext[T](zipper: Zipper[T]): Zipper.MoveResult[T] =
-      zipper.tryMoveDownLeft.orElse(next)
-
-    // go through the original and the modified trees and highlight the differences
-    def iterate(zipper1: Zipper[RefTree], zipper2: Zipper[RefTree], example: RefTree): RefTree = {
-      def iterateOrCommit(updated: Zipper[RefTree], move: Zipper.Move[RefTree]) =
-        (move(updated), move(zipper2)) match {
-          case (Zipper.MoveResult.Success(z1), Zipper.MoveResult.Success(z2)) ⇒ iterate(z1, z2, example)
-          case _ ⇒ updated.commit
-        }
-      (example, zipper1.focus, zipper2.focus) match {
+    def inner(tree1: RefTree, tree2: RefTree, example: RefTree): RefTree = {
+      (example, tree1, tree2) match {
         case (_: RefTree.Val, x: RefTree.Val, y: RefTree.Val) if x != y ⇒
           // the example is a Val, and we found two mismatching Val trees
-          val updated = zipper1.set(x.copy(highlight = true))
-          iterateOrCommit(updated, next)
+          x.copy(highlight = true)
 
         case (RefTree.Ref(name, _, _, _), x: RefTree.Ref, y: RefTree.Ref) if x != y && x.name == name ⇒
           // the example is a Ref, and we found two mismatching Ref trees with the same name
-          val updated = zipper1.set(x.copy(highlight = true))
-          iterateOrCommit(updated, next)
+          x.copy(highlight = true)
 
-        case _ ⇒
-          iterateOrCommit(zipper1, childOrNext)
+        case (_, x: RefTree.Ref, y: RefTree.Ref) ⇒
+          // recurse
+          val children = (x.children zip y.children) map { case (cx, cy) ⇒ inner(cx, cy, example) }
+          x.copy(children = children)
+
+        case _ ⇒ tree1
       }
     }
 
@@ -126,6 +102,6 @@ object LensInstances {
     // an example RefTree for type B used to detect similar RefTrees
     val example = exampleB.exemplify.refTree
     // compare the RefTrees before and after modification
-    iterate(Zipper(target.refTree), Zipper(modified.refTree), example)
+    inner(target.refTree, modified.refTree, example)
   }
 }
