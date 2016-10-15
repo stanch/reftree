@@ -26,6 +26,7 @@ declarations (each section might add its own):
 import reftree._
 import reftree.demo.Data._
 import scala.collection.immutable._
+import scala.concurrent.duration.DurationInt
 import java.nio.file.Paths
 
 val diagram = Diagram(
@@ -462,13 +463,13 @@ val zippers = Utils.iterate(Zipper(simpleTree))(
 
 diagram.renderAnimation(
   "navigation-tree",
-  tweakOptions = _.copy(delay = 200))(
+  tweakOptions = _.copy(delay = 2.seconds))(
   zippers.map(ZipperFocus(_, simpleTree))
 )
 
 diagram.renderAnimation(
   "navigation-zipper",
-  tweakOptions = _.copy(delay = 200))(
+  tweakOptions = _.copy(delay = 2.seconds))(
   zippers
 )
 ```

@@ -5,6 +5,8 @@ import java.nio.file.{Paths, Path}
 import reftree.geometry.Interpolation
 import reftree.svg.SvgGraphAnimation
 
+import scala.concurrent.duration._
+
 object Diagram {
   case class Options(
     density: Int = 300,
@@ -16,7 +18,7 @@ object Diagram {
   )
 
   case class AnimationOptions(
-    delay: Int = 100,
+    delay: FiniteDuration = 1.second,
     loop: Boolean = true,
     onionSkinLayers: Int = 0,
     anchoring: Boolean = true,
@@ -86,7 +88,7 @@ case class Diagram(
     val indexWidth = processedFrames.length.toString.length
     def padding(index: Int) = index.toString.reverse.padTo(indexWidth, '0').reverse
     processedFrames.zipWithIndex.par foreach { case (svg, i) ⇒
-      Output.renderPng(svg, directory.resolve(s"$baseName-${padding(i + 1)}.png"), tweakedOptions)
+      Output.renderImage(svg, tweakedOptions).output(directory.resolve(s"$baseName-${padding(i + 1)}.png"))
     }
   }
 

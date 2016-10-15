@@ -26,6 +26,7 @@ declarations (each section might add its own):
 import reftree._
 import reftree.demo.Data._
 import scala.collection.immutable._
+import scala.concurrent.duration.DurationInt
 import java.nio.file.Paths
 
 val diagram = Diagram(
@@ -131,7 +132,7 @@ import monocle.macros.GenLens
 
 scala> val salaryLens = GenLens[Employee](_.salary)
 warning: there was one feature warning; re-run with -feature for details
-salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@9f21f72
+salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@6911afb1
 
 scala> salaryLens.get(startup.founder)
 res6: Long = 4000
@@ -151,7 +152,7 @@ We can also define a lens that focuses on the startup’s founder:
 ```scala
 scala> val founderLens = GenLens[Startup](_.founder)
 warning: there was one feature warning; re-run with -feature for details
-founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@3088cb1
+founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@24de86b2
 
 scala> founderLens.get(startup)
 res9: reftree.demo.Data.Employee = Employee(Michael,4000)
@@ -167,7 +168,7 @@ It’s not apparent yet how this would help, but the trick is that lenses can be
 
 ```scala
 scala> val founderSalaryLens = founderLens composeLens salaryLens
-founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@7ef747cd
+founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@7389c9f
 
 scala> founderSalaryLens.get(startup)
 res11: Long = 4000
@@ -196,10 +197,10 @@ We can use it to give our founder a funny name:
 ```scala
 scala> val employeeNameLens = GenLens[Employee](_.name)
 warning: there was one feature warning; re-run with -feature for details
-employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@67683c2a
+employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@361f89dd
 
 scala> val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
-founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@26dc86c
+founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@aee5f13
 
 scala> founderVowelTraversal.modify(v => v.toUpper)(startup)
 res15: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
@@ -490,13 +491,13 @@ val zippers = Utils.iterate(Zipper(simpleTree))(
 
 diagram.renderAnimation(
   "navigation-tree",
-  tweakOptions = _.copy(delay = 200))(
+  tweakOptions = _.copy(delay = 2.seconds))(
   zippers.map(ZipperFocus(_, simpleTree))
 )
 
 diagram.renderAnimation(
   "navigation-zipper",
-  tweakOptions = _.copy(delay = 200))(
+  tweakOptions = _.copy(delay = 2.seconds))(
   zippers
 )
 ```

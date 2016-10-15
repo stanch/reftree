@@ -1,13 +1,18 @@
 package reftree
 
-import java.io.{File, StringWriter}
+import java.awt.image.BufferedImage
+import java.io._
 import java.nio.file.Path
 import javax.xml.parsers.SAXParserFactory
 
+import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.nio.GifSequenceWriter
+import org.apache.batik.transcoder.{SVGAbstractTranscoder, TranscoderInput, TranscoderOutput}
+import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
 import uk.co.turingatemyhamster.graphvizs.dsl.Graph
 import uk.co.turingatemyhamster.graphvizs.exec._
 
-import scala.sys.process.{Process, BasicIO}
+import scala.sys.process.{BasicIO, Process}
 
 object Output {
   // Normal rendering
@@ -27,9 +32,12 @@ object Output {
 
   // SVG-based pipeline for animations
 
-  private val saxParserFactory = SAXParserFactory.newInstance()
-  saxParserFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-  private val XML = xml.XML.withSAXParser(saxParserFactory.newSAXParser())
+  private lazy val saxParserFactory = {
+    val instance = SAXParserFactory.newInstance()
+    instance.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+    instance
+  }
+  private lazy val XML = xml.XML.withSAXParser(saxParserFactory.newSAXParser())
 
   def renderSvg(graph: Graph): xml.Node = {
     val args = Seq("-K", "dot", "-T", "svg")
@@ -40,34 +48,29 @@ object Output {
     XML.loadString(output.toString)
   }
 
-  def renderPng(svg: xml.Node, output: Path, options: Diagram.AnimationOptions): Unit = {
-    val svgFile = File.createTempFile("graph", ".svg")
-    xml.XML.save(svgFile.getAbsolutePath, svg, "UTF-8", xmlDecl = true)
-    val args = Seq(
-      "-z",
-      "-b", "white",
-      "-d", options.density.toString,
-      "-e", output.toString,
-      svgFile.getAbsolutePath
-    )
-    val process = Process("inkscape", args)
-    (if (options.silent) process run BasicIO(withIn = false, _ ⇒ (), None) else process.run()).exitValue()
-    svgFile.delete()
+  def renderImage(svg: xml.Node, options: Diagram.AnimationOptions): Image = {
+    var image: BufferedImage = null
+    val transcoder = new PNGTranscoder {
+      override def writeImage(img: BufferedImage, output: TranscoderOutput): Unit = image = img
+      addTranscodingHint(
+        ImageTranscoder.KEY_BACKGROUND_COLOR,
+        java.awt.Color.white
+      )
+      addTranscodingHint(
+        SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER,
+        new java.lang.Float(25.4 / options.density)
+      )
+    }
+    val inputStream = new ByteArrayInputStream(svg.toString().getBytes("UTF-8"))
+    val transcoderInput = new TranscoderInput(inputStream)
+    transcoder.transcode(transcoderInput, null)
+    inputStream.close()
+    Image.fromAwt(image)
   }
 
   def renderAnimatedGif(svgs: Seq[xml.Node], output: Path, options: Diagram.AnimationOptions): Unit = {
-    val pngFiles = svgs map { svg ⇒
-      val pngFile = File.createTempFile("graph", ".png")
-      renderPng(svg, pngFile.toPath, options)
-      pngFile
-    }
-    val verboseArg = if (options.silent) Seq.empty else Seq("-verbose")
-    val args = Seq(
-      "-delay", Math.max(options.delay / Math.max(options.interpolationFrames, 1), 1).toString,
-      "-loop", if (options.loop) "0" else "1"
-    ) ++ verboseArg ++ pngFiles.map(_.getAbsolutePath) :+ output.toString
-    val process = Process("convert", args)
-    process.run().exitValue()
-    pngFiles.foreach(_.delete())
+    val delay = options.delay / Math.max(options.interpolationFrames * 2, 1)
+    val writer = GifSequenceWriter(delay, options.loop)
+    writer.output(svgs.par.map(renderImage(_, options)).to[Seq], output)
   }
 }

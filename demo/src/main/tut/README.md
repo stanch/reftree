@@ -150,8 +150,6 @@ diagram.render("case-classes")(
 #### Animations
 
 You can generate animations using `diagram.renderAnimation`.
-For this you will need [Inkscape](https://inkscape.org/en/) and [ImageMagick](http://www.imagemagick.org/) installed
-(and have `inkscape` and `convert` on your `PATH`).
 
 Here is an example:
 

@@ -6,6 +6,9 @@ import reftree.geometry._
 import scala.util.Try
 
 object SvgGraphAnimation {
+  private def improveRendering(svg: xml.Node): xml.Node = svg.asInstanceOf[xml.Elem] %
+    new xml.UnprefixedAttribute("shape-rendering", "geometricPrecision", xml.Null)
+
   private def fixTextColor(svg: xml.Node) = SvgGraphLens.nodes.modify { nodes ⇒
     // Graphviz does not set the fill-opacity attribute on text
     nodes map { case (id, node) ⇒ id → SvgGraphLens.color.modify(identity)(node) }
@@ -79,8 +82,8 @@ object SvgGraphAnimation {
       }
 
   def animate(svgs: Seq[xml.Node], anchorIds: Seq[String], options: AnimationOptions) = {
-    val colored = svgs.map(fixTextColor)
-    val aligned = alignPairwise(colored, anchorIds, options)
+    val preprocessed = svgs.map(improveRendering).map(fixTextColor)
+    val aligned = alignPairwise(preprocessed, anchorIds, options)
     val maxViewBox = Rectangle.union(aligned.map(SvgLens.viewBox.get))
     val resized = aligned.map(SvgLens.viewBox.set(maxViewBox))
     interpolatePairwise(resized, options)
