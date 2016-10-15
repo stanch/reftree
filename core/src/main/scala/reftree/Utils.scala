@@ -2,15 +2,10 @@ package reftree
 
 object Utils {
   def iterate[A](start: A, n: Int)(iteration: A ⇒ A): Seq[A] =
-    Iterator.iterate(start)(iteration).take(n).toSeq
+    (1 to n).foldLeft(Vector(start))((current, _) ⇒ current :+ iteration(current.last))
 
   def flatIterate[A](start: A, n: Int)(iteration: A ⇒ Seq[A]): Seq[A] =
-    if (n == 0) Seq.empty else {
-      iteration(start) match {
-        case seq @ (_ :+ last) ⇒ seq ++ flatIterate(last, n - 1)(iteration)
-        case _ ⇒ Seq.empty
-      }
-    }
+    (1 to n).foldLeft(Vector(start))((current, _) ⇒ current ++ iteration(current.last))
 
   def iterate[A](start: A)(iterations: (A ⇒ A)*): Seq[A] =
     iterations.foldLeft(Vector(start))((current, iteration) ⇒ current :+ iteration(current.last))

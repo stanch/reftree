@@ -8,174 +8,117 @@ To use this library you will need to have [GraphViz](http://www.graphviz.org/) i
 
 For more examples see the [materials for my talk “Unzipping Immutability”](DEMO.md).
 
-### Examples
+<p align="center"><img src="images/data/queue.gif" width="40%" /></p>
 
-The following examples will assume these declarations:
+### Features
+
+* Pre-made visualizations of many standard collections.
+
+<p align="center"><img src="images/data/lists.png" width="20%" /></p>
+
+* Automatic visualization of case classes (using
+  [shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes)).
+
+```scala
+case class Employee(
+  name: String,
+  salary: Long
+)
+
+case class Startup(
+  name: String,
+  founder: Employee,
+  team: List[Employee]
+)
+```
+
+<p align="center"><img src="images/lenses/startup.png" width="70%" /></p>
+
+* Static images, animations and image sequences can be generated.
+* Automatic captions (using [sourcecode](https://github.com/lihaoyi/sourcecode)).
+
+### API
+
+#### `RefTree`
+
+This library renders diagrams based on a simple data representation called
+[`RefTree`](https://github.com/stanch/reftree/blob/master/core/src/main/scala/reftree/RefTree.scala).
+Essentially, a `RefTree` denotes either an object (`AnyRef`) with a number of fields,
+or a primitive (`AnyVal`).
+
+To render a value of type `A`, you will need an implicit instance of `ToRefTree[A]`
+available. For many Scala collections, as well as case classes, no extra work is needed,
+as these instances are readily available or generated on the fly.
+
+For examples of manual instance derivation, see the
+[`contrib` package](https://github.com/stanch/reftree/tree/master/core/src/main/scala/reftree/contrib).
+
+#### `Diagram`
+
+To render a diagram, first create a `Diagram` object that encapsulates some default settings:
+
 ```tut:silent
-import scala.collection.immutable._
+import reftree._
 import java.nio.file.Paths
-import reftree.Diagram
+import scala.collection.immutable.Queue
 
 val diagram = Diagram(
-  defaultOptions = Diagram.Options(density = 100),
-  defaultDirectory = Paths.get("images", "data")
+  defaultOptions = Diagram.Options(density = 75),
+  defaultDirectory = Paths.get("images", "usage")
 )
 ```
 
-Since all the example code is actually run by [tut](https://github.com/tpolecat/tut),
-you can find the resulting images in the `images` directory.
-
-#### Lists
+Now you can use these methods to create diagrams:
 
 ```tut:silent
-val list1 = List(1, 2, 3, 4, 5)
-val list2 = List(-1, -2) ++ list1.drop(2)
-
-diagram.render("lists")(list1, list2)
+// render to "structures.png", automatic captions
+diagram.render("lists")(List(1), List(2))
 ```
 
-<p align="center"><img src="images/data/lists.png" width="40%" /></p>
-
-By default the trees will be labeled with the arguments passed to `render`
-(using [sourcecode](https://github.com/lihaoyi/sourcecode)),
-but you can provide the labels explicitly:
+<p align="center"><img src="images/usage/lists.png" width="30%" /></p>
 
 ```tut:silent
-val list1 = List(1, 2, 3, 4, 5)
-val list2 = List(-1, -2) ++ list1.drop(2)
-
-diagram.render("lists2")(
-  "positive" → list1,
-  "negative" → list2
-)
+// same as above, but with manually specified captions
+diagram.render("lists-captioned")("one" → List(1), List(2))
 ```
 
-<p align="center"><img src="images/data/lists2.png" width="40%" /></p>
-
-#### Queues
+<p align="center"><img src="images/usage/lists-captioned.png" width="30%" /></p>
 
 ```tut:silent
-val queue1 = Queue(1, 2) :+ 3 :+ 4
-val queue2 = (queue1 :+ 5).tail
-
-diagram.render("queues", tweakOptions = _.copy(verticalSpacing = 1.2))(queue1, queue2)
+// tweak the default options
+diagram.render("lists-spaced", tweakOptions = _.copy(verticalSpacing = 2))(List(1), List(2))
 ```
 
-<p align="center"><img src="images/data/queues.png" width="40%" /></p>
-
-To reduce visual noise from `Cons` and `Nil`, the visualization of lists can be simplified.
-Note however that this option also hides structural sharing:
+<p align="center"><img src="images/usage/lists-spaced.png" width="30%" /></p>
 
 ```tut:silent
-val queue1 = Queue(1, 2) :+ 3 :+ 4
-val queue2 = (queue1 :+ 5).tail
-
-{
-  import reftree.contrib.SimplifiedInstances.list
-  diagram.render("queues2")(queue1, queue2)
-}
-```
-
-<p align="center"><img src="images/data/queues2.png" width="50%" /></p>
-
-
-#### Vectors
-
-```tut:silent
- val vector = 1 +: Vector(10 to 42: _*) :+ 50
-
- diagram.render("vector", tweakOptions = _.copy(verticalSpacing = 2))(vector)
-```
-
-<p align="center"><img src="images/data/vector.png" width="100%" /></p>
-
-#### HashSets
-
-```tut:silent
-val set = HashSet(1L, 2L + 2L * Int.MaxValue, 3L, 4L)
-
-diagram.render("hashset")(set)
-```
-
-<p align="center"><img src="images/data/hashset.png" width="100%" /></p>
-
-#### TreeSets
-
-```tut:silent
-val set = TreeSet(1 to 14: _*)
-
-diagram.render("treeset", tweakOptions = _.copy(highlightColor = "coral1"))(set)
-```
-
-<p align="center"><img src="images/data/treeset.png" width="100%" /></p>
-
-#### FingerTrees (using https://github.com/Sciss/FingerTree)
-
-```tut:silent
-import de.sciss.fingertree.{FingerTree, Measure}
-import reftree.contrib.FingerTreeInstances._
-
-implicit val measure = Measure.Indexed
-val tree = FingerTree(1 to 22: _*)
-
-diagram.render("fingertree", tweakOptions = _.copy(verticalSpacing = 1.2))(tree)
-```
-
-<p align="center"><img src="images/data/fingertree.png" width="100%" /></p>
-
-#### Case classes
-
-Arbitrary case classes are supported automatically via
-[shapeless’ Generic](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes),
-as long as the types or their fields are supported.
-
-```tut:silent
-import com.softwaremill.quicklens._
-
-case class Street(name: String, house: Int)
-case class Address(street: Street, city: String)
-case class Person(address: Address, age: Int)
-
-val person1 = Person(Address(Street("Functional Rd.", 1), "London"), 35)
-val person2 = person1.modify(_.address.street.house).using(_ + 2)
-
-diagram.render("case-classes")(
-  person1,
-  "person next door" → person2
-)
-```
-
-<p align="center"><img src="images/data/case-classes.png" width="70%" /></p>
-
-#### Animations
-
-You can generate animations using `diagram.renderAnimation`.
-
-Here is an example:
-
-```tut:silent
-import reftree.Utils
-
-diagram.renderAnimation(
-  "list-prepend",
-  tweakOptions = _.copy(diffAccent = true, onionSkinLayers = 1))(
-  Utils.iterate(List(1))(2 :: _, 3 :: _, 4 :: _)
-)
-
-diagram.renderAnimation(
-  "list-append",
-  tweakOptions = _.copy(onionSkinLayers = 3))(
-  Utils.iterate(List(1))(_ :+ 2, _ :+ 3, _ :+ 4)
+// render a sequence of PNG images, i.e. "queue-01.png", "queue-02.png", etc
+diagram.renderSequence("queue", tweakOptions = _.copy(interpolationFrames = 3))(
+  Utils.iterate(Queue(1))(_ :+ 2, _.tail)
 )
 ```
 
 <p align="center">
-  <img src="images/data/list-prepend.gif" width="30%" />
-  <img src="images/data/list-append.gif" width="52%" />
+  <img src="images/usage/queue-1.png" width="10%" />
+  <img src="images/usage/queue-2.png" width="10%" />
+  <img src="images/usage/queue-3.png" width="10%" />
+  <img src="images/usage/queue-4.png" width="10%" />
+  <img src="images/usage/queue-5.png" width="10%" />
+  <img src="images/usage/queue-6.png" width="10%" />
+  <img src="images/usage/queue-7.png" width="10%" />
+  <img src="images/usage/queue-8.png" width="10%" />
+  <img src="images/usage/queue-9.png" width="10%" />
 </p>
 
-If you prefer to navigate between the animation frames interactively,
-take a look at `renderSequence`, which will render each frame into its own file.
+```tut:silent
+// render an animated GIF
+diagram.renderAnimation("queue")(Utils.iterate(Queue(1))(_ :+ 2))
+```
+
+<p align="center"><img src="images/usage/queue.gif" width="30%" /></p>
+
+See the [materials for my talk “Unzipping Immutability”](DEMO.md) for more ideas
+of how the various options can be utilized.
 
 ### Usage
 

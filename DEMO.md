@@ -14,7 +14,7 @@ You can use this page in two ways:
 
 Here is an overview:
 
-* [Immutable data structures (wip)](#immutable-data-structures)
+* [Immutable data structures](#immutable-data-structures)
 * [Lenses](#lenses)
 * [Zippers](#zippers)
 * [Useful resources](#useful-resources)
@@ -28,11 +28,6 @@ import reftree.demo.Data._
 import scala.collection.immutable._
 import scala.concurrent.duration.DurationInt
 import java.nio.file.Paths
-
-val diagram = Diagram(
-  defaultOptions = Diagram.Options(density = 100),
-  defaultDirectory = Paths.get("images")
-)
 ```
 
 To start an interactive session, just run
@@ -49,13 +44,193 @@ already has all the necessary imports in scope.*
 
 ### Immutable data structures
 
-This section is not ready yet, but in the meantime you can find
-a few interesting visualizations on the [main page](https://github.com/stanch/reftree).
+```scala
+// extra declarations for this section
+val diagram = Diagram(
+  defaultOptions = Diagram.Options(density = 100),
+  defaultDirectory = Paths.get("images", "data")
+)
+```
 
+#### Lists
+
+We’ll start with one of the simplest structures: a list.
+It consists of a number of cells pointing to each other:
+
+```scala
+scala> val list = List(1, 2, 3)
+list: List[Int] = List(1, 2, 3)
+```
+
+```scala
+diagram.render("list")(list)
+```
+
+<p align="center"><img src="images/data/list.png" width="20%" /></p>
+
+Elements can be added to or removed from the front of the list with no effort,
+because we can share the same cells across several lists.
+This would not be possible with a mutable list,
+since modifying the shared part would modify every data structure making use of it.
+
+```scala
+scala> val add = 0 :: list
+add: List[Int] = List(0, 1, 2, 3)
+
+scala> val remove = list.tail
+remove: List[Int] = List(2, 3)
+```
+
+```scala
+diagram.render("lists")(list, add, remove)
+```
+
+<p align="center"><img src="images/data/lists.png" width="20%" /></p>
+
+However we can’t easily add elements at the end of the list, since the last cell
+is pointing to the empty list (`Nil`) and is immutable, i.e. cannot be changed.
+Thus we are forced to create a new list every time:
+
+```scala
+diagram.renderAnimation(
+  "list-append",
+  tweakOptions = _.copy(onionSkinLayers = 3))(
+  Utils.iterate(List(1))(_ :+ 2, _ :+ 3, _ :+ 4)
+)
+```
+
+<p align="center"><img src="images/data/list-append.gif" width="40%" /></p>
+
+This certainly does not look efficient compared to adding elements at the front:
+
+```scala
+diagram.renderAnimation(
+  "list-prepend",
+  tweakOptions = _.copy(onionSkinLayers = 1, diffAccent = true))(
+  Utils.iterate(List(1))(2 :: _, 3 :: _, 4 :: _)
+)
+```
+
+<p align="center"><img src="images/data/list-prepend.gif" width="20%" /></p>
+
+#### Queues
+
+If we want to add elements on both sides efficiently, we need a different data structure: a queue.
+The queue below, also known as a “Banker’s Queue”, has two lists: one for prepending and one for appending.
+
+```scala
+scala> val queue1 = Queue(1, 2, 3)
+queue1: scala.collection.immutable.Queue[Int] = Queue(1, 2, 3)
+
+scala> val queue2 = (queue1 :+ 4).tail
+queue2: scala.collection.immutable.Queue[Int] = Queue(2, 3, 4)
+```
+
+```scala
+diagram.render("queues", tweakOptions = _.copy(verticalSpacing = 1.2))(queue1, queue2)
+```
+
+<p align="center"><img src="images/data/queues.png" width="40%" /></p>
+
+This way we can add and remove elements very easily at both ends.
+Except when we try to remove an element and the respective list is empty!
+In this case the queue will rotate the other list to make use of its elements.
+Although this operation is expensive, the usage pattern intended for a queue
+makes it rare enough to yield great average (“ammortized”) performance:
+
+```scala
+def add(n: Int)(q: Queue[Int]) = Utils.iterate(q, n)(q => q :+ (q.max + 1)).tail
+def remove(n: Int)(q: Queue[Int]) = Utils.iterate(q, n)(q => q.tail).tail
+def addRemove(n: Int)(q: Queue[Int]) = Utils.flatIterate(q)(add(n), remove(n)).tail
+
+val queues = Utils.flatIterate(Queue(1, 2, 3), 3)(addRemove(2))
+
+diagram.renderAnimation(
+  "queue",
+  tweakOptions = _.copy(diffAccent = true))(
+  queues
+)
+```
+
+<p align="center"><img src="images/data/queue.gif" width="40%" /></p>
+
+#### Vectors
+
+One downside common to both lists and queues we saw before is that to get an element by index,
+we need to potentially traverse the whole structure. A `Vector` is a powerful data structure
+addressing this shortcoming and available in Scala (among other languages, like Clojure).
+
+Internally vectors utilize up to 6 layers of arrays, where 32 elements sit on the first layer,
+1024 — on the second, 32^3 — on the third, etc.
+Therefore getting any element by its index requires at most 6 pointer dereferences,
+which can be deemed constant time (yes, the trick is that the number of elements that can
+be stored is limited by 2^31).
+
+The internal 32-element arrays form the basic structural sharing blocks.
+For small vectors they will be recreated on most operations:
+
+```scala
+scala> val vector1 = (1 to 20).toVector
+vector1: Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+
+scala> val vector2 = vector1 :+ 21
+vector2: scala.collection.immutable.Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21)
+```
+
+```scala
+ diagram.render("vectors", tweakOptions = _.copy(verticalSpacing = 2))(vector1, vector2)
+```
+
+<p align="center"><img src="images/data/vectors.png" width="100%" /></p>
+
+However as more layers leap into action, a huge chunk of the data can be shared:
+
+```scala
+scala> val vector1 = (1 to 100).toVector
+vector1: Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100)
+
+scala> val vector2 = vector1 :+ 21
+vector2: scala.collection.immutable.Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 21)
+```
+
+```scala
+ diagram.render("big-vectors", tweakOptions = _.copy(verticalSpacing = 2))(vector1, vector2)
+```
+
+<p align="center"><img src="images/data/big-vectors.png" width="100%" /></p>
+
+If you want to know more, this structure is covered in great detail by Jean Niklas L’orange
+[in his blog](http://hypirion.com/musings/understanding-persistent-vector-pt-1).
+I also highly recommend watching [this talk](https://www.youtube.com/watch?v=pNhBQJN44YQ) by Daniel Spiewak.
+
+#### Finger Trees
+
+To conclude this section, I would like to share a slightly less popular, but beautifully designed
+data structure called “finger tree” described in [this paper](http://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf)
+by Hinze and Paterson. Enjoy the read and this animation of a finger tree getting filled with some numbers:
+
+```scala
+import de.sciss.fingertree.{FingerTree, Measure}
+import reftree.contrib.FingerTreeInstances._
+
+implicit val measure = Measure.Indexed
+
+val fingerTrees = Utils.iterate(FingerTree(1), 21)(t ⇒ t :+ (t.measure + 1))
+
+diagram.renderAnimation(
+  "finger",
+  tweakOptions = _.copy(diffAccent = true, verticalSpacing = 2, density = 75))(
+  fingerTrees
+)
+```
+
+<p align="center"><img src="images/data/finger.gif" width="100%" /></p>
 
 ### Lenses
 
-Updating immutable data structures can be tricky.
+So far we were looking into “standard” data structures,
+but in our code we often have to deal with custom data structures comprising our domain model.
+Updating this sort of data can be tricky if it’s immutable.
 For case classes Scala gives us the `copy` method:
 
 ```scala
@@ -67,7 +242,7 @@ case class Employee(
 
 ```scala
 scala> employee
-res1: reftree.demo.Data.Employee = Employee(Michael,4000)
+res15: reftree.demo.Data.Employee = Employee(Michael,4000)
 
 scala> val raisedEmployee = employee.copy(salary = employee.salary + 10)
 raisedEmployee: reftree.demo.Data.Employee = Employee(Michael,4010)
@@ -91,7 +266,7 @@ case class Startup(
 
 ```scala
 scala> startup
-res2: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
+res16: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
 
 scala> val raisedFounder = startup.copy(
      |   founder = startup.founder.copy(
@@ -132,13 +307,13 @@ import monocle.macros.GenLens
 
 scala> val salaryLens = GenLens[Employee](_.salary)
 warning: there was one feature warning; re-run with -feature for details
-salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@6911afb1
+salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@17e515ec
 
 scala> salaryLens.get(startup.founder)
-res6: Long = 4000
+res20: Long = 4000
 
 scala> salaryLens.modify(s => s + 10)(startup.founder)
-res7: reftree.demo.Data.Employee = Employee(Michael,4010)
+res21: reftree.demo.Data.Employee = Employee(Michael,4010)
 ```
 
 ```scala
@@ -152,10 +327,10 @@ We can also define a lens that focuses on the startup’s founder:
 ```scala
 scala> val founderLens = GenLens[Startup](_.founder)
 warning: there was one feature warning; re-run with -feature for details
-founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@24de86b2
+founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@6dade26a
 
 scala> founderLens.get(startup)
-res9: reftree.demo.Data.Employee = Employee(Michael,4000)
+res23: reftree.demo.Data.Employee = Employee(Michael,4000)
 ```
 
 ```scala
@@ -168,13 +343,13 @@ It’s not apparent yet how this would help, but the trick is that lenses can be
 
 ```scala
 scala> val founderSalaryLens = founderLens composeLens salaryLens
-founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@7389c9f
+founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@41cdf1cc
 
 scala> founderSalaryLens.get(startup)
-res11: Long = 4000
+res25: Long = 4000
 
 scala> founderSalaryLens.modify(s => s + 10)(startup)
-res12: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
+res26: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
 ```
 
 ```scala
@@ -197,13 +372,13 @@ We can use it to give our founder a funny name:
 ```scala
 scala> val employeeNameLens = GenLens[Employee](_.name)
 warning: there was one feature warning; re-run with -feature for details
-employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@361f89dd
+employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@3d294f73
 
 scala> val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
-founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@aee5f13
+founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@3a4dd32f
 
 scala> founderVowelTraversal.modify(v => v.toUpper)(startup)
-res15: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
+res29: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
 ```
 
 ```scala
@@ -314,7 +489,7 @@ and a simple tree:
 
 ```scala
 scala> simpleTree
-res21: reftree.demo.Data.Tree = Tree(1,List(Tree(2,List()), Tree(3,List()), Tree(4,List()), Tree(5,List(Tree(6,List()), Tree(7,List())))))
+res35: reftree.demo.Data.Tree = Tree(1,List(Tree(2,List()), Tree(3,List()), Tree(4,List()), Tree(5,List(Tree(6,List()), Tree(7,List())))))
 ```
 
 ```scala
@@ -489,15 +664,11 @@ val zippers = Utils.iterate(Zipper(simpleTree))(
   _.top.get
 )
 
-diagram.renderAnimation(
-  "navigation-tree",
-  tweakOptions = _.copy(delay = 2.seconds))(
+diagram.renderAnimation("navigation-tree")(
   zippers.map(ZipperFocus(_, simpleTree))
 )
 
-diagram.renderAnimation(
-  "navigation-zipper",
-  tweakOptions = _.copy(delay = 2.seconds))(
+diagram.renderAnimation("navigation-zipper")(
   zippers
 )
 ```
@@ -517,6 +688,8 @@ diagram.renderAnimation(
   with pointers for further reading
 * [Extreme cleverness](https://www.youtube.com/watch?v=pNhBQJN44YQ) by Daniel Spiewak — a superb talk
   covering several immutable data structures (implemented [here](https://github.com/djspiewak/extreme-cleverness))
+* [Understanding Clojure’s Persistent Vectors, part 1](http://hypirion.com/musings/understanding-persistent-vector-pt-1)
+  and [part 2](http://hypirion.com/musings/understanding-persistent-vector-pt-2) — a series of blog posts by Jean Niklas L’orange
 * [Finger Trees](http://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf) and
   [1-2 Brother Trees](http://www.cs.ox.ac.uk/ralf.hinze/publications/Brother12.pdf) described by Hinze and Paterson
 * [Huet’s original Zipper paper](https://www.st.cs.uni-saarland.de/edu/seminare/2005/advanced-fp/docs/huet-zipper.pdf) — a great short read

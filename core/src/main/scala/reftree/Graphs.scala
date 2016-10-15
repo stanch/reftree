@@ -1,6 +1,6 @@
 package reftree
 
-import reftree.Diagram.{AnimationOptions, Options}
+import reftree.Diagram.{SequenceRenderingOptions, RenderingOptions}
 import uk.co.turingatemyhamster.graphvizs.dsl._
 
 object Graphs {
@@ -21,7 +21,7 @@ object Graphs {
     )
   }
 
-  private def node(tree: RefTree, color: String, options: Options): NodeStatement = {
+  private def node(tree: RefTree, color: String, options: RenderingOptions): NodeStatement = {
     val id = treeId(tree)
     val highlight = if (tree.highlight) s"""bgcolor="${options.highlightColor}"""" else ""
     val style = s"""style="rounded" cellspacing="0" cellpadding="6" cellborder="0" columns="*" $highlight"""
@@ -85,7 +85,7 @@ object Graphs {
     }
   }
 
-  def graph(options: Options)(trees: Seq[LabeledRefTree]): Graph = {
+  def graph(options: RenderingOptions)(trees: Seq[LabeledRefTree]): Graph = {
     val graphAttrs = "graph" :| ("ranksep" := options.verticalSpacing)
     val nodeAttrs = "node" :| ("shape" := "plaintext", "fontname" := "consolas")
     val edgeAttrs = "edge" :| ("arrowsize" := "0.7")
@@ -125,9 +125,9 @@ object Graphs {
     })
   }
 
-  def graphFrames(options: AnimationOptions)(trees: Seq[LabeledRefTree]): Seq[Graph] = {
+  def graphFrames(options: SequenceRenderingOptions)(trees: Seq[LabeledRefTree]): Seq[Graph] = {
     val prefix = Seq.fill(options.onionSkinLayers)(trees.head)
-    val frames = (prefix ++ trees).sliding(options.onionSkinLayers + 1).map(graph(options.toOptions)).toSeq
+    val frames = (prefix ++ trees).sliding(options.onionSkinLayers + 1).map(graph(options)).toSeq
     if (!options.diffAccent) frames else {
       val accentuated = frames.sliding(2).map {
         case Seq(prev, next) ⇒ accentuateDiff(prev, next, options.accentColor)

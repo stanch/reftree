@@ -48,7 +48,7 @@ object Output {
     XML.loadString(output.toString)
   }
 
-  def renderImage(svg: xml.Node, options: Diagram.AnimationOptions): Image = {
+  def renderImage(svg: xml.Node, options: Diagram.RenderingOptions): Image = {
     var image: BufferedImage = null
     val transcoder = new PNGTranscoder {
       override def writeImage(img: BufferedImage, output: TranscoderOutput): Unit = image = img
@@ -69,8 +69,12 @@ object Output {
   }
 
   def renderAnimatedGif(svgs: Seq[xml.Node], output: Path, options: Diagram.AnimationOptions): Unit = {
-    val delay = options.delay / Math.max(options.interpolationFrames * 2, 1)
-    val writer = GifSequenceWriter(delay, options.loop)
-    writer.output(svgs.par.map(renderImage(_, options)).to[Seq], output)
+    val images = svgs.par.map(renderImage(_, options)).to[Seq]
+    val duplicated = Seq.fill(options.keyFrames)(images.head) ++
+      images.tail.grouped(options.interpolationFrames + 1).flatMap {
+        case init :+ last ⇒ init ++ Seq.fill(options.keyFrames)(last)
+      }
+    val writer = GifSequenceWriter(options.delay, options.loop)
+    writer.output(duplicated, output)
   }
 }

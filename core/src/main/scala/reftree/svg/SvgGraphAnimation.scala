@@ -1,6 +1,6 @@
 package reftree.svg
 
-import reftree.Diagram.AnimationOptions
+import reftree.Diagram.SequenceRenderingOptions
 import reftree.geometry._
 
 import scala.util.Try
@@ -26,7 +26,7 @@ object SvgGraphAnimation {
     (SvgGraphLens.graph composeLens SvgLens.translation).modify(_ + translation)(withBox)
   }.toOption
 
-  private def alignPairwise(svgs: Seq[xml.Node], anchorIds: Seq[String], options: AnimationOptions) =
+  private def alignPairwise(svgs: Seq[xml.Node], anchorIds: Seq[String], options: SequenceRenderingOptions) =
     (svgs.tail zip anchorIds.sliding(2).toSeq).foldLeft(Vector(svgs.head)) {
       case (acc :+ prev, (next, Seq(prevAnchorId, nextAnchorId))) ⇒
         val anchoringAttempt = if (!options.anchoring) None else {
@@ -73,15 +73,13 @@ object SvgGraphAnimation {
     )
   }
 
-  private def interpolatePairwise(svgs: Seq[xml.Node], options: AnimationOptions) =
-    Seq.fill(options.interpolationFrames + 1)(svgs.head) ++
-      svgs.sliding(2).toSeq.flatMap {
-        case Seq(prev, next) ⇒
-          interpolation.sample(prev, next, options.interpolationFrames, inclusive = false) ++
-            Seq.fill(options.interpolationFrames + 1)(next)
-      }
+  private def interpolatePairwise(svgs: Seq[xml.Node], options: SequenceRenderingOptions) =
+    svgs.head +: svgs.sliding(2).toSeq.flatMap {
+      case Seq(prev, next) ⇒
+        interpolation.sample(prev, next, options.interpolationFrames, inclusive = false) :+ next
+    }
 
-  def animate(svgs: Seq[xml.Node], anchorIds: Seq[String], options: AnimationOptions) = {
+  def animate(svgs: Seq[xml.Node], anchorIds: Seq[String], options: SequenceRenderingOptions) = {
     val preprocessed = svgs.map(improveRendering).map(fixTextColor)
     val aligned = alignPairwise(preprocessed, anchorIds, options)
     val maxViewBox = Rectangle.union(aligned.map(SvgLens.viewBox.get))
