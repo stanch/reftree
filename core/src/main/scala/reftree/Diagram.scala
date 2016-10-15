@@ -18,7 +18,7 @@ object Diagram {
   case class AnimationOptions(
     delay: Int = 100,
     loop: Boolean = true,
-    onionSkinLayers: Int = 1,
+    onionSkinLayers: Int = 0,
     anchoring: Boolean = true,
     diffAccent: Boolean = false,
     interpolationFrames: Int = 10,
@@ -27,7 +27,7 @@ object Diagram {
     color: String = "dodgerblue4",
     onionSkinBaseColor: String = "#898988",
     accentColor: String = "#228B22",
-    highlightColor: String = "bisque",
+    highlightColor: String = "#ffe4c4",
     silent: Boolean = true
   ) {
     def toOptions = {

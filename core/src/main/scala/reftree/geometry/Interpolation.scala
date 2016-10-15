@@ -5,6 +5,16 @@ import scala.collection.immutable.ListMap
 
 trait SemiInterpolation[A] { self ⇒
   def apply(value: A, t: Double): A
+
+  def mapTime(f: Double ⇒ Double) = SemiInterpolation[A] { (value, t) ⇒
+    self(value, f(t) min 1 max 0)
+  }
+
+  def timespan(from: Double, to: Double) = mapTime(t ⇒ (t - from) / (to - from))
+
+  def lens[B](l: Lens[B, A]) = SemiInterpolation[B] { (value, t) ⇒
+    l.set(self(l.get(value), t))(value)
+  }
 }
 
 object SemiInterpolation {
@@ -30,6 +40,8 @@ trait Interpolation[A] { self ⇒
     self(left, right, f(t) min 1 max 0)
   }
 
+  def timespan(from: Double, to: Double) = mapTime(t ⇒ (t - from) / (to - from))
+
   def lensLeft[B](l: Lens[B, A]) = Interpolation[B] { (left, right, t) ⇒
     l.set(self(l.get(left), l.get(right), t))(left)
   }
@@ -42,9 +54,13 @@ trait Interpolation[A] { self ⇒
     self(rightToLeft(value), value, t)
   }
 
+  def withLeft(left: A) = SemiInterpolation[A]((value, t) ⇒ self(left, value, t))
+
   def withRight(leftToRight: A ⇒ A) = SemiInterpolation[A] { (value, t) ⇒
     self(value, leftToRight(value), t)
   }
+
+  def withRight(right: A) = SemiInterpolation[A]((value, t) ⇒ self(value, right, t))
 }
 
 object Interpolation {

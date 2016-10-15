@@ -4,6 +4,12 @@ import monocle.{Traversal, Lens}
 import reftree._
 
 object LensInstances {
+  case class LensFocus[A, B](lens: Traversal[A, B], target: A)
+
+  object LensFocus {
+    def apply[A, B](lens: Lens[A, B], target: A): LensFocus[A, B] = LensFocus(lens.asTraversal, target)
+  }
+
   trait Example[A] {
     def exemplify: A
   }
@@ -58,28 +64,18 @@ object LensInstances {
     }
   }
 
-  implicit def `Lens+target RefTree`[A, B](
+  implicit def `LensFocus RefTree`[A, B](
     implicit refTreeA: ToRefTree[A],
     exampleB: Example[B], refTreeB: ToRefTree[B],
     marker: Marker[B]
-  ): ToRefTree[(Lens[A, B], A)] = new ToRefTree[(Lens[A, B], A)] {
-    def refTree(value: (Lens[A, B], A)): RefTree = lensRefTree(value._1.modify, value._2)
-  }
+  ): ToRefTree[LensFocus[A, B]] = new ToRefTree[LensFocus[A, B]] {
+    def refTree(value: LensFocus[A, B]): RefTree = {
+      // modify the target using the lens and the marker function
+      val modified = value.lens.modify(marker.mark)(value.target)
+      // an example RefTree for type B used to detect similar RefTrees
+      val example = exampleB.exemplify.refTree
 
-  implicit def `Traversal+target RefTree`[A, B](
-    implicit refTreeA: ToRefTree[A],
-    exampleB: Example[B], refTreeB: ToRefTree[B],
-    marker: Marker[B]
-  ): ToRefTree[(Traversal[A, B], A)] = new ToRefTree[(Traversal[A, B], A)] {
-    def refTree(value: (Traversal[A, B], A)): RefTree = lensRefTree(value._1.modify, value._2)
-  }
-
-  private def lensRefTree[A, B](modify: (B ⇒ B) ⇒ A ⇒ A, target: A)(
-    implicit refTreeA: ToRefTree[A],
-    exampleB: Example[B], refTreeB: ToRefTree[B], marker: Marker[B]
-  ) = {
-    def inner(tree1: RefTree, tree2: RefTree, example: RefTree): RefTree = {
-      (example, tree1, tree2) match {
+      def inner(tree1: RefTree, tree2: RefTree): RefTree = (example, tree1, tree2) match {
         case (_: RefTree.Val, x: RefTree.Val, y: RefTree.Val) if x != y ⇒
           // the example is a Val, and we found two mismatching Val trees
           x.copy(highlight = true)
@@ -90,18 +86,14 @@ object LensInstances {
 
         case (_, x: RefTree.Ref, y: RefTree.Ref) ⇒
           // recurse
-          val children = (x.children zip y.children) map { case (cx, cy) ⇒ inner(cx, cy, example) }
+          val children = (x.children zip y.children) map { case (cx, cy) ⇒ inner(cx, cy) }
           x.copy(children = children)
 
         case _ ⇒ tree1
       }
-    }
 
-    // modify the target using the lens and the marker function
-    val modified = modify(marker.mark)(target)
-    // an example RefTree for type B used to detect similar RefTrees
-    val example = exampleB.exemplify.refTree
-    // compare the RefTrees before and after modification
-    inner(target.refTree, modified.refTree, example)
+      // compare the RefTrees before and after modification
+      inner(value.target.refTree, modified.refTree)
+    }
   }
 }

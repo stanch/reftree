@@ -3,7 +3,6 @@ package reftree.svg
 import reftree.Diagram.AnimationOptions
 import reftree.geometry._
 
-import scala.collection.immutable.ListMap
 import scala.util.Try
 
 object SvgGraphAnimation {
@@ -35,30 +34,39 @@ object SvgGraphAnimation {
     }
 
   private val interpolation: Interpolation[xml.Node] = {
-    val opacity = Interpolation.double.lensLeft(SvgLens.opacity)
-    val fadeIn = opacity.mapTime(_ * 3 - 2).withLeft(SvgLens.opacity.set(0.0))
-    val fadeOut = opacity.mapTime(_ * 3).withRight(SvgLens.opacity.set(0.0))
+    val fadeOut = Interpolation.double.withRight(0.0).lens(SvgLens.opacity).timespan(0, 1/3.0)
+    val fadeIn = Interpolation.double.withLeft(0.0).lens(SvgLens.opacity).timespan(2/3.0, 1)
 
-    val nodeOption = Interpolation.option(
-      fadeOut, fadeIn, Interpolation.combineLeft(
-        opacity.mapTime(_ * 3 - 1),
-        Color.RGBA.interpolation.lensLeft(SvgGraphLens.color).mapTime(_ * 1.5 - 0.5),
-        Point.interpolation.lensLeft(SvgGraphLens.nodePosition).mapTime(_ * 3 - 1)
-      )
+    val opacityAndColor = Interpolation.combineLeft(
+      Interpolation.double.lensLeft(SvgLens.opacity).timespan(1/3.0, 2/3.0),
+      Color.RGBA.interpolation.lensLeft(SvgGraphLens.color).timespan(1/3.0, 1)
     )
 
-    val edgeOption = Interpolation.option(
-      fadeOut, fadeIn, Interpolation.combineLeft(
-        opacity.mapTime(_ * 3 - 1),
-        Color.RGBA.interpolation.lensLeft(SvgGraphLens.color).mapTime(_ * 1.5 - 0.5),
-        Polyline.interpolation.lensLeft(SvgGraphLens.edgeArrow).mapTime(_ * 3 - 1),
-        Path.interpolation.lensLeft(SvgGraphLens.edgePath).mapTime(_ * 3 - 1)
-      )
+    val nodePosition = Point.interpolation.lensLeft(SvgGraphLens.nodePosition)
+      .timespan(1/3.0, 2/3.0)
+
+    val nodeHighlight = Interpolation.option(
+      Color.RGBA.interpolation.withRight(_.copy(a = 0.0)).timespan(0, 1/2.0),
+      Color.RGBA.interpolation.withLeft(_.copy(a = 0.0)).timespan(1/2.0, 1),
+      Color.RGBA.interpolation
+    ).lensLeft(SvgGraphLens.nodeHighlight)
+
+    val edgePosition = Interpolation.combineLeft(
+      Polyline.interpolation.lensLeft(SvgGraphLens.edgeArrow),
+      Path.interpolation.lensLeft(SvgGraphLens.edgePath)
+    ).timespan(1/3.0, 2/3.0)
+
+    val node = Interpolation.option(
+      fadeOut, fadeIn, Interpolation.combineLeft(opacityAndColor, nodeHighlight, nodePosition)
+    )
+
+    val edge = Interpolation.option(
+      fadeOut, fadeIn, Interpolation.combineLeft(opacityAndColor, edgePosition)
     )
 
     Interpolation.combineLeft(
-      Interpolation.map(nodeOption).lensLeft(SvgGraphLens.nodes),
-      Interpolation.map(edgeOption).lensLeft(SvgGraphLens.edges)
+      Interpolation.map(node).lensLeft(SvgGraphLens.nodes),
+      Interpolation.map(edge).lensLeft(SvgGraphLens.edges)
     )
   }
 

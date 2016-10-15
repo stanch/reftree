@@ -160,7 +160,7 @@ import reftree.Utils
 
 diagram.renderAnimation(
   "list-prepend",
-  tweakOptions = _.copy(diffAccent = true))(
+  tweakOptions = _.copy(diffAccent = true, onionSkinLayers = 1))(
   Utils.iterate(List(1))(2 :: _, 3 :: _, 4 :: _)
 )
 

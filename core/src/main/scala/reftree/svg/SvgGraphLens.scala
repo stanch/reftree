@@ -1,6 +1,7 @@
 package reftree.svg
 
 import monocle.Lens
+import com.softwaremill.quicklens._
 import reftree.geometry.{Color, Point, Polyline, Path}
 
 import scala.xml.UnprefixedAttribute
@@ -11,11 +12,17 @@ object SvgGraphLens {
   val nodes = graph composeLens SvgLens.childrenById("g", Some("node"))
   val edges = graph composeLens SvgLens.childrenById("g", Some("edge"))
 
+  private def highlightPath(svg: xml.Node) =
+    svg.label == "path" && (svg \ "@stroke").text == "none"
+
   val color = Lens[xml.Node, Color.RGBA] { nodeOrEdge ⇒
-    val path = (nodeOrEdge \\ "path").find(p ⇒ (p \ "@stroke").text != "none").head
+    val path = (nodeOrEdge \\ "path").filterNot(highlightPath).head
     val opacity = path.attribute("stroke-opacity").map(_.text.toDouble).getOrElse(1.0)
     Color.RGBA.fromString((path \ "@stroke").text, opacity)
-  }(SvgLens.color.set)
+  } { color ⇒
+    SvgLens.color(Set("text", "polygon"), fill = true, stroke = true).set(color) andThen
+    SvgLens.color(Set("path"), fill = false, stroke = true).set(color)
+  }
 
   val nodePosition = Lens[xml.Node, Point] { node ⇒
     val translation = SvgLens.translation.get(node)
@@ -25,6 +32,27 @@ object SvgGraphLens {
     val text = (node \\ "text").head
     val pos = Point((text \ "@x").text.toDouble, (text \ "@y").text.toDouble)
     SvgLens.translation.set(position - pos)(node)
+  }
+
+  val nodeHighlight = Lens[xml.Node, Option[Color.RGBA]] { node ⇒
+    (node \\ "path").find(highlightPath) map { path ⇒
+      val opacity = path.attribute("fill-opacity").map(_.text.toDouble).getOrElse(1.0)
+      Color.RGBA.fromString((path \ "@fill").text, opacity)
+    }
+  } {
+    case Some(color) ⇒ node ⇒
+      val highlightedNode = if ((node \\ "path").exists(highlightPath)) node else {
+        // create a new path for highlighting by copying the existing outline
+        // the fill color will be properly set below
+        val strokeAttr = new UnprefixedAttribute("stroke", "none", xml.Null)
+        val fillAttr = new UnprefixedAttribute("fill", "#000000", xml.Null)
+        val path = (node \\ "path").head.asInstanceOf[xml.Elem] % strokeAttr % fillAttr
+        node.asInstanceOf[xml.Elem].modify(_.child).using(path +: _)
+      }
+      SvgLens.color(Set("path"), fill = true, stroke = false).set(color)(highlightedNode)
+    case None ⇒ node ⇒
+      // remove the highlight path from the node
+      node.asInstanceOf[xml.Elem].modify(_.child).using(_.filterNot(highlightPath))
   }
 
   val edgePath = SvgLens.singleChild("path") composeLens Lens[xml.Node, Path] { path ⇒

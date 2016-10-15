@@ -3,9 +3,9 @@
 This page contains the materials for my talk “Unzipping Immutability”.
 Here are some past and future presentations:
 
-* [LX Scala 2016](http://www.lxscala.com/schedule/#session-2) ([video](https://vimeo.com/162214356)).
-* [Pixels Camp 2016](https://github.com/PixelsCamp/talks/blob/master/unzipping-immutability_nick-stanchenko.md).
-* [Scala By The Bay 2016](http://sched.co/7iTv).
+* [LX Scala, April 2016](http://www.lxscala.com/schedule/#session-2) ([video](https://vimeo.com/162214356)).
+* [Pixels Camp, October 2016](https://github.com/PixelsCamp/talks/blob/master/unzipping-immutability_nick-stanchenko.md) ([video](https://www.youtube.com/watch?v=yeMvhuD689A)).
+* [Scala By The Bay, November 2016](http://sched.co/7iTv).
 
 You can use this page in two ways:
 
@@ -129,7 +129,7 @@ salaryLens.modify(s => s + 10)(startup.founder)
 ```
 
 ```tut:silent
-diagram.render("salaryLens")(salaryLens → startup.founder)
+diagram.render("salaryLens")(LensFocus(salaryLens, startup.founder))
 ```
 
 <p align="center"><img src="images/lenses/salaryLens.png" width="40%" /></p>
@@ -143,7 +143,7 @@ founderLens.get(startup)
 ```
 
 ```tut:silent
-diagram.render("founderLens")(founderLens → startup)
+diagram.render("founderLens")(LensFocus(founderLens, startup))
 ```
 
 <p align="center"><img src="images/lenses/founderLens.png" width="100%" /></p>
@@ -158,7 +158,7 @@ founderSalaryLens.modify(s => s + 10)(startup)
 ```
 
 ```tut:silent
-diagram.render("founderSalaryLens")(founderSalaryLens → startup)
+diagram.render("founderSalaryLens")(LensFocus(founderSalaryLens, startup))
 ```
 
 <p align="center"><img src="images/lenses/founderSalaryLens.png" width="100%" /></p>
@@ -167,7 +167,7 @@ One interesting thing is that lenses can focus on anything, not just direct attr
 Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
 ```tut:silent
-diagram.render("vowelTraversal")(vowelTraversal → "example")
+diagram.render("vowelTraversal")(LensFocus(vowelTraversal, "example"))
 ```
 
 <p align="center"><img src="images/lenses/vowelTraversal.png" width="40%" /></p>
@@ -176,16 +176,16 @@ We can use it to give our founder a funny name:
 
 ```tut
 val employeeNameLens = GenLens[Employee](_.name)
-val founderVowelLens = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
+val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
 
-founderVowelLens.modify(v => v.toUpper)(startup)
+founderVowelTraversal.modify(v => v.toUpper)(startup)
 ```
 
 ```tut:silent
-diagram.render("founderVowelLens")(founderVowelLens → startup)
+diagram.render("founderVowelTraversal")(LensFocus(founderVowelTraversal, startup))
 ```
 
-<p align="center"><img src="images/lenses/founderVowelLens.png" width="100%" /></p>
+<p align="center"><img src="images/lenses/founderVowelTraversal.png" width="100%" /></p>
 
 So far we have replaced the `copy` boilerplate with a number of lens declarations.
 However most of the time our goal is just to update data.
@@ -237,6 +237,7 @@ Let’s grab a company object and display its hierarchy as a tree:
 // extra declarations for this section
 import zipper._
 import reftree.contrib.SimplifiedInstances.option
+import reftree.contrib.ZipperInstances._
 
 val diagram = Diagram(
   defaultOptions = Diagram.Options(density = 100),
@@ -283,31 +284,24 @@ case class Tree(x: Int, c: List[Tree] = List.empty)
 
 and a simple tree:
 
-```tut:silent
-val tree1 = Tree(
-  1, List(
-    Tree(2),
-    Tree(3),
-    Tree(4),
-    Tree(5)
-  )
-)
+```tut
+simpleTree
 ```
 
 ```tut:silent
-diagram.render("tree1")(tree1)
+diagram.render("simpleTree")(simpleTree)
 ```
 
-<p align="center"><img src="images/zippers/tree1.png" width="50%" /></p>
+<p align="center"><img src="images/zippers/simpleTree.png" width="50%" /></p>
 
 When we wrap a Zipper around this tree, it does not look very interesting yet:
 
 ```tut:silent
-val zipper1 = Zipper(tree1)
+val zipper1 = Zipper(simpleTree)
 ```
 
 ```tut:silent
-diagram.render("zipper1")(tree1, zipper1)
+diagram.render("zipper1")(simpleTree, zipper1)
 ```
 
 <p align="center"><img src="images/zippers/zipper1.png" width="50%" /></p>
@@ -334,7 +328,7 @@ val zipper2 = zipper1.update(focus ⇒ focus.copy(x = focus.x + 99))
 ```
 
 ```tut:silent
-diagram.render("zipper2")(tree1, zipper1, zipper2)
+diagram.render("zipper2")(simpleTree, zipper1, zipper2)
 ```
 
 <p align="center"><img src="images/zippers/zipper2.png" width="50%" /></p>
@@ -346,7 +340,7 @@ val tree2 = zipper2.commit
 ```
 
 ```tut:silent
-diagram.render("tree2")(tree1, tree2)
+diagram.render("tree2")(simpleTree, tree2)
 ```
 
 <p align="center"><img src="images/zippers/tree2.png" width="50%" /></p>
@@ -356,7 +350,7 @@ you would notice that nothing spectacular happened yet:
 we could’ve easily obtained the same result by modifying the tree directly:
 
 ```tut:silent
-val tree2b = tree1.copy(x = tree1.x + 99)
+val tree2b = simpleTree.copy(x = simpleTree.x + 99)
 
 assert(tree2b == tree2)
 ```
@@ -430,19 +424,6 @@ diagram.render("zipper5")(zipper5)
 
 <p align="center"><img src="images/zippers/zipper5.png" width="50%" /></p>
 
-Here is an animation of the focus moving between the sibling nodes:
-
-```tut:silent
-diagram.renderAnimation("sideways", tweakOptions = _.copy(onionSkinLayers = 0))(
-  Utils.iterate(zipper2)(
-    _.moveRight, _.moveRight, _.moveRight,
-    _.moveLeft, _.moveLeft, _.moveLeft
-  )
-)
-```
-
-<p align="center"><img src="images/zippers/sideways.gif" width="60%" /></p>
-
 Finally, when we move up, the siblings at the current level are “zipped”
 together and their parent node is updated:
 
@@ -466,6 +447,36 @@ val tree3b = zipper5.commit
 assert(tree3a == tree3b)
 ```
 
+Here is an animation of the navigation process:
+
+```tut:silent
+val zippers = Utils.iterate(Zipper(simpleTree))(
+  _.moveDownLeft,
+  _.moveRight, _.moveRight, _.moveRight,
+  _.moveDownLeft,
+  _.moveRight, _.moveLeft,
+  _.top.get,
+  _.moveLeft, _.moveLeft, _.moveLeft,
+  _.top.get
+)
+
+diagram.renderAnimation(
+  "navigation-tree",
+  tweakOptions = _.copy(delay = 200))(
+  zippers.map(ZipperFocus(_, simpleTree))
+)
+
+diagram.renderAnimation(
+  "navigation-zipper",
+  tweakOptions = _.copy(delay = 200))(
+  zippers
+)
+```
+
+<p align="center">
+  <img src="images/zippers/navigation-tree.gif" width="42%" />
+  <img src="images/zippers/navigation-zipper.gif" width="52%" />
+</p>
 
 ### Useful resources
 
