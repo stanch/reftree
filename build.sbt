@@ -1,7 +1,10 @@
 val commonSettings = Seq(
   organization := "org.stanch",
   scalaVersion := "2.11.8",
-  resolvers += Resolver.bintrayRepo("drdozer", "maven"),
+  resolvers ++= Seq(
+    Resolver.bintrayRepo("stanch", "maven"),
+    Resolver.bintrayRepo("drdozer", "maven")
+  ),
   licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
 )
 
