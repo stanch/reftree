@@ -4,25 +4,16 @@ import reftree.Diagram.{SequenceRenderingOptions, RenderingOptions}
 import uk.co.turingatemyhamster.graphvizs.dsl._
 
 object Graphs {
-  private def treeId(tree: RefTree) = tree match {
-    case RefTree.Ref(_, id, _, _) ⇒ id
-    case RefTree.Val(value, _, _) ⇒ value.toString
-    case _: RefTree.Null ⇒ "null"
-    case _: RefTree.Elided ⇒ "elided"
-  }
-
   private def label(tree: LabeledRefTree): Seq[Statement] = {
-    val id = treeId(tree.tree)
-    val labelNodeId = s"$id-label"
+    val labelNodeId = s"${tree.tree.id}-label"
     Seq(
       labelNodeId :| AttributeAssignment("label", ID.Identifier(s"<<i>${tree.label}</i>>")),
       NodeId(labelNodeId, Some(Port(None, Some(CompassPt.S)))) -->
-        NodeId(id, Some(Port(Some("n"), Some(CompassPt.N))))
+        NodeId(tree.tree.id, Some(Port(Some("n"), Some(CompassPt.N))))
     )
   }
 
   private def node(tree: RefTree, color: String, options: RenderingOptions): NodeStatement = {
-    val id = treeId(tree)
     val highlight = if (tree.highlight) s"""bgcolor="${options.highlightColor}"""" else ""
     val style = s"""style="rounded" cellspacing="0" cellpadding="6" cellborder="0" columns="*" $highlight"""
     val label = tree match {
@@ -35,7 +26,7 @@ object Graphs {
         s"""<<table $style><tr>$title</tr></table>>"""
     }
     val labelAttribute = AttributeAssignment("label", ID.Identifier(label))
-    id :| ("id" := id, labelAttribute, "color" := color, "fontcolor" := color)
+    tree.id :| ("id" := tree.id, labelAttribute, "color" := color, "fontcolor" := color)
   }
 
   private def cellLabel(tree: RefTree): String = tree match {

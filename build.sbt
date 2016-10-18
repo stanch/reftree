@@ -19,7 +19,7 @@ val core = project.settings(commonSettings: _*).settings(
     "com.softwaremill.quicklens" %% "quicklens" % "1.4.7",
     "uk.co.turingatemyhamster" %% "gv-core" % "0.3.2",
     "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-    "batik" % "batik-transcoder" % "1.6-1",
+    "batik" % "batik-transcoder" % "1.6-1" exclude("fop", "fop"),
     "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.7",
     "com.github.julien-truffaut" %% "monocle-macro" % "1.2.2",
     "de.sciss" %% "fingertree" % "1.5.2",

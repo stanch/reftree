@@ -113,7 +113,7 @@ case class Diagram(
     val trees = data.map(d ⇒ LabeledRefTree(d.toString, d.refTree))
     val frames = Graphs.graphFrames(options)(trees)
     val svgs = frames.map(Output.renderSvg)
-    val ids = trees.map(_.tree) collect { case RefTree.Ref(_, id, _, _) ⇒ id }
+    val ids = trees.map(_.tree.id)
     SvgGraphAnimation.animate(svgs, ids, options)
   }
 

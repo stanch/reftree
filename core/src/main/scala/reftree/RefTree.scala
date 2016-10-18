@@ -3,19 +3,26 @@ package reftree
 import scala.collection.immutable.CollectionInstances
 
 sealed trait RefTree {
+  def id: String
   def highlight: Boolean
 }
 
 object RefTree {
-  case class Val(value: AnyVal, hint: Option[Val.Hint], highlight: Boolean) extends RefTree
+  case class Val(value: AnyVal, hint: Option[Val.Hint], highlight: Boolean) extends RefTree {
+    def id = value.toString
+  }
   object Val {
     sealed trait Hint
     case object Bin extends Hint
     def apply(value: AnyVal): Val = Val(value, None, highlight = false)
   }
 
-  case class Null(highlight: Boolean = false) extends RefTree
-  case class Elided(highlight: Boolean = false) extends RefTree
+  case class Null(highlight: Boolean = false) extends RefTree {
+    def id = "null"
+  }
+  case class Elided(highlight: Boolean = false) extends RefTree {
+    def id = "elided"
+  }
 
   case class Ref(name: String, id: String, children: Seq[RefTree], highlight: Boolean) extends RefTree
   object Ref {
