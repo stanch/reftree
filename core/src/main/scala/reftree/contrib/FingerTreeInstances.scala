@@ -41,7 +41,5 @@ object FingerTreeInstances {
   }
 
   implicit def `FingerTree RefTree`[V: ToRefTree, A: ToRefTree]: ToRefTree[FingerTree[V, A]] =
-    new ToRefTree[FingerTree[V, A]] {
-      def refTree(value: FingerTree[V, A]): RefTree = fingerTreeRefTree[V, A](value, depth = 1)
-    }
+    ToRefTree[FingerTree[V, A]](fingerTreeRefTree[V, A](_, depth = 1))
 }

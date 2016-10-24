@@ -68,32 +68,30 @@ object LensInstances {
     implicit refTreeA: ToRefTree[A],
     exampleB: Example[B], refTreeB: ToRefTree[B],
     marker: Marker[B]
-  ): ToRefTree[LensFocus[A, B]] = new ToRefTree[LensFocus[A, B]] {
-    def refTree(value: LensFocus[A, B]): RefTree = {
-      // modify the target using the lens and the marker function
-      val modified = value.lens.modify(marker.mark)(value.target)
-      // an example RefTree for type B used to detect similar RefTrees
-      val example = exampleB.exemplify.refTree
+  ): ToRefTree[LensFocus[A, B]] = ToRefTree[LensFocus[A, B]] { value ⇒
+    // modify the target using the lens and the marker function
+    val modified = value.lens.modify(marker.mark)(value.target)
+    // an example RefTree for type B used to detect similar RefTrees
+    val example = exampleB.exemplify.refTree
 
-      def inner(tree1: RefTree, tree2: RefTree): RefTree = (example, tree1, tree2) match {
-        case (_: RefTree.Val, x: RefTree.Val, y: RefTree.Val) if x != y ⇒
-          // the example is a Val, and we found two mismatching Val trees
-          x.copy(highlight = true)
+    def inner(tree1: RefTree, tree2: RefTree): RefTree = (example, tree1, tree2) match {
+      case (_: RefTree.Val, x: RefTree.Val, y: RefTree.Val) if x != y ⇒
+        // the example is a Val, and we found two mismatching Val trees
+        x.copy(highlight = true)
 
-        case (RefTree.Ref(name, _, _, _), x: RefTree.Ref, y: RefTree.Ref) if x != y && x.name == name ⇒
-          // the example is a Ref, and we found two mismatching Ref trees with the same name
-          x.copy(highlight = true)
+      case (RefTree.Ref(name, _, _, _), x: RefTree.Ref, y: RefTree.Ref) if x != y && x.name == name ⇒
+        // the example is a Ref, and we found two mismatching Ref trees with the same name
+        x.copy(highlight = true)
 
-        case (_, x: RefTree.Ref, y: RefTree.Ref) ⇒
-          // recurse
-          val children = (x.children zip y.children) map { case (cx, cy) ⇒ inner(cx, cy) }
-          x.copy(children = children)
+      case (_, x: RefTree.Ref, y: RefTree.Ref) ⇒
+        // recurse
+        val children = (x.children zip y.children) map { case (cx, cy) ⇒ inner(cx, cy) }
+        x.copy(children = children)
 
-        case _ ⇒ tree1
-      }
-
-      // compare the RefTrees before and after modification
-      inner(value.target.refTree, modified.refTree)
+      case _ ⇒ tree1
     }
+
+    // compare the RefTrees before and after modification
+    inner(value.target.refTree, modified.refTree)
   }
 }

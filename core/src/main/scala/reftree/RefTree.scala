@@ -60,8 +60,8 @@ object LabeledRefTree {
 trait ToRefTree[-A] { self ⇒
   def refTree(value: A): RefTree
 
-  def suppressField(index: Int) = new ToRefTree[A] {
-    def refTree(value: A) = self.refTree(value) match {
+  def suppressField(index: Int) = ToRefTree[A] { value ⇒
+    self.refTree(value) match {
       case r: RefTree.Ref ⇒ r.copy(children = r.children.updated(index, RefTree.Elided()))
       case t ⇒ t
     }
@@ -69,11 +69,13 @@ trait ToRefTree[-A] { self ⇒
 }
 
 object ToRefTree extends CollectionInstances with GenericInstances {
-  implicit def `AnyVal RefTree`: ToRefTree[AnyVal] = new ToRefTree[AnyVal] {
-    def refTree(value: AnyVal) = RefTree.Val(value)
+  def apply[A](toRefTree: A ⇒ RefTree) = new ToRefTree[A] {
+    def refTree(value: A) = toRefTree(value)
   }
 
-  implicit def `String RefTree`: ToRefTree[String] = new ToRefTree[String] {
-    def refTree(value: String) = RefTree.Ref(value, value.map(RefTree.Val.apply))
+  implicit def `AnyVal RefTree`: ToRefTree[AnyVal] = ToRefTree[AnyVal](RefTree.Val.apply)
+
+  implicit def `String RefTree`: ToRefTree[String] = ToRefTree[String] { value ⇒
+    RefTree.Ref(value, value.map(RefTree.Val.apply))
   }
 }
