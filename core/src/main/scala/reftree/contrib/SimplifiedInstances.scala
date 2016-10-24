@@ -14,6 +14,20 @@ object SimplifiedInstances {
     case value ⇒ RefTree.Ref(value, value.map(_.refTree)).copy(name = "List")
   }
 
+  implicit def seq[A: ToRefTree]: ToRefTree[Seq[A]] = ToRefTree[Seq[A]] { value ⇒
+    if (value.isEmpty) RefTree.Null() else {
+      RefTree.Ref(value, value.map(_.refTree)).copy(name = "Seq")
+    }
+  }
+
+  implicit def map[A: ToRefTree, B: ToRefTree]: ToRefTree[Map[A, B]] = ToRefTree[Map[A, B]] { value ⇒
+    if (value.isEmpty) RefTree.Null() else {
+      RefTree.Ref(value, value.toSeq map {
+        case tuple @ (k, v) ⇒ RefTree.Ref(tuple, Seq(k.refTree, v.refTree)).copy(name = "MapEntry")
+      }).copy(name = "Map")
+    }
+  }
+
   implicit def zipper[A](implicit default: ToRefTree[Zipper[A]]): ToRefTree[Zipper[A]] =
     default.suppressField(3)
 }
