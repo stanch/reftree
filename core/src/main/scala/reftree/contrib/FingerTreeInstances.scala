@@ -1,23 +1,23 @@
 package reftree.contrib
 
 import de.sciss.fingertree.FingerTree
-import reftree._
-import reftree.Utils.PrivateFields
+import reftree.core._
+import reftree.util.Reflection.PrivateFields
 
 object FingerTreeInstances {
   private def fingerTreeRefTree[V: ToRefTree, A: ToRefTree](tree: AnyRef, depth: Int): RefTree = {
     val measure = tree.privateField[V]("measure").refTree
     tree.getClass.getSimpleName match {
       case "Empty" ⇒
-        RefTree.Ref(tree, Seq(measure)).copy(name = "FingerTree.Empty")
+        RefTree.Ref(tree, Seq(measure)).rename("FingerTree.Empty")
       case "Single" ⇒
         val a = digitRefTree[V, A](tree.privateField[AnyRef]("a"), depth - 1)
-        RefTree.Ref(tree, Seq(measure, a)).copy(name = "FingerTree.Single")
+        RefTree.Ref(tree, Seq(measure, a)).rename("FingerTree.Single")
       case "Deep" ⇒
         val prefix = digitRefTree[V, A](tree.privateField[AnyRef]("prefix"), depth)
         val subtree = fingerTreeRefTree[V, A](tree.privateField[AnyRef]("tree"), depth + 1)
         val suffix = digitRefTree[V, A](tree.privateField[AnyRef]("suffix"), depth)
-        RefTree.Ref(tree, Seq(measure, prefix, subtree, suffix)).copy(name = "FingerTree.Deep")
+        RefTree.Ref(tree, Seq(measure, prefix, subtree, suffix)).rename("FingerTree.Deep")
     }
   }
 
@@ -36,7 +36,7 @@ object FingerTreeInstances {
         val child = digit.privateField[AnyRef](s"a${i + 1}")
         digitRefTree[V, A](child, depth - 1)
       }
-      RefTree.Ref(digit, measure +: children).copy(name = s"FingerTree.${digit.getClass.getSimpleName}")
+      RefTree.Ref(digit, measure +: children).rename(s"FingerTree.${digit.getClass.getSimpleName}")
     }
   }
 

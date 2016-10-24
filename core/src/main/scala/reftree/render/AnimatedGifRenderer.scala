@@ -1,37 +1,20 @@
-package reftree
+package reftree.render
 
 import java.awt.image.BufferedImage
-import java.io._
+import java.io.{ByteArrayInputStream, StringWriter}
 import java.nio.file.Path
 import javax.xml.parsers.SAXParserFactory
 
 import com.sksamuel.scrimage.Image
 import com.sksamuel.scrimage.nio.GifSequenceWriter
-import org.apache.batik.transcoder.{SVGAbstractTranscoder, TranscoderInput, TranscoderOutput}
+import org.apache.batik.transcoder.{TranscoderInput, SVGAbstractTranscoder, TranscoderOutput}
 import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
 import uk.co.turingatemyhamster.graphvizs.dsl.Graph
 import uk.co.turingatemyhamster.graphvizs.exec._
 
-import scala.sys.process.{BasicIO, Process}
+import scala.sys.process.{Process, BasicIO}
 
-object Output {
-  // Normal rendering
-
-  def renderPng(graph: Graph, output: Path, options: Diagram.Options): Unit = {
-    val args = Seq(
-      "-K", "dot",
-      "-T", "png",
-      s"-Gdpi=${options.density}",
-      "-o", output.toString
-    )
-    val process = Process("dot", args)
-    val io = BasicIO.standard(GraphInputHandler.handle(graph) _)
-    (process run io).exitValue()
-    ()
-  }
-
-  // SVG-based pipeline for animations
-
+object AnimatedGifRenderer {
   private lazy val saxParserFactory = {
     val instance = SAXParserFactory.newInstance()
     instance.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
@@ -39,7 +22,7 @@ object Output {
   }
   private lazy val XML = xml.XML.withSAXParser(saxParserFactory.newSAXParser())
 
-  def renderSvg(graph: Graph): xml.Node = {
+  private def renderSvg(graph: Graph): xml.Node = {
     val args = Seq("-K", "dot", "-T", "svg")
     val process = Process("dot", args)
     val output = new StringWriter
@@ -48,7 +31,7 @@ object Output {
     XML.loadString(output.toString)
   }
 
-  def renderImage(svg: xml.Node, options: Diagram.RenderingOptions): Image = {
+  private def renderImage(svg: xml.Node, options: RenderingOptions): Image = {
     var image: BufferedImage = null
     val transcoder = new PNGTranscoder {
       override def writeImage(img: BufferedImage, output: TranscoderOutput): Unit = image = img
@@ -68,13 +51,21 @@ object Output {
     Image.fromAwt(image)
   }
 
-  def renderAnimatedGif(svgs: Seq[xml.Node], output: Path, options: Diagram.AnimationOptions): Unit = {
-    val images = svgs.par.map(renderImage(_, options)).to[Seq]
-    val duplicated = Seq.fill(options.keyFrames)(images.head) ++
-      images.tail.grouped(options.interpolationFrames + 1).flatMap {
-        case init :+ last ⇒ init ++ Seq.fill(options.keyFrames)(last)
+  def renderAnimatedGif(
+    graphs: Seq[Graph],
+    svgPreprocessing: Seq[xml.Node] ⇒ Seq[xml.Node],
+    output: Path,
+    renderingOptions: RenderingOptions,
+    animationOptions: AnimationOptions
+  ): Unit = {
+    val svgs = svgPreprocessing(graphs.map(renderSvg))
+    val images = svgs.par.map(renderImage(_, renderingOptions)).to[Seq]
+    val duplicated = Seq.fill(animationOptions.keyFrames)(images.head) ++
+      images.tail.grouped(animationOptions.interpolationFrames + 1).flatMap {
+        case init :+ last ⇒ init ++ Seq.fill(animationOptions.keyFrames)(last)
       }
-    val writer = GifSequenceWriter(options.delay, options.loop)
+    // TODO: use the streaming writer
+    val writer = GifSequenceWriter(animationOptions.delay, animationOptions.loop)
     writer.output(duplicated, output)
   }
 }

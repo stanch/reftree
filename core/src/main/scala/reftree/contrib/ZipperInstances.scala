@@ -1,6 +1,6 @@
 package reftree.contrib
 
-import reftree._
+import reftree.core._
 import zipper.Zipper
 import com.softwaremill.quicklens._
 
@@ -16,7 +16,7 @@ object ZipperInstances {
       val focus = value.zipper.focus.refTree
 
       def inner(tree: RefTree): RefTree = tree match {
-        case `focus` ⇒ tree.modify(_.highlight).setTo(true)
+        case `focus` ⇒ tree.withHighlight(true)
         case ref: RefTree.Ref ⇒ ref.modify(_.children.each).using(inner)
         case _ ⇒ tree
       }

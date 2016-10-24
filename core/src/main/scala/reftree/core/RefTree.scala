@@ -1,16 +1,25 @@
-package reftree
+package reftree.core
 
+import scala.annotation.implicitNotFound
 import scala.collection.immutable.CollectionInstances
 
 sealed trait RefTree {
   def id: String
   def highlight: Boolean
+
+  def withHighlight(highlight: Boolean) = this match {
+    case tree: RefTree.Val ⇒ tree.copy(highlight = highlight)
+    case tree: RefTree.Null ⇒ tree.copy(highlight = highlight)
+    case tree: RefTree.Elided ⇒ tree.copy(highlight = highlight)
+    case tree: RefTree.Ref ⇒ tree.copy(highlight = highlight)
+  }
 }
 
 object RefTree {
   case class Val(value: AnyVal, hint: Option[Val.Hint], highlight: Boolean) extends RefTree {
     def id = value.toString
   }
+
   object Val {
     sealed trait Hint
     case object Bin extends Hint
@@ -20,11 +29,20 @@ object RefTree {
   case class Null(highlight: Boolean = false) extends RefTree {
     def id = "null"
   }
+
   case class Elided(highlight: Boolean = false) extends RefTree {
     def id = "elided"
   }
 
-  case class Ref private (name: String, id: String, children: Seq[RefTree], highlight: Boolean) extends RefTree
+  case class Ref private (
+    name: String,
+    id: String,
+    children: Seq[RefTree],
+    highlight: Boolean
+  ) extends RefTree {
+    def rename(name: String) = copy(name = name)
+  }
+
   object Ref {
     def apply(value: AnyRef, children: Seq[RefTree]): Ref = Ref(
       // getSimpleName sometimes does not work, see https://issues.scala-lang.org/browse/SI-5425
@@ -37,26 +55,7 @@ object RefTree {
   }
 }
 
-case class LabeledRefTree(label: String, tree: RefTree)
-
-object LabeledRefTree {
-  import scala.language.implicitConversions
-  import scala.language.experimental.macros
-  import scala.reflect.macros.blackbox
-
-  implicit def fromTuple[A: ToRefTree](pair: (String, A)): LabeledRefTree =
-    LabeledRefTree(pair._1, pair._2.refTree)
-
-  implicit def fromValue[A](value: A)(implicit toRefTree: ToRefTree[A]): LabeledRefTree =
-    macro fromValueMacro[A]
-
-  def fromValueMacro[A](c: blackbox.Context)(value: c.Expr[A])(toRefTree: c.Expr[ToRefTree[A]]) = {
-    import c.universe._
-    val source = q"_root_.sourcecode.Text($value)"
-    q"_root_.reftree.LabeledRefTree($source.source, $toRefTree.refTree($value))"
-  }
-}
-
+@implicitNotFound("To render a diagram for type ${A}, implement an instance of reftree.core.ToRefTree[${A}]")
 trait ToRefTree[-A] { self ⇒
   def refTree(value: A): RefTree
 
@@ -69,7 +68,7 @@ trait ToRefTree[-A] { self ⇒
 }
 
 object ToRefTree extends CollectionInstances with GenericInstances {
-  def apply[A](toRefTree: A ⇒ RefTree) = new ToRefTree[A] {
+  def apply[A](toRefTree: A ⇒ RefTree): ToRefTree[A] = new ToRefTree[A] {
     def refTree(value: A) = toRefTree(value)
   }
 

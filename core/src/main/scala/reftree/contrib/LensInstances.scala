@@ -1,7 +1,7 @@
 package reftree.contrib
 
 import monocle.{Traversal, Lens}
-import reftree._
+import reftree.core._
 
 object LensInstances {
   case class LensFocus[A, B](lens: Traversal[A, B], target: A)

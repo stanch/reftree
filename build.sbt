@@ -41,14 +41,13 @@ val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
       "import monocle.macros.GenLens",
       "import com.softwaremill.quicklens._",
       "import zipper._",
-      "import reftree._",
+      "import reftree.diagram._",
       "import reftree.contrib.FingerTreeInstances._",
       "import reftree.contrib.LensInstances._",
       "import reftree.contrib.ZipperInstances._",
       "import reftree.contrib.SimplifiedInstances",
       "import reftree.demo.Data._",
-      "val diagram = Diagram()",
-      "import diagram.{renderDefault ⇒ render}"
+      "import reftree.demo.Shortcuts._"
     ).mkString(";")
     s"""ammonite.Main("$predef").run(); System.exit(0)"""
   },

@@ -1,9 +1,6 @@
 package reftree.svg
 
-import reftree.Diagram.SequenceRenderingOptions
 import reftree.geometry._
-
-import scala.util.Try
 
 object SvgGraphAnimation {
   private def improveRendering(svg: xml.Node): xml.Node = svg.asInstanceOf[xml.Elem] %
@@ -14,26 +11,21 @@ object SvgGraphAnimation {
     nodes map { case (id, node) ⇒ id → SvgGraphLens.color.modify(identity)(node) }
   }(svg)
 
-  private def align(prev: xml.Node, next: xml.Node, prevAnchorId: String, nextAnchorId: String) = Try {
-    val prevPosition =
-      SvgGraphLens.node(prevAnchorId) composeLens
-        SvgGraphLens.nodePosition get prev
-    val nextPosition =
-      SvgGraphLens.node(nextAnchorId) composeLens
-        SvgGraphLens.nodePosition get next
-    val translation = prevPosition - nextPosition
+  private def align(prev: xml.Node, next: xml.Node) = {
+    val prevNodes = SvgGraphLens.nodes.get(prev)
+    val nextNodes = SvgGraphLens.nodes.get(next)
+    val deltas = (prevNodes.keySet & nextNodes.keySet) map { id ⇒
+      SvgGraphLens.nodePosition.get(prevNodes(id)) - SvgGraphLens.nodePosition.get(nextNodes(id))
+    }
+    // TODO: add more weight to label nodes
+    val translation = Point.sum(deltas.toSeq) * (1.0 / deltas.size)
     val withBox = SvgLens.viewBox.modify(_ + translation)(next)
     (SvgGraphLens.graph composeLens SvgLens.translation).modify(_ + translation)(withBox)
-  }.toOption
+  }
 
-  private def alignPairwise(svgs: Seq[xml.Node], anchorIds: Seq[String], options: SequenceRenderingOptions) =
-    (svgs.tail zip anchorIds.sliding(2).toSeq).foldLeft(Vector(svgs.head)) {
-      case (acc :+ prev, (next, Seq(prevAnchorId, nextAnchorId))) ⇒
-        val anchoringAttempt = if (!options.anchoring) None else {
-          align(prev, next, prevAnchorId, prevAnchorId)
-        }
-        lazy val default = align(prev, next, prevAnchorId, nextAnchorId).get
-        acc :+ prev :+ (anchoringAttempt getOrElse default)
+  private def alignPairwise(svgs: Seq[xml.Node]) =
+    svgs.foldLeft(Vector(svgs.head)) {
+      case ((acc :+ prev), next) ⇒ acc :+ prev :+ align(prev, next)
     }
 
   private val interpolation: Interpolation[xml.Node] = {
@@ -73,17 +65,18 @@ object SvgGraphAnimation {
     )
   }
 
-  private def interpolatePairwise(svgs: Seq[xml.Node], options: SequenceRenderingOptions) =
+  private def interpolatePairwise(svgs: Seq[xml.Node], interpolationFrames: Int) =
     svgs.head +: svgs.sliding(2).toSeq.flatMap {
       case Seq(prev, next) ⇒
-        interpolation.sample(prev, next, options.interpolationFrames, inclusive = false) :+ next
+        interpolation.sample(prev, next, interpolationFrames, inclusive = false) :+ next
     }
 
-  def animate(svgs: Seq[xml.Node], anchorIds: Seq[String], options: SequenceRenderingOptions) = {
+  def animate(interpolationFrames: Int)(svgs: Seq[xml.Node]) = {
     val preprocessed = svgs.map(improveRendering).map(fixTextColor)
-    val aligned = alignPairwise(preprocessed, anchorIds, options)
+    val aligned = alignPairwise(preprocessed)
     val maxViewBox = Rectangle.union(aligned.map(SvgLens.viewBox.get))
     val resized = aligned.map(SvgLens.viewBox.set(maxViewBox))
-    interpolatePairwise(resized, options)
+    // TODO: resurrect accentDiff functionality
+    interpolatePairwise(resized, interpolationFrames)
   }
 }

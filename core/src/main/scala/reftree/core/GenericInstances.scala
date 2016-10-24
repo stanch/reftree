@@ -1,4 +1,4 @@
-package reftree
+package reftree.core
 
 import shapeless._
 
