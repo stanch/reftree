@@ -8,14 +8,14 @@ object Shortcuts {
   val renderer = Renderer()
 
   def render[A: ToRefTree](value: sourcecode.Text[A]) =
-    renderer.render("diagram", Diagram.sourceCodeLabel(value))
+    renderer.render("diagram", Diagram.sourceCodeCaption(value))
 
   def render[A: ToRefTree, B: ToRefTree](
     value1: sourcecode.Text[A],
     value2: sourcecode.Text[B]
   ) = renderer.render(
     "diagram",
-    Diagram.sourceCodeLabel(value1) + Diagram.sourceCodeLabel(value2)
+    Diagram.sourceCodeCaption(value1) + Diagram.sourceCodeCaption(value2)
   )
 
   def render[A: ToRefTree, B: ToRefTree, C: ToRefTree](
@@ -24,6 +24,6 @@ object Shortcuts {
     value3: sourcecode.Text[C]
   ) = renderer.render(
     "diagram",
-    Diagram.sourceCodeLabel(value1) + Diagram.sourceCodeLabel(value2) + Diagram.sourceCodeLabel(value3)
+    Diagram.sourceCodeCaption(value1) + Diagram.sourceCodeCaption(value2) + Diagram.sourceCodeCaption(value3)
   )
 }

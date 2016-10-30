@@ -7,7 +7,10 @@ case class RenderingOptions(
   palette: IndexedSeq[String] = Array("#104e8b", "#228B22", "#cd5b45"),
   highlightColor: String = "#ffe4c4",
   density: Int = 100
-)
+) {
+  def withVerticalSpacing(spacing: Double) = copy(verticalSpacing = spacing)
+  def withDensity(density: Int) = copy(density = density)
+}
 
 case class AnimationOptions(
   keyFrameDuration: FiniteDuration = 2.seconds,
@@ -16,6 +19,8 @@ case class AnimationOptions(
   loop: Boolean = true,
   onionSkinLayers: Int = 0
 ) {
+  def withOnionSkinLayers(layers: Int) = copy(onionSkinLayers = layers)
+
   def interpolationFrames = Math.round(interpolationDuration.toMillis * framesPerSecond / 1000.0f)
 
   def keyFrames = if (interpolationFrames == 0) 1 else {

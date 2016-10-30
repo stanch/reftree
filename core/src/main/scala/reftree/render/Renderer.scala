@@ -11,6 +11,12 @@ case class Renderer(
   animationOptions: AnimationOptions = AnimationOptions(),
   directory: Path = Paths.get(".")
 ) { self ⇒
+  def tweakRendering(tweak: RenderingOptions ⇒ RenderingOptions) =
+    copy(renderingOptions = tweak(renderingOptions))
+
+  def tweakAnimation(tweak: AnimationOptions ⇒ AnimationOptions) =
+    copy(animationOptions = tweak(animationOptions))
+
   def render(name: String, diagram: Diagram): Unit = {
     val graph = Graphs.graph(renderingOptions)(diagram)
     PngRenderer.renderPng(
@@ -32,10 +38,22 @@ case class Renderer(
   }
 
   implicit class DiagramRenderSyntax(diagram: Diagram) {
-    def render(name: String) = self.render(name, diagram)
+    def render(
+      name: String,
+      tweak: RenderingOptions ⇒ RenderingOptions = identity
+    ) = self
+      .tweakRendering(tweak)
+      .render(name, diagram)
   }
 
   implicit class AnimationRenderSyntax(animation: Animation) {
-    def render(name: String) = self.render(name, animation)
+    def render(
+      name: String,
+      tweakRendering: RenderingOptions ⇒ RenderingOptions = identity,
+      tweakAnimation: AnimationOptions ⇒ AnimationOptions = identity
+    ) = self
+      .tweakRendering(tweakRendering)
+      .tweakAnimation(tweakAnimation)
+      .render(name, animation)
   }
 }

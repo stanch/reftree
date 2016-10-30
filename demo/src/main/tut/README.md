@@ -1,4 +1,4 @@
-## reftree — automatic object tree diagrams for immutable data
+## reftree — diagrams for immutable data
 
 [![Join the chat at https://gitter.im/stanch/reftree](https://badges.gitter.im/stanch/reftree.png)](https://gitter.im/stanch/reftree?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -34,91 +34,164 @@ case class Startup(
 
 <p align="center"><img src="images/lenses/startup.png" width="70%" /></p>
 
-* Static images, animations and image sequences can be generated.
-* Automatic captions (using [sourcecode](https://github.com/lihaoyi/sourcecode)).
+* Static images as well as animations can be generated.
+* Hassle-free captions (using [sourcecode](https://github.com/lihaoyi/sourcecode)).
 
-### API
+### Getting Started
 
 #### `RefTree`
 
 This library renders diagrams based on a simple data representation called
-[`RefTree`](https://github.com/stanch/reftree/blob/master/core/src/main/scala/reftree/RefTree.scala).
+[`RefTree`](https://github.com/stanch/reftree/blob/master/core/src/main/scala/reftree/core/RefTree.scala).
 Essentially, a `RefTree` denotes either an object (`AnyRef`) with a number of fields,
 or a primitive (`AnyVal`).
 
-To render a value of type `A`, you will need an implicit instance of `ToRefTree[A]`
-available. For many Scala collections, as well as case classes, no extra work is needed,
+To render a value of type `A`, you will need an implicit instance of `ToRefTree[A]`.
+For many Scala collections, as well as case classes, no extra work is needed,
 as these instances are readily available or generated on the fly.
 
 For examples of manual instance derivation, see the
 [`contrib` package](https://github.com/stanch/reftree/tree/master/core/src/main/scala/reftree/contrib).
 
-#### `Diagram`
+#### `Renderer`
 
-To render a diagram, first create a `Diagram` object that encapsulates some default settings:
+To render diagrams and animations, you will need a `Renderer`:
 
 ```tut:silent
-import reftree._
+import reftree.render._
+import reftree.diagram._
 import java.nio.file.Paths
 import scala.collection.immutable.Queue
 
-val diagram = Diagram(
-  defaultOptions = Diagram.Options(density = 75),
-  defaultDirectory = Paths.get("images", "usage")
+val renderer = Renderer(
+  renderingOptions = RenderingOptions(density = 75),
+  directory = Paths.get("images", "usage")
 )
 ```
 
-Now you can use these methods to create diagrams:
+There are two ways to use it:
 
 ```tut:silent
-// render to "structures.png", automatic captions
-diagram.render("lists")(List(1), List(2))
+// using the `render` method
+renderer.render("queue", Diagram(Queue(1)))
+
+// using syntactic sugar
+import renderer._
+Diagram(Queue(1)).render("queue")
 ```
 
-<p align="center"><img src="images/usage/lists.png" width="30%" /></p>
+There are various rendering options you can set, for example:
 
 ```tut:silent
-// same as above, but with manually specified captions
-diagram.render("lists-captioned")("one" → List(1), List(2))
+// using the `render` method
+renderer.tweakRendering(_.withVerticalSpacing(2)).render("queue", Diagram(Queue(1)))
+
+// using syntactic sugar
+Diagram(Queue(1)).render("queue", _.withVerticalSpacing(2))
 ```
 
-<p align="center"><img src="images/usage/lists-captioned.png" width="30%" /></p>
+#### `Diagram`
+
+Diagrams can be created and combined into bigger diagrams using the following API:
 
 ```tut:silent
-// tweak the default options
-diagram.render("lists-spaced", tweakOptions = _.copy(verticalSpacing = 2))(List(1), List(2))
+// no caption
+Diagram(Queue(1)).render("caption-none")
 ```
 
-<p align="center"><img src="images/usage/lists-spaced.png" width="30%" /></p>
+<p align="center"><img src="images/usage/caption-none.png" /></p>
 
 ```tut:silent
-// render a sequence of PNG images, i.e. "queue-01.png", "queue-02.png", etc
-diagram.renderSequence("queue", tweakOptions = _.copy(interpolationFrames = 3))(
-  Utils.iterate(Queue(1))(_ :+ 2, _.tail)
-)
+// automatically set caption to "Queue(1) :+ 2"
+Diagram.sourceCodeCaption(Queue(1) :+ 2).render("caption-source")
 ```
 
-<p align="center">
-  <img src="images/usage/queue-1.png" width="10%" />
-  <img src="images/usage/queue-2.png" width="10%" />
-  <img src="images/usage/queue-3.png" width="10%" />
-  <img src="images/usage/queue-4.png" width="10%" />
-  <img src="images/usage/queue-5.png" width="10%" />
-  <img src="images/usage/queue-6.png" width="10%" />
-  <img src="images/usage/queue-7.png" width="10%" />
-  <img src="images/usage/queue-8.png" width="10%" />
-  <img src="images/usage/queue-9.png" width="10%" />
-</p>
+<p align="center"><img src="images/usage/caption-source.png" /></p>
 
 ```tut:silent
-// render an animated GIF
-diagram.renderAnimation("queue")(Utils.iterate(Queue(1))(_ :+ 2))
+// use toString to get the caption, i.e. "Queue(1, 2)"
+Diagram.toStringCaption(Queue(1) :+ 2).render("caption-tostring")
 ```
 
-<p align="center"><img src="images/usage/queue.gif" width="30%" /></p>
+<p align="center"><img src="images/usage/caption-tostring.png" /></p>
 
-See the [materials for my talk “Unzipping Immutability”](DEMO.md) for more ideas
-of how the various options can be utilized.
+```tut:silent
+// merge two diagrams, set captions manually
+(Diagram(Queue(1)).withCaption("one") + Diagram(Queue(2)).withCaption("two")).render("one-two")
+```
+
+<p align="center"><img src="images/usage/one-two.png" /></p>
+
+```tut:silent
+// isolate each diagram in its own namespace (graph nodes will not be shared across them)
+(Diagram(Queue(1)).toNamespace("one") + Diagram(Queue(2)).toNamespace("two")).render("namespaced")
+```
+
+<p align="center"><img src="images/usage/namespaced.png" /></p>
+
+#### `Animation`
+
+Animation is essentially a sequence of diagrams, which can be rendered to an animated GIF.
+The simplest way to create an animation is to use the builder API:
+
+```tut:silent
+(Animation
+  .startWith(Queue(1))
+  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+  .build()
+  .render("animation-simple"))
+```
+
+<p align="center"><img src="images/usage/animation-simple.gif" /></p>
+
+You can also configure how the diagram for each frame is produced:
+
+```tut:silent
+(Animation
+  .startWith(Queue(1))
+  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+  .build(Diagram(_).withCaption("My Queue").withColor(2))
+  .render("animation-captioned-red"))
+```
+
+<p align="center"><img src="images/usage/animation-captioned-red.gif" /></p>
+
+Note that by default the library will try to reduce the average movement of
+all tree nodes across animation frames. Sometimes you want to “anchor”
+the root of the data structure instead, to force it to stay still
+while everything else is moving. You can achieve this via `withAnchor` method:
+
+```tut:silent
+(Animation
+  .startWith(Queue(1))
+  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+  .build(Diagram(_).withAnchor("queue").withCaption("This node is anchored!"))
+  .render("animation-anchored"))
+```
+
+<p align="center"><img src="images/usage/animation-anchored.gif" /></p>
+
+Finally, animations can be combined in sequence or in parallel, for example:
+
+```tut:silent
+val queue1 = (Animation
+  .startWith(Queue(1))
+  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+  .build()
+  .toNamespace("one"))
+
+val queue2 = (Animation
+  .startWith(Queue(10))
+  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (10 * (i + 1)))
+  .build()
+  .toNamespace("two"))
+
+(queue1 addInParallel queue2).render("animation-parallel")
+```
+
+<p align="center"><img src="images/usage/animation-parallel.gif" /></p>
+
+See the [materials for my talk “Unzipping Immutability”](DEMO.md) for more inspiration!
 
 ### Usage
 

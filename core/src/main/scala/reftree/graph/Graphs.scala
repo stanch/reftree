@@ -9,18 +9,18 @@ object Graphs {
   private def namespaced(id: String, namespace: Seq[String]) =
     s"${namespace.mkString("/")}-$id"
 
-  private def label(label: String, tree: RefTree, namespace: Seq[String]): Seq[Statement] = {
-    val labelNodeId = namespaced(s"${tree.id}-label-${label.hashCode}", namespace)
-    val labelNode = labelNodeId :| (
-      AttributeAssignment("label", ID.Identifier(s"<<i>$label</i>>")),
-      "id" := labelNodeId
+  private def caption(caption: String, tree: RefTree, namespace: Seq[String]): Seq[Statement] = {
+    val captionNodeId = namespaced(s"${tree.id}-caption-${caption.hashCode}", namespace)
+    val captionNode = captionNodeId :| (
+      AttributeAssignment("label", ID.Identifier(s"<<i>$caption</i>>")),
+      "id" := captionNodeId
     )
-    val labelEdgeId = namespaced(s"$labelNodeId-${tree.id}", namespace)
-    val labelEdge =
-      NodeId(labelNodeId, Some(Port(None, Some(CompassPt.S)))) -->
+    val captionEdgeId = namespaced(s"$captionNodeId-${tree.id}", namespace)
+    val captionEdge =
+      NodeId(captionNodeId, Some(Port(None, Some(CompassPt.S)))) -->
       NodeId(namespaced(tree.id, namespace), Some(Port(Some("n"), Some(CompassPt.N)))) :|
-      ("id" := labelEdgeId)
-    Seq(labelNode, labelEdge)
+      ("id" := captionEdgeId)
+    Seq(captionNode, captionEdge)
   }
 
   private def node(
@@ -134,7 +134,7 @@ object Graphs {
     (diagram.fragments zip colorIndices) flatMap {
       case (fragment, i) ⇒
         val color = options.palette(i % options.palette.length)
-        fragment.label.toSeq.flatMap(label(_, fragment.tree, fragment.namespace)) ++
+        fragment.caption.toSeq.flatMap(caption(_, fragment.tree, fragment.namespace)) ++
           inner(fragment.tree, color, fragment.anchorId, fragment.namespace, depth = 0)
     }
   }

@@ -23,11 +23,13 @@ Throughout this page we will assume the following
 declarations (each section might add its own):
 
 ```tut:silent
-import reftree._
+import reftree.core._
+import reftree.diagram._
+import reftree.render._
 import reftree.demo.Data._
 import scala.collection.immutable._
-import scala.concurrent.duration.DurationInt
 import java.nio.file.Paths
+import Diagram.{sourceCodeCaption ⇒ diagram}
 ```
 
 To start an interactive session, just run
@@ -46,10 +48,11 @@ already has all the necessary imports in scope.*
 
 ```tut:silent
 // extra declarations for this section
-val diagram = Diagram(
-  defaultOptions = Diagram.Options(density = 100),
-  defaultDirectory = Paths.get("images", "data")
+val renderer = Renderer(
+  renderingOptions = RenderingOptions(density = 100),
+  directory = Paths.get("images", "data")
 )
+import renderer._
 ```
 
 #### Lists
@@ -62,7 +65,7 @@ val list = List(1, 2, 3)
 ```
 
 ```tut:silent
-diagram.render("list")(list)
+diagram(list).render("list")
 ```
 
 <p align="center"><img src="images/data/list.png" width="20%" /></p>
@@ -78,7 +81,7 @@ val remove = list.tail
 ```
 
 ```tut:silent
-diagram.render("lists")(list, add, remove)
+(diagram(list) + diagram(add) + diagram(remove)).render("lists")
 ```
 
 <p align="center"><img src="images/data/lists.png" width="20%" /></p>
@@ -87,24 +90,24 @@ However we can’t easily add elements at the end of the list, since the last ce
 is pointing to the empty list (`Nil`) and is immutable, i.e. cannot be changed.
 Thus we are forced to create a new list every time:
 
-```tut:silent
-diagram.renderAnimation(
-  "list-append",
-  tweakOptions = _.copy(onionSkinLayers = 3))(
-  Utils.iterate(List(1))(_ :+ 2, _ :+ 3, _ :+ 4)
-)
+```scala
+Animation
+  .startWith(List(1))
+  .iterate(_ :+ 2, _ :+ 3, _ :+ 4)
+  .build()
+  .render("list-append", tweakAnimation = _.withOnionSkinLayers(3))
 ```
 
 <p align="center"><img src="images/data/list-append.gif" width="40%" /></p>
 
 This certainly does not look efficient compared to adding elements at the front:
 
-```tut:silent
-diagram.renderAnimation(
-  "list-prepend",
-  tweakOptions = _.copy(onionSkinLayers = 1, diffAccent = true))(
-  Utils.iterate(List(1))(2 :: _, 3 :: _, 4 :: _)
-)
+```scala
+Animation
+  .startWith(List(1))
+  .iterate(2 :: _, 3 :: _, 4 :: _)
+  .build()
+  .render("list-prepend")
 ```
 
 <p align="center"><img src="images/data/list-prepend.gif" width="20%" /></p>
@@ -120,7 +123,7 @@ val queue2 = (queue1 :+ 4).tail
 ```
 
 ```tut:silent
-diagram.render("queues", tweakOptions = _.copy(verticalSpacing = 1.2))(queue1, queue2)
+(diagram(queue1) + diagram(queue2)).render("queues", _.withVerticalSpacing(1.2))
 ```
 
 <p align="center"><img src="images/data/queues.png" width="40%" /></p>
@@ -131,18 +134,12 @@ In this case the queue will rotate the other list to make use of its elements.
 Although this operation is expensive, the usage pattern intended for a queue
 makes it rare enough to yield great average (“ammortized”) performance:
 
-```tut:silent
-def add(n: Int)(q: Queue[Int]) = Utils.iterate(q, n)(q => q :+ (q.max + 1)).tail
-def remove(n: Int)(q: Queue[Int]) = Utils.iterate(q, n)(q => q.tail).tail
-def addRemove(n: Int)(q: Queue[Int]) = Utils.flatIterate(q)(add(n), remove(n)).tail
-
-val queues = Utils.flatIterate(Queue(1, 2, 3), 3)(addRemove(2))
-
-diagram.renderAnimation(
-  "queue",
-  tweakOptions = _.copy(diffAccent = true))(
-  queues
-)
+```scala
+Animation
+  .startWith(Queue(1, 2, 3))
+  .repeat(3)(_.iterate(2)(q ⇒ q :+ (q.max + 1)).iterate(2)(_.tail))
+  .build(Diagram.toStringCaption(_).withAnchor("queue"))
+  .render("queue")
 ```
 
 <p align="center"><img src="images/data/queue.gif" width="40%" /></p>
@@ -168,7 +165,7 @@ val vector2 = vector1 :+ 21
 ```
 
 ```tut:silent
- diagram.render("vectors", tweakOptions = _.copy(verticalSpacing = 2))(vector1, vector2)
+(diagram(vector1) + diagram(vector2)).render("vectors", _.withVerticalSpacing(2))
 ```
 
 <p align="center"><img src="images/data/vectors.png" width="100%" /></p>
@@ -181,7 +178,7 @@ val vector2 = vector1 :+ 21
 ```
 
 ```tut:silent
- diagram.render("big-vectors", tweakOptions = _.copy(verticalSpacing = 2))(vector1, vector2)
+(diagram(vector1) + diagram(vector2)).render("big-vectors", _.withVerticalSpacing(2))
 ```
 
 <p align="center"><img src="images/data/big-vectors.png" width="100%" /></p>
@@ -196,19 +193,17 @@ To conclude this section, I would like to share a slightly less popular, but bea
 data structure called “finger tree” described in [this paper](http://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf)
 by Hinze and Paterson. Enjoy the read and this animation of a finger tree getting filled with some numbers:
 
-```tut:silent
+```scala
 import de.sciss.fingertree.{FingerTree, Measure}
 import reftree.contrib.FingerTreeInstances._
 
 implicit val measure = Measure.Indexed
 
-val fingerTrees = Utils.iterate(FingerTree(1), 21)(t ⇒ t :+ (t.measure + 1))
-
-diagram.renderAnimation(
-  "finger",
-  tweakOptions = _.copy(diffAccent = true, verticalSpacing = 2, density = 75))(
-  fingerTrees
-)
+Animation
+  .startWith(FingerTree(1))
+  .iterateWithIndex(21)((t, i) ⇒ t :+ (i + 1))
+  .build(Diagram(_).withCaption("Finger Tree").withAnchor("tree"))
+  .render("finger", _.withDensity(75).withVerticalSpacing(2))
 ```
 
 <p align="center"><img src="images/data/finger.gif" width="100%" /></p>
@@ -262,14 +257,15 @@ val raisedFounder = startup.copy(
 import reftree.contrib.SimplifiedInstances.list
 import reftree.contrib.LensInstances._
 
-val diagram = Diagram(
-  defaultOptions = Diagram.Options(density = 100),
-  defaultDirectory = Paths.get("images", "lenses")
+val renderer = Renderer(
+  renderingOptions = RenderingOptions(density = 100),
+  directory = Paths.get("images", "lenses")
 )
+import renderer._
 ```
 
 ```tut:silent
-diagram.render("startup")(startup, raisedFounder)
+(diagram(startup) + diagram(raisedFounder)).render("startup")
 ```
 
 <p align="center"><img src="images/lenses/startup.png" width="100%" /></p>
@@ -292,7 +288,7 @@ salaryLens.modify(s => s + 10)(startup.founder)
 ```
 
 ```tut:silent
-diagram.render("salaryLens")(LensFocus(salaryLens, startup.founder))
+diagram(LensFocus(salaryLens, startup.founder)).render("salaryLens")
 ```
 
 <p align="center"><img src="images/lenses/salaryLens.png" width="40%" /></p>
@@ -306,7 +302,7 @@ founderLens.get(startup)
 ```
 
 ```tut:silent
-diagram.render("founderLens")(LensFocus(founderLens, startup))
+diagram(LensFocus(founderLens, startup)).render("founderLens")
 ```
 
 <p align="center"><img src="images/lenses/founderLens.png" width="100%" /></p>
@@ -321,7 +317,7 @@ founderSalaryLens.modify(s => s + 10)(startup)
 ```
 
 ```tut:silent
-diagram.render("founderSalaryLens")(LensFocus(founderSalaryLens, startup))
+diagram(LensFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 ```
 
 <p align="center"><img src="images/lenses/founderSalaryLens.png" width="100%" /></p>
@@ -330,7 +326,7 @@ One interesting thing is that lenses can focus on anything, not just direct attr
 Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
 ```tut:silent
-diagram.render("vowelTraversal")(LensFocus(vowelTraversal, "example"))
+diagram(LensFocus(vowelTraversal, "example")).render("vowelTraversal")
 ```
 
 <p align="center"><img src="images/lenses/vowelTraversal.png" width="40%" /></p>
@@ -345,7 +341,7 @@ founderVowelTraversal.modify(v => v.toUpper)(startup)
 ```
 
 ```tut:silent
-diagram.render("founderVowelTraversal")(LensFocus(founderVowelTraversal, startup))
+diagram(LensFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
 ```
 
 <p align="center"><img src="images/lenses/founderVowelTraversal.png" width="100%" /></p>
@@ -402,14 +398,15 @@ import zipper._
 import reftree.contrib.SimplifiedInstances.option
 import reftree.contrib.ZipperInstances._
 
-val diagram = Diagram(
-  defaultOptions = Diagram.Options(density = 100),
-  defaultDirectory = Paths.get("images", "zippers")
+val renderer = Renderer(
+  renderingOptions = RenderingOptions(density = 100),
+  directory = Paths.get("images", "zippers")
 )
+import renderer._
 ```
 
 ```tut:silent
-diagram.render("company")(company.hierarchy)
+diagram(company.hierarchy).render("company")
 ```
 
 <p align="center"><img src="images/zippers/company.png" width="100%" /></p>
@@ -431,7 +428,7 @@ val updatedHierarchy = Zipper(company.hierarchy).moveDownRight.moveDownRight.ins
 ```
 
 ```tut:silent
-diagram.render("updatedHierarchy")(company.hierarchy, updatedHierarchy)
+(diagram(company.hierarchy) + diagram(updatedHierarchy)).render("updatedHierarchy")
 ```
 
 <p align="center"><img src="images/zippers/updatedHierarchy.png" width="100%" /></p>
@@ -452,7 +449,7 @@ simpleTree
 ```
 
 ```tut:silent
-diagram.render("simpleTree")(simpleTree)
+diagram(simpleTree).render("simpleTree")
 ```
 
 <p align="center"><img src="images/zippers/simpleTree.png" width="50%" /></p>
@@ -464,7 +461,7 @@ val zipper1 = Zipper(simpleTree)
 ```
 
 ```tut:silent
-diagram.render("zipper1")(simpleTree, zipper1)
+(diagram(simpleTree) + diagram(zipper1)).render("zipper1")
 ```
 
 <p align="center"><img src="images/zippers/zipper1.png" width="50%" /></p>
@@ -491,7 +488,7 @@ val zipper2 = zipper1.update(focus ⇒ focus.copy(x = focus.x + 99))
 ```
 
 ```tut:silent
-diagram.render("zipper2")(simpleTree, zipper1, zipper2)
+(diagram(simpleTree) + diagram(zipper1) + diagram(zipper2)).render("zipper2")
 ```
 
 <p align="center"><img src="images/zippers/zipper2.png" width="50%" /></p>
@@ -503,7 +500,7 @@ val tree2 = zipper2.commit
 ```
 
 ```tut:silent
-diagram.render("tree2")(simpleTree, tree2)
+(diagram(simpleTree) + diagram(tree2)).render("tree2")
 ```
 
 <p align="center"><img src="images/zippers/tree2.png" width="50%" /></p>
@@ -527,7 +524,7 @@ val zipper2 = zipper1.moveDownLeft
 ```
 
 ```tut:silent
-diagram.render("zipper1+2")(zipper1, zipper2)
+(diagram(zipper1) + diagram(zipper2)).render("zipper1+2")
 ```
 
 <p align="center"><img src="images/zippers/zipper1+2.png" width="50%" /></p>
@@ -542,7 +539,7 @@ import reftree.contrib.SimplifiedInstances.zipper
 ```
 
 ```tut:silent
-diagram.render("zipper2b")(zipper2)
+diagram(zipper2).render("zipper2b")
 ```
 
 <p align="center"><img src="images/zippers/zipper2b.png" width="50%" /></p>
@@ -554,7 +551,7 @@ val zipper3 = zipper2.moveRightBy(2)
 ```
 
 ```tut:silent
-diagram.render("zipper3")(zipper3)
+diagram(zipper3).render("zipper3")
 ```
 
 <p align="center"><img src="images/zippers/zipper3.png" width="50%" /></p>
@@ -570,7 +567,7 @@ val zipper4 = zipper3.insertLeft(Tree(34))
 ```
 
 ```tut:silent
-diagram.render("zipper4")(zipper4)
+diagram(zipper4).render("zipper4")
 ```
 
 <p align="center"><img src="images/zippers/zipper4.png" width="50%" /></p>
@@ -582,7 +579,7 @@ val zipper5 = zipper4.deleteAndMoveRight.set(Tree(45))
 ```
 
 ```tut:silent
-diagram.render("zipper5")(zipper5)
+diagram(zipper5).render("zipper5")
 ```
 
 <p align="center"><img src="images/zippers/zipper5.png" width="50%" /></p>
@@ -595,7 +592,7 @@ val zipper6 = zipper5.moveUp
 ```
 
 ```tut:silent
-diagram.render("zipper6")(zipper6)
+diagram(zipper6).render("zipper6")
 ```
 
 <p align="center"><img src="images/zippers/zipper6.png" width="50%" /></p>
@@ -612,30 +609,31 @@ assert(tree3a == tree3b)
 
 Here is an animation of the navigation process:
 
-```tut:silent
-val zippers = Utils.iterate(Zipper(simpleTree))(
-  _.moveDownLeft,
-  _.moveRight, _.moveRight, _.moveRight,
-  _.moveDownLeft,
-  _.moveRight, _.moveLeft,
-  _.top.get,
-  _.moveLeft, _.moveLeft, _.moveLeft,
-  _.top.get
-)
+```scala
+val movement = Animation
+  .startWith(Zipper(Data.simpleTree))
+  .iterate(
+    _.moveDownLeft,
+    _.moveRight, _.moveRight, _.moveRight,
+    _.moveDownLeft,
+    _.moveRight, _.moveLeft,
+    _.top.get,
+    _.moveLeft, _.moveLeft, _.moveLeft,
+    _.top.get
+  )
 
-diagram.renderAnimation("navigation-tree")(
-  zippers.map(ZipperFocus(_, simpleTree))
-)
+val trees = movement
+  .build(z ⇒ Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
+  .toNamespace("tree")
 
-diagram.renderAnimation("navigation-zipper")(
-  zippers
-)
+val zippers = movement
+  .build(Diagram(_).withCaption("Zipper").withAnchor("zipper").withColor(2))
+  .toNamespace("zipper")
+
+(trees addInParallel zippers).render("tree+zipper")
 ```
 
-<p align="center">
-  <img src="images/zippers/navigation-tree.gif" width="42%" />
-  <img src="images/zippers/navigation-zipper.gif" width="52%" />
-</p>
+<p align="center"><img src="images/zippers/tree+zipper.gif" /></p>
 
 ### Useful resources
 

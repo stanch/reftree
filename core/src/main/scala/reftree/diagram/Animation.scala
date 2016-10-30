@@ -34,10 +34,10 @@ object Animation {
     def repeatWithIndex(n: Int)(operation: (Builder[A], Int) ⇒ Builder[A]) =
       (1 to n).foldLeft(this)((current, i) ⇒ operation(current, i))
 
-    def build(diagram: A ⇒ Diagram = value ⇒ Diagram.toStringLabel(value)) =
+    def build(diagram: A ⇒ Diagram = value ⇒ Diagram.toStringCaption(value)) =
       Animation(frames.map(diagram))
 
-    def buildWithIndex(diagram: (A, Int) ⇒ Diagram = (value, _) ⇒ Diagram.toStringLabel(value)) =
+    def buildWithIndex(diagram: (A, Int) ⇒ Diagram = (value, _) ⇒ Diagram.toStringCaption(value)) =
       Animation(frames.zipWithIndex.map(diagram.tupled))
   }
 }

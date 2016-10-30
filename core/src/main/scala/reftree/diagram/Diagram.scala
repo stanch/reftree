@@ -19,13 +19,13 @@ sealed trait Diagram {
 object Diagram {
   case class Single(
     tree: RefTree,
-    label: Option[String] = None,
+    caption: Option[String] = None,
     colorIndex: Option[Int] = None,
     anchorId: Option[String] = None,
     namespace: Seq[String] = Seq.empty
   ) extends Diagram {
     def fragments = Seq(this)
-    def withLabel(label: String) = copy(label = Some(label))
+    def withCaption(caption: String) = copy(caption = Some(caption))
     def withColor(index: Int) = copy(colorIndex = Some(index))
     def withAnchor(id: String) = copy(anchorId = Some(id))
   }
@@ -37,9 +37,9 @@ object Diagram {
   def apply[A: ToRefTree](value: A) =
     Single(value.refTree)
 
-  def sourceCodeLabel[A: ToRefTree](value: sourcecode.Text[A]) =
-    Single(value.value.refTree).withLabel(value.source)
+  def sourceCodeCaption[A: ToRefTree](value: sourcecode.Text[A]) =
+    Single(value.value.refTree).withCaption(value.source)
 
-  def toStringLabel[A: ToRefTree](value: A) =
-    Single(value.refTree).withLabel(value.toString)
+  def toStringCaption[A: ToRefTree](value: A) =
+    Single(value.refTree).withCaption(value.toString)
 }
