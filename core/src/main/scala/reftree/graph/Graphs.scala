@@ -1,21 +1,35 @@
 package reftree.graph
 
 import reftree.render.RenderingOptions
-import reftree.diagram.{Animation, Diagram, Fragment}
+import reftree.diagram.{Animation, Diagram}
 import reftree.core.RefTree
 import uk.co.turingatemyhamster.graphvizs.dsl._
 
 object Graphs {
-  private def label(label: String, tree: RefTree): Seq[Statement] = {
-    val labelNodeId = s"${tree.id}-label-${label.hashCode}"
-    Seq(
-      labelNodeId :| AttributeAssignment("label", ID.Identifier(s"<<i>$label</i>>")),
-      NodeId(labelNodeId, Some(Port(None, Some(CompassPt.S)))) -->
-        NodeId(tree.id, Some(Port(Some("n"), Some(CompassPt.N))))
+  private def namespaced(id: String, namespace: Seq[String]) =
+    s"${namespace.mkString("/")}-$id"
+
+  private def label(label: String, tree: RefTree, namespace: Seq[String]): Seq[Statement] = {
+    val labelNodeId = namespaced(s"${tree.id}-label-${label.hashCode}", namespace)
+    val labelNode = labelNodeId :| (
+      AttributeAssignment("label", ID.Identifier(s"<<i>$label</i>>")),
+      "id" := labelNodeId
     )
+    val labelEdgeId = namespaced(s"$labelNodeId-${tree.id}", namespace)
+    val labelEdge =
+      NodeId(labelNodeId, Some(Port(None, Some(CompassPt.S)))) -->
+      NodeId(namespaced(tree.id, namespace), Some(Port(Some("n"), Some(CompassPt.N)))) :|
+      ("id" := labelEdgeId)
+    Seq(labelNode, labelEdge)
   }
 
-  private def node(tree: RefTree, color: String, highlightColor: String): NodeStatement = {
+  private def node(
+    tree: RefTree,
+    color: String,
+    highlightColor: String,
+    anchorId: Option[String],
+    namespace: Seq[String]
+  ): NodeStatement = {
     val highlight = if (tree.highlight) s"""bgcolor="$highlightColor"""" else ""
     val style = s"""style="rounded" cellspacing="0" cellpadding="6" cellborder="0" columns="*" $highlight"""
     val label = tree match {
@@ -28,7 +42,9 @@ object Graphs {
         s"""<<table $style><tr>$title</tr></table>>"""
     }
     val labelAttribute = AttributeAssignment("label", ID.Identifier(label))
-    tree.id :| ("id" := tree.id, labelAttribute, "color" := color, "fontcolor" := color)
+    val tooltipAttribute = anchorId.map(a ⇒ "tooltip" := s"anchor-$a").toSeq
+    val id = namespaced(tree.id, namespace)
+    id :| ("id" := id, labelAttribute, "color" := color, "fontcolor" := color) :| (tooltipAttribute: _*)
   }
 
   private def cellLabel(tree: RefTree): String = tree match {
@@ -52,12 +68,22 @@ object Graphs {
     s"""<td $port $highlight>$label</td>"""
   }
 
-  private def link(id: String, tree: RefTree, i: Int, color: String): Option[EdgeStatement] = tree match {
-    case RefTree.Ref(_, linkId, _, _) ⇒ Some(
-      NodeId(id, Some(Port(Some(s"$linkId-$i"), Some(CompassPt.S)))) -->
-        NodeId(linkId, Some(Port(Some("n"), Some(CompassPt.N)))) :|
-        ("id" := s"$id-$i-$linkId", "color" := color)
-    )
+  private def edge(
+    id: String,
+    tree: RefTree,
+    i: Int,
+    color: String,
+    namespace: Seq[String]
+  ): Option[EdgeStatement] = tree match {
+    case RefTree.Ref(_, refId, _, _) ⇒
+      val sourceId = namespaced(id, namespace)
+      val targetId = namespaced(refId, namespace)
+      val edgeId = namespaced(s"$id-$i-$refId", namespace)
+      Some {
+        NodeId(sourceId, Some(Port(Some(s"$refId-$i"), Some(CompassPt.S)))) -->
+          NodeId(targetId, Some(Port(Some("n"), Some(CompassPt.N)))) :|
+          ("id" := edgeId, "color" := color)
+      }
     case _ ⇒ None
   }
 
@@ -78,30 +104,38 @@ object Graphs {
     }
   }
 
+  private def graphAttributes(options: RenderingOptions): Seq[Statement] = Seq(
+    "graph" :| ("ranksep" := options.verticalSpacing),
+    "node" :| ("shape" := "plaintext", "fontname" := "consolas"),
+    "edge" :| ("arrowsize" := "0.7", "color" := "#000000")
+  )
+
   private def graphStatements(options: RenderingOptions)(diagram: Diagram): Seq[Statement] = {
-    val graphAttrs = "graph" :| ("ranksep" := options.verticalSpacing)
-    val nodeAttrs = "node" :| ("shape" := "plaintext", "fontname" := "consolas")
-    val edgeAttrs = "edge" :| ("arrowsize" := "0.7")
+    def inner(
+      tree: RefTree,
+      color: String,
+      anchorId: Option[String],
+      namespace: Seq[String],
+      depth: Int
+    ): Seq[Statement] = tree match {
+      case r @ RefTree.Ref(_, id, children, _) ⇒
+        Seq(node(r, color, options.highlightColor, anchorId, namespace)) ++
+          children.flatMap(inner(_, color, None, namespace, depth + 1)) ++
+          children.zipWithIndex.flatMap { case (c, i) ⇒ edge(id, c, i, color, namespace) }
+      case _ if depth == 0 ⇒
+        Seq(node(tree, color, options.highlightColor, anchorId, namespace))
+      case _ ⇒
+        Seq.empty
+    }
 
-    val labels = diagram.fragments.collect {
-      case Fragment(tree, Some(l), _, _) ⇒ label(l, tree)
-    }.flatten
+    val spareColorIndices = Iterator.from(0).filterNot(diagram.fragments.flatMap(_.colorIndex).toSet)
+    val colorIndices = diagram.fragments.map(_.colorIndex.getOrElse(spareColorIndices.next()))
 
-    Seq(graphAttrs, nodeAttrs, edgeAttrs) ++ labels ++ {
-      def inner(tree: RefTree, color: String, depth: Int): Seq[Statement] = tree match {
-        case r @ RefTree.Ref(_, id, children, _) ⇒
-          Seq(node(r, color, options.highlightColor)) ++
-            children.flatMap(inner(_, color, depth + 1)) ++
-            children.zipWithIndex.flatMap { case (c, i) ⇒ link(id, c, i, color) }
-        case _ if depth == 0 ⇒
-          Seq(node(tree, color, options.highlightColor))
-        case _ ⇒
-          Seq.empty
-      }
-      diagram.fragments.map(_.tree).zipWithIndex.flatMap {
-        // TODO: use namespace and colorIndex attributes
-        case (tree, i) ⇒ inner(tree, options.palette(i % options.palette.length), depth = 0)
-      }
+    (diagram.fragments zip colorIndices) flatMap {
+      case (fragment, i) ⇒
+        val color = options.palette(i % options.palette.length)
+        fragment.label.toSeq.flatMap(label(_, fragment.tree, fragment.namespace)) ++
+          inner(fragment.tree, color, fragment.anchorId, fragment.namespace, depth = 0)
     }
   }
 
@@ -112,15 +146,18 @@ object Graphs {
     statements.map(ColorlessStatement).reverse.distinct.reverse.map(_.s)
 
   def graph(options: RenderingOptions)(diagram: Diagram): Graph = {
-    val statements = deduplicateLeft(graphStatements(options)(diagram))
+    val statements = graphAttributes(options) ++
+      deduplicateLeft(graphStatements(options)(diagram))
     NonStrictDigraph("diagram", statements: _*)
   }
 
   def graphs(options: RenderingOptions, onionSkinLayers: Int)(animation: Animation): Seq[Graph] = {
     val prefix = Seq.fill(onionSkinLayers)(animation.diagrams.head)
     (prefix ++ animation.diagrams).sliding(onionSkinLayers + 1).toSeq map { diagrams ⇒
-      val statementLayers = diagrams.map(graphStatements(options))
-      val statements = deduplicateRight(statementLayers.flatMap(deduplicateLeft))
+      val onionSkin = diagrams.init.map(_.withoutAnchors)
+      val statementLayers = (onionSkin :+ diagrams.last).map(graphStatements(options))
+      val statements = graphAttributes(options) ++
+        deduplicateRight(statementLayers.flatMap(deduplicateLeft))
       NonStrictDigraph("diagram", statements: _*)
     }
   }

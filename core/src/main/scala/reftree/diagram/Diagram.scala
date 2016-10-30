@@ -1,61 +1,45 @@
 package reftree.diagram
 
 import reftree.core._
+import com.softwaremill.quicklens._
 
-case class Fragment(
-  tree: RefTree,
-  label: Option[String],
-  colorIndex: Option[Int],
-  namespace: Option[String]
-) {
-  def withColor(index: Int) = copy(colorIndex = Some(index))
-  def toNamespace(name: String) = copy(namespace = namespace.map(name + "/" + _) orElse Some(name))
-}
+sealed trait Diagram {
+  def fragments: Seq[Diagram.Single]
 
-object Fragment {
-  def apply[A: ToRefTree](value: A, label: Option[String] = None): Fragment =
-    Fragment(value.refTree, label, None, None)
+  def +(that: Diagram): Diagram =
+    Diagram.Multiple(this.fragments ++ that.fragments)
 
-  def autoLabel[A: ToRefTree](value: sourcecode.Text[A], useToString: Boolean = false) =
-    Fragment(value.value, Some(if (useToString) value.value.toString else value.source))
-}
+  def withoutAnchors: Diagram =
+    Diagram.Multiple(fragments.map(_.copy(anchorId = None)))
 
-case class Diagram(fragments: Seq[Fragment]) {
-  def +(that: Diagram) = Diagram(this.fragments ++ that.fragments)
-
-  def toNamespace(name: String) = copy(fragments = fragments.map(_.toNamespace(name)))
+  def toNamespace(name: String): Diagram =
+    Diagram.Multiple(fragments.modify(_.each.namespace).using(name +: _))
 }
 
 object Diagram {
-  def empty = Diagram(Seq.empty)
+  case class Single(
+    tree: RefTree,
+    label: Option[String] = None,
+    colorIndex: Option[Int] = None,
+    anchorId: Option[String] = None,
+    namespace: Seq[String] = Seq.empty
+  ) extends Diagram {
+    def fragments = Seq(this)
+    def withLabel(label: String) = copy(label = Some(label))
+    def withColor(index: Int) = copy(colorIndex = Some(index))
+    def withAnchor(id: String) = copy(anchorId = Some(id))
+  }
 
-  def apply[A: ToRefTree](value: sourcecode.Text[A]): Diagram =
-    Diagram(Seq(Fragment.autoLabel(value)))
+  case class Multiple(fragments: Seq[Diagram.Single]) extends Diagram
 
-  def apply[A: ToRefTree, B: ToRefTree](
-    value1: sourcecode.Text[A],
-    value2: sourcecode.Text[B]
-  ): Diagram = Diagram(Seq(
-    Fragment.autoLabel(value1),
-    Fragment.autoLabel(value2)
-  ))
+  def empty: Diagram = Multiple(Seq.empty)
 
-  def apply[A: ToRefTree, B: ToRefTree, C: ToRefTree](
-    value1: sourcecode.Text[A],
-    value2: sourcecode.Text[B],
-    value3: sourcecode.Text[C]
-  ): Diagram = Diagram(Seq(
-    Fragment.autoLabel(value1),
-    Fragment.autoLabel(value2),
-    Fragment.autoLabel(value3)
-  ))
+  def apply[A: ToRefTree](value: A) =
+    Single(value.refTree)
 
-  def noLabel[A: ToRefTree](value: A): Diagram =
-    Diagram(Seq(Fragment(value)))
+  def sourceCodeLabel[A: ToRefTree](value: sourcecode.Text[A]) =
+    Single(value.value.refTree).withLabel(value.source)
 
-  def noLabel[A: ToRefTree, B: ToRefTree](value1: A, value2: B): Diagram =
-    Diagram(Seq(Fragment(value1), Fragment(value2)))
-
-  def noLabel[A: ToRefTree, B: ToRefTree, C: ToRefTree](value1: A, value2: B, value3: C): Diagram =
-    Diagram(Seq(Fragment(value1), Fragment(value2), Fragment(value3)))
+  def toStringLabel[A: ToRefTree](value: A) =
+    Single(value.refTree).withLabel(value.toString)
 }

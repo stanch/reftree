@@ -21,6 +21,8 @@ object Point {
 
   def sum(points: Seq[Point]) = points.foldLeft(zero)(_ + _)
 
+  def mean(points: Seq[Point]) = sum(points) * (1.0 / points.length)
+
   def fromString(string: String) = {
     val Array(x, y) = string.split(" |,").map(_.toDouble)
     Point(x, y)

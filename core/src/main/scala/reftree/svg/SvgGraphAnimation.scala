@@ -12,13 +12,36 @@ object SvgGraphAnimation {
   }(svg)
 
   private def align(prev: xml.Node, next: xml.Node) = {
+    def groupByAnchor(nodes: Map[String, xml.Node]) =
+      nodes.values.groupBy(SvgGraphLens.nodeAnchor.get) flatMap {
+        case (Some(anchor), group) ⇒ Some((anchor, group.head))
+        case _ ⇒ None
+      }
+
+    def mapDelta(prev: Map[String, xml.Node], next: Map[String, xml.Node]) = {
+      val common = prev.keySet & next.keySet
+      if (common.isEmpty) None else {
+        val deltas = common map { id ⇒
+          SvgGraphLens.nodePosition.get(prev(id)) -
+            SvgGraphLens.nodePosition.get(next(id))
+        }
+        Some(Point.mean(deltas.toSeq))
+      }
+    }
+
+    def seqDelta(prev: Seq[xml.Node], next: Seq[xml.Node]) = {
+      Point.mean(prev.map(SvgGraphLens.nodePosition.get)) -
+        Point.mean(next.map(SvgGraphLens.nodePosition.get))
+    }
+
     val prevNodes = SvgGraphLens.nodes.get(prev)
     val nextNodes = SvgGraphLens.nodes.get(next)
-    val deltas = (prevNodes.keySet & nextNodes.keySet) map { id ⇒
-      SvgGraphLens.nodePosition.get(prevNodes(id)) - SvgGraphLens.nodePosition.get(nextNodes(id))
-    }
-    // TODO: add more weight to label nodes
-    val translation = Point.sum(deltas.toSeq) * (1.0 / deltas.size)
+    val prevAnchors = groupByAnchor(prevNodes)
+    val nextAnchors = groupByAnchor(nextNodes)
+    val translation =
+      mapDelta(prevAnchors, nextAnchors) orElse
+      mapDelta(prevNodes, nextNodes) getOrElse
+      seqDelta(prevNodes.values.toSeq, nextNodes.values.toSeq)
     val withBox = SvgLens.viewBox.modify(_ + translation)(next)
     (SvgGraphLens.graph composeLens SvgLens.translation).modify(_ + translation)(withBox)
   }

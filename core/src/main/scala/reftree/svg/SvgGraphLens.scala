@@ -1,6 +1,6 @@
 package reftree.svg
 
-import monocle.Lens
+import monocle.{Getter, Lens}
 import com.softwaremill.quicklens._
 import reftree.geometry.{Color, Point, Polyline, Path}
 
@@ -16,12 +16,21 @@ object SvgGraphLens {
     svg.label == "path" && (svg \ "@stroke").text == "none"
 
   val color = Lens[xml.Node, Color.RGBA] { nodeOrEdge ⇒
-    val path = (nodeOrEdge \\ "path").filterNot(highlightPath).head
-    val opacity = path.attribute("stroke-opacity").map(_.text.toDouble).getOrElse(1.0)
-    Color.RGBA.fromString((path \ "@stroke").text, opacity)
+    (nodeOrEdge \\ "path").filterNot(highlightPath).headOption map { path ⇒
+      val opacity = path.attribute("stroke-opacity").map(_.text.toDouble).getOrElse(1.0)
+      Color.RGBA.fromString((path \ "@stroke").text, opacity)
+    } getOrElse {
+      val text = (nodeOrEdge \\ "text").head
+      val color = text.attribute("fill").map(_.text).getOrElse("#000000")
+      Color.RGBA.fromString(color)
+    }
   } { color ⇒
     SvgLens.color(Set("text", "polygon"), fill = true, stroke = true).set(color) andThen
     SvgLens.color(Set("path"), fill = false, stroke = true).set(color)
+  }
+
+  val nodeAnchor = Getter[xml.Node, Option[String]] { node ⇒
+    (node \\ "a" \ "@{http://www.w3.org/1999/xlink}title").headOption.map(_.text)
   }
 
   val nodePosition = Lens[xml.Node, Point] { node ⇒
