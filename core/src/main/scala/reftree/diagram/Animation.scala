@@ -15,6 +15,8 @@ case class Animation(diagrams: Seq[Diagram]) {
 object Animation {
   def startWith[A: ToRefTree](start: A) = Builder(Vector(start))
 
+  def startWithSequence[A: ToRefTree](start: Seq[A]) = Builder(start.toVector)
+
   case class Builder[A: ToRefTree](frames: Vector[A]) {
     def iterate(iterations: (A ⇒ A)*) =
       Builder(iterations.foldLeft(frames)((current, step) ⇒ current :+ step(current.last)))

@@ -58,7 +58,10 @@ object Zippers extends App {
   import reftree.contrib.ZipperInstances._
   import reftree.contrib.SimplifiedInstances.{list, option, zipper}
 
-  val renderer = Renderer(directory = Paths.get("images", "zippers"))
+  val renderer = Renderer(
+    renderingOptions = RenderingOptions(density = 75),
+    directory = Paths.get("images", "zippers")
+  )
   import renderer._
 
   val movement = Animation
@@ -73,13 +76,13 @@ object Zippers extends App {
       _.top.get
     )
 
-  val trees = movement
-    .build(z ⇒ Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
-    .toNamespace("tree")
-
   val zippers = movement
     .build(Diagram(_).withCaption("Zipper").withAnchor("zipper").withColor(2))
     .toNamespace("zipper")
 
-  (trees addInParallel zippers).render("tree+zipper")
+  val trees = movement
+    .build(z ⇒ Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
+    .toNamespace("tree")
+
+  (zippers addInParallel trees).render("tree+zipper")
 }

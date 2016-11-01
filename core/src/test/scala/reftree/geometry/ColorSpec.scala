@@ -33,7 +33,7 @@ class ColorSpec extends FlatSpec with Matchers with PropertyChecks {
       "#104e8b" → Color.RGBA(0x10 / 255.0, 0x4e / 255.0, 0x8b / 255.0, 1.0),
       "#228b22" → Color.RGBA(0x22 / 255.0, 0x8b / 255.0, 0x22 / 255.0, 1.0)
     )
-    forAll(colors)((string, color) ⇒ sameRgba(color, Color.RGBA.fromString(string)))
+    forAll(colors)((string, color) ⇒ sameRgba(color, Color.fromRgbString(string)))
   }
 
   it should "convert RGBA to HSLA" in {
@@ -42,11 +42,11 @@ class ColorSpec extends FlatSpec with Matchers with PropertyChecks {
       "#104e8b" → Color.HSLA(210 / 360.0, 0.79, 0.3, 1.0),
       "#228b22" → Color.HSLA(120 / 360.0, 0.61, 0.34, 1.0)
     )
-    forAll(colors)((string, color) ⇒ sameHsla(color, Color.RGBA.fromString(string).toHsla))
+    forAll(colors)((string, color) ⇒ sameHsla(color, Color.fromRgbString(string).toHsla))
   }
 
   it should "convert from RGBA to string and back" in {
-    forAll(genRgba)(color ⇒ sameRgba(color, Color.RGBA.fromString(color.toString, color.a)))
+    forAll(genRgba)(color ⇒ sameRgba(color, Color.fromRgbString(color.toRgbString, color.a)))
   }
 
   it should "convert from RGBA to HSLA and back" in {

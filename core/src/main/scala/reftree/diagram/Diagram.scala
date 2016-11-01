@@ -9,6 +9,9 @@ sealed trait Diagram {
   def +(that: Diagram): Diagram =
     Diagram.Multiple(this.fragments ++ that.fragments)
 
+  def withoutCaptions: Diagram =
+    Diagram.Multiple(fragments.map(_.copy(caption = None)))
+
   def withoutAnchors: Diagram =
     Diagram.Multiple(fragments.map(_.copy(anchorId = None)))
 

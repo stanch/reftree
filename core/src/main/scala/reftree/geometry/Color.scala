@@ -1,6 +1,30 @@
 package reftree.geometry
 
 import monocle.Iso
+import com.softwaremill.quicklens._
+
+sealed trait Color {
+  def a: Double
+
+  def toRgba: Color.RGBA
+  def toHsla: Color.HSLA
+
+  def lighten(factor: Double) = toHsla.modify(_.l).using(_ * factor min 1.0)
+
+  def saturate(factor: Double) = toHsla.modify(_.s).using(_ * factor min 1.0)
+
+  def opacify(factor: Double) = this match {
+    case rgba: Color.RGBA ⇒ rgba.copy(a = rgba.a * factor min 1.0)
+    case hsla: Color.HSLA ⇒ hsla.copy(a = hsla.a * factor min 1.0)
+  }
+
+  def toRgbString = {
+    val rgba = toRgba
+    f"#${(rgba.r * 255).toInt}%02x${(rgba.g * 255).toInt}%02x${(rgba.b * 255).toInt}%02x"
+  }
+
+  def toRgbaString = f"$toRgbString${(a * 255).toInt}%02x"
+}
 
 object Color {
   val rgbaComponents = Iso[RGBA, Seq[Double]] { color ⇒
@@ -15,7 +39,10 @@ object Color {
     case Seq(h, s, l, a) ⇒ HSLA(h, s, l, a)
   }
 
-  case class RGBA(r: Double, g: Double, b: Double, a: Double) {
+  val color2hsla = Iso[Color, HSLA](_.toHsla)(identity)
+
+  case class RGBA(r: Double, g: Double, b: Double, a: Double) extends Color {
+    def toRgba = this
     def toHsla = {
       val max = r max g max b
       val min = r min g min b
@@ -31,27 +58,10 @@ object Color {
         HSLA(h / 6, s, l, a)
       }
     }
-
-    override def toString = f"#${(r * 255).toInt}%02x${(g * 255).toInt}%02x${(b * 255).toInt}%02x"
   }
 
-  object RGBA {
-    def fromString(string: String, a: Double = 1.0) = parser(a).parse(string).get.value
-
-    private def parser(a: Double) = {
-      import fastparse.all._
-
-      val x = CharIn(('0' to '9') ++ ('a' to 'f'))
-      val component = P(x ~ x).!.map(n ⇒ java.lang.Long.parseLong(n, 16) / 255.0)
-      P("#" ~ component ~ component ~ component) map {
-        case (r, g, b) ⇒ RGBA(r, g, b, a)
-      }
-    }
-
-    val interpolation = Interpolation.seq(Interpolation.double).lensLeft(rgbaComponents.asLens)
-  }
-
-  case class HSLA(h: Double, s: Double, l: Double, a: Double) {
+  case class HSLA(h: Double, s: Double, l: Double, a: Double) extends Color {
+    def toHsla = this
     def toRgba = {
       if (s == 0) RGBA(l, l, l, a) else {
         def hue2rgb(p: Double, q: Double, t: Double) = {
@@ -71,4 +81,19 @@ object Color {
       }
     }
   }
+
+  def fromRgbString(string: String, a: Double = 1.0) = rgbParser(a).parse(string).get.value
+
+  private def rgbParser(a: Double) = {
+    import fastparse.all._
+
+    val x = CharIn(('0' to '9') ++ ('a' to 'f'))
+    val component = P(x ~ x).!.map(n ⇒ java.lang.Long.parseLong(n, 16) / 255.0)
+    P("#" ~ component ~ component ~ component) map {
+      case (r, g, b) ⇒ RGBA(r, g, b, a)
+    }
+  }
+
+  val interpolation = Interpolation.seq(Interpolation.double)
+    .lensLeft((color2hsla composeIso hslaComponents).asLens)
 }

@@ -1,7 +1,6 @@
-package reftree
+package reftree.core
 
-import org.scalatest.{Inside, Matchers, FlatSpec}
-import ToRefTree._
+import org.scalatest.{FlatSpec, Matchers}
 
 case class Person(age: Int, name: String)
 

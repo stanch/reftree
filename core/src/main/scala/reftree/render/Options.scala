@@ -1,15 +1,23 @@
 package reftree.render
 
+import reftree.geometry.Color
+import com.softwaremill.quicklens._
+
 import scala.concurrent.duration._
 
 case class RenderingOptions(
   verticalSpacing: Double = 0.8,
-  palette: IndexedSeq[String] = Array("#104e8b", "#228B22", "#cd5b45"),
-  highlightColor: String = "#ffe4c4",
+  palette: IndexedSeq[Color] = Array(
+    Color.fromRgbString("#104e8b"),
+    Color.fromRgbString("#228b22"),
+    Color.fromRgbString("#cd5b45")
+  ),
+  highlightColor: Color = Color.fromRgbString("#ffe4c4"),
   density: Int = 100
 ) {
   def withVerticalSpacing(spacing: Double) = copy(verticalSpacing = spacing)
   def withDensity(density: Int) = copy(density = density)
+  def mapPalette(f: Color ⇒ Color) = this.modify(_.palette.each).using(f)
 }
 
 case class AnimationOptions(
