@@ -157,10 +157,13 @@ object SvgGraphAnimation {
     }
 
   def animate(interpolationFrames: Int)(svgs: Seq[xml.Node]) = {
-    val preprocessed = accentuatePairwise(svgs.map(improveRendering).map(fixTextColor))
-    val aligned = alignPairwise(preprocessed)
-    val maxViewBox = Rectangle.union(aligned.map(SvgLenses.viewBox.get))
-    val resized = aligned.map(SvgLenses.viewBox.set(maxViewBox))
-    interpolatePairwise(resized, interpolationFrames)
+    val preprocessed = svgs.map(improveRendering).map(fixTextColor)
+    if (svgs.length < 2) preprocessed else {
+      val accentuated = accentuatePairwise(preprocessed)
+      val aligned = alignPairwise(accentuated)
+      val maxViewBox = Rectangle.union(aligned.map(SvgLenses.viewBox.get))
+      val resized = aligned.map(SvgLenses.viewBox.set(maxViewBox))
+      interpolatePairwise(resized, interpolationFrames)
+    }
   }
 }

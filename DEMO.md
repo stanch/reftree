@@ -303,7 +303,7 @@ import monocle.macros.GenLens
 
 scala> val salaryLens = GenLens[Employee](_.salary)
 warning: there was one feature warning; re-run with -feature for details
-salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@5546bd72
+salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@67e29ee6
 
 scala> salaryLens.get(startup.founder)
 res11: Long = 4000
@@ -323,7 +323,7 @@ We can also define a lens that focuses on the startup’s founder:
 ```scala
 scala> val founderLens = GenLens[Startup](_.founder)
 warning: there was one feature warning; re-run with -feature for details
-founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@21cde6cc
+founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@7a6b2504
 
 scala> founderLens.get(startup)
 res14: reftree.demo.Data.Employee = Employee(Michael,4000)
@@ -339,7 +339,7 @@ It’s not apparent yet how this would help, but the trick is that lenses can be
 
 ```scala
 scala> val founderSalaryLens = founderLens composeLens salaryLens
-founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@7130813a
+founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@5326daf0
 
 scala> founderSalaryLens.get(startup)
 res16: Long = 4000
@@ -368,10 +368,10 @@ We can use it to give our founder a funny name:
 ```scala
 scala> val employeeNameLens = GenLens[Employee](_.name)
 warning: there was one feature warning; re-run with -feature for details
-employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@cb0581f
+employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@e3a4de7
 
 scala> val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
-founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@3b736380
+founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@410e8ee6
 
 scala> founderVowelTraversal.modify(v => v.toUpper)(startup)
 res20: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))

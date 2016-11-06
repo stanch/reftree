@@ -204,7 +204,7 @@ trait Interpolation[A] { self ⇒
    */
   def listMap[B](implicit evidence1: A =:= Option[B], evidence2: Option[B] =:= A) =
     Interpolation[ListMap[String, B]] { (left, right, t) ⇒
-      val ids = (left.keys ++ right.keys).toSeq.distinct
+      val ids = (left.keysIterator ++ right.keysIterator).toSeq.distinct
       ListMap(ids flatMap { id ⇒
         self(left.get(id), right.get(id), t).map(id → _)
       }: _*)
