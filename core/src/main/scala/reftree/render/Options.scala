@@ -8,11 +8,10 @@ import scala.concurrent.duration._
 case class RenderingOptions(
   verticalSpacing: Double = 0.8,
   palette: IndexedSeq[Color] = Array(
-    Color.fromRgbString("#104e8b"),
-    Color.fromRgbString("#228b22"),
-    Color.fromRgbString("#cd5b45")
+    Color.fromRgbaString("#104e8b"),
+    Color.fromRgbaString("#228b22"),
+    Color.fromRgbaString("#cd5b45")
   ),
-  highlightColor: Color = Color.fromRgbString("#ffe4c4"),
   density: Int = 100
 ) {
   def withVerticalSpacing(spacing: Double) = copy(verticalSpacing = spacing)

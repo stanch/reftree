@@ -48,7 +48,6 @@ object PathSegment {
 
 case class Path(segments: Seq[PathSegment]) {
   def +(delta: Point) = copy(segments.map(_ + delta))
-  def -(delta: Point) = copy(segments.map(_ - delta))
 
   def +(segment: PathSegment) = copy(segments :+ segment)
   def last = segments.last.to
@@ -114,7 +113,10 @@ object Path {
     cycle(Path.empty, acc ⇒ move(acc) | line(acc) | bezier(acc))
   }
 
-  val interpolation = Polyline.interpolation.lensLeft {
-    Iso[Path, Polyline](_.simplify(100))(fromPolyline).asLens
+  val interpolation = Iso[Path, Polyline](_.simplify(100))(fromPolyline).asLens
+    .interpolateWith(Polyline.interpolation)
+
+  implicit object `Path Translatable` extends Translatable[Path] {
+    def translate(value: Path, delta: Point): Path = value + delta
   }
 }

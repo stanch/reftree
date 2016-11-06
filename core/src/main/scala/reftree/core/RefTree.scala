@@ -1,5 +1,7 @@
 package reftree.core
 
+import com.softwaremill.quicklens._
+
 import scala.annotation.implicitNotFound
 import scala.collection.immutable.CollectionInstances
 
@@ -59,11 +61,12 @@ object RefTree {
 trait ToRefTree[-A] { self ⇒
   def refTree(value: A): RefTree
 
+  def highlightField(index: Int) = ToRefTree[A] { value ⇒
+    self.refTree(value).modify(_.when[RefTree.Ref].children.at(index)).using(_.withHighlight(true))
+  }
+
   def suppressField(index: Int) = ToRefTree[A] { value ⇒
-    self.refTree(value) match {
-      case r: RefTree.Ref ⇒ r.copy(children = r.children.updated(index, RefTree.Elided()))
-      case t ⇒ t
-    }
+    self.refTree(value).modify(_.when[RefTree.Ref].children.at(index)).setTo(RefTree.Elided())
   }
 }
 

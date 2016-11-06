@@ -39,7 +39,7 @@ object Color {
     case Seq(h, s, l, a) ⇒ HSLA(h, s, l, a)
   }
 
-  val color2hsla = Iso[Color, HSLA](_.toHsla)(identity)
+  val color2rgba = Iso[Color, RGBA](_.toRgba)(identity)
 
   case class RGBA(r: Double, g: Double, b: Double, a: Double) extends Color {
     def toRgba = this
@@ -82,18 +82,22 @@ object Color {
     }
   }
 
-  def fromRgbString(string: String, a: Double = 1.0) = rgbParser(a).parse(string).get.value
+  def fromRgbaString(string: String, defaultAlpha: Double = 1.0) = rgbaParser(defaultAlpha).parse(string).get.value
 
-  private def rgbParser(a: Double) = {
+  private def rgbaParser(defaultAlpha: Double) = {
     import fastparse.all._
 
     val x = CharIn(('0' to '9') ++ ('a' to 'f'))
     val component = P(x ~ x).!.map(n ⇒ java.lang.Long.parseLong(n, 16) / 255.0)
-    P("#" ~ component ~ component ~ component) map {
-      case (r, g, b) ⇒ RGBA(r, g, b, a)
+    P("#" ~ component ~ component ~ component ~ component.?) map {
+      case (r, g, b, a) ⇒ RGBA(r, g, b, a.getOrElse(defaultAlpha))
     }
   }
 
-  val interpolation = Interpolation.seq(Interpolation.double)
-    .lensLeft((color2hsla composeIso hslaComponents).asLens)
+  val interpolation = (color2rgba composeIso rgbaComponents).asLens
+    .interpolateEachWith(Interpolation.double)
+
+  def mix(colors: Seq[Color]) = rgbaComponents.reverseGet {
+    colors.map(_.toRgba).map(rgbaComponents.get).transpose.map(values ⇒ values.sum / values.length)
+  }
 }

@@ -1,6 +1,6 @@
 package reftree.geometry
 
-import monocle.Lens
+import monocle.{Lens, Prism, Optional}
 import scala.collection.immutable.ListMap
 
 trait SemiInterpolation[A] { self ⇒
@@ -42,13 +42,22 @@ trait Interpolation[A] { self ⇒
 
   def timespan(from: Double, to: Double) = mapTime(t ⇒ (t - from) / (to - from))
 
-  def lensLeft[B](l: Lens[B, A]) = Interpolation[B] { (left, right, t) ⇒
+  def +(that: Interpolation[A]) = Interpolation[A] { (left, right, t) ⇒
+    that(self(left, right, t), right, t)
+  }
+
+  def lens[B](l: Lens[B, A]): Interpolation[B] = Interpolation[B] { (left, right, t) ⇒
     l.set(self(l.get(left), l.get(right), t))(left)
   }
 
-  def lensRight[B](l: Lens[B, A]) = Interpolation[B] { (left, right, t) ⇒
-    l.set(self(l.get(left), l.get(right), t))(right)
+  def optional[B](o: Optional[B, A]): Interpolation[B] = Interpolation[B] { (left, right, t) ⇒
+    (o.getOption(left), o.getOption(right)) match {
+      case (Some(l), Some(r)) ⇒ o.set(self(l, r, t))(left)
+      case _ ⇒ left
+    }
   }
+
+  def prism[B](p: Prism[B, A]): Interpolation[B] = optional(p.asOptional)
 
   def withLeft(rightToLeft: A ⇒ A) = SemiInterpolation[A] { (value, t) ⇒
     self(rightToLeft(value), value, t)
@@ -61,6 +70,42 @@ trait Interpolation[A] { self ⇒
   }
 
   def withRight(right: A) = SemiInterpolation[A]((value, t) ⇒ self(value, right, t))
+
+  def option(
+    leftOnly: SemiInterpolation[A],
+    rightOnly: SemiInterpolation[A]
+  ): Interpolation[Option[A]] = Interpolation[Option[A]] {
+    case (Some(l), Some(r), t) ⇒ Some(self(l, r, t))
+    case (Some(l), None, t) ⇒ Some(leftOnly(l, t))
+    case (None, Some(r), t) ⇒ Some(rightOnly(r, t))
+    case (None, None, t) ⇒ None
+  }
+
+  def option(default: A ⇒ A): Interpolation[Option[A]] =
+    option(self.withRight(default), self.withLeft(default))
+
+  def option(default: A): Interpolation[Option[A]] =
+    option(self.withRight(default), self.withLeft(default))
+
+  def seq = Interpolation[Seq[A]] { (left, right, t) ⇒
+    (left zip right) map {
+      case (l, r) ⇒ self(l, r, t)
+    }
+  }
+
+  def list = Interpolation[List[A]] { (left, right, t) ⇒
+    (left zip right) map {
+      case (l, r) ⇒ self(l, r, t)
+    }
+  }
+
+  def listMap[B](implicit evidence1: A =:= Option[B], evidence2: Option[B] =:= A) =
+    Interpolation[ListMap[String, B]] { (left, right, t) ⇒
+      val ids = (left.keys ++ right.keys).toSeq.distinct
+      ListMap(ids flatMap { id ⇒
+        self(left.get(id), right.get(id), t).map(id → _)
+      }: _*)
+    }
 }
 
 object Interpolation {
@@ -69,40 +114,39 @@ object Interpolation {
   }
 
   val double = Interpolation[Double]((l, r, t) ⇒ l * (1 - t) + r * t)
+}
 
-  def combineLeft[A](interpolation0: Interpolation[A], interpolations: Interpolation[A]*) =
-    Interpolation[A] { (left, right, t) ⇒
-      interpolations.foldLeft(interpolation0(left, right, t))((l, i) ⇒ i(l, right, t))
-    }
-
-  def combineRight[A](interpolation0: Interpolation[A], interpolations: Interpolation[A]*) =
-    Interpolation[A] { (left, right, t) ⇒
-      interpolations.foldRight(interpolation0(left, right, t))((i, r) ⇒ i(left, r, t))
-    }
-
-  def option[A](
-    leftOnly: SemiInterpolation[A],
-    rightOnly: SemiInterpolation[A],
-    both: Interpolation[A]
-  ) = Interpolation[Option[A]] {
-    case (Some(l), Some(r), t) ⇒ Some(both(l, r, t))
-    case (Some(l), None, t) ⇒ Some(leftOnly(l, t))
-    case (None, Some(r), t) ⇒ Some(rightOnly(r, t))
-    case (None, None, t) ⇒ None
+trait InterpolationSyntax {
+  implicit class LensInterpolation[A, B](l: Lens[B, A]) {
+    def interpolateWith(interpolation: Interpolation[A]) = interpolation.lens(l)
+    def semiInterpolateWith(semiInterpolation: SemiInterpolation[A]) = semiInterpolation.lens(l)
   }
 
-  def seq[A](interpolation: Interpolation[A]) =
-    Interpolation[Seq[A]] { (left, right, t) ⇒
-      (left zip right) map {
-        case (l, r) ⇒ interpolation(l, r, t)
-      }
-    }
+  implicit class LensSeqInterpolation[A, B](l: Lens[B, Seq[A]]) {
+    def interpolateEachWith(interpolation: Interpolation[A]) = interpolation.seq.lens(l)
+  }
 
-  def map[A](optionInterpolation: Interpolation[Option[A]]) =
-    Interpolation[ListMap[String, A]] { (left, right, t) ⇒
-      val ids = (left.keys ++ right.keys).toSeq.distinct
-      ListMap(ids flatMap { id ⇒
-        optionInterpolation(left.get(id), right.get(id), t).map(id → _)
-      }: _*)
-    }
+  implicit class LensListInterpolation[A, B](l: Lens[B, List[A]]) {
+    def interpolateEachWith(interpolation: Interpolation[A]) = interpolation.list.lens(l)
+  }
+
+  implicit class LensListMapInterpolation[A, B](l: Lens[B, ListMap[String, A]]) {
+    def interpolateEachWith(interpolation: Interpolation[Option[A]]) = interpolation.listMap[A].lens(l)
+  }
+
+  implicit class OptionalInterpolation[A, B](o: Optional[B, A]) {
+    def interpolateWith(interpolation: Interpolation[A]) = interpolation.optional(o)
+  }
+
+  implicit class OptionalListInterpolation[A, B](o: Optional[B, List[A]]) {
+    def interpolateEachWith(interpolation: Interpolation[A]) = interpolation.list.optional(o)
+  }
+
+  implicit class OptionalListMapInterpolation[A, B](o: Optional[B, ListMap[String, A]]) {
+    def interpolateEachWith(interpolation: Interpolation[Option[A]]) = interpolation.listMap[A].optional(o)
+  }
+
+  implicit class PrismInterpolation[A, B](p: Prism[B, A]) {
+    def interpolateWith(interpolation: Interpolation[A]) = interpolation.prism(p)
+  }
 }

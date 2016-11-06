@@ -9,6 +9,8 @@ case class Animation(diagrams: Seq[Diagram]) {
     diagrams.zipAll(that.diagrams, Diagram.empty, Diagram.empty).map { case (a, b) ⇒ a + b }
   }
 
+  def mirror = Animation(diagrams ++ diagrams.reverse)
+
   def toNamespace(name: String) = copy(diagrams = diagrams.map(_.toNamespace(name)))
 }
 

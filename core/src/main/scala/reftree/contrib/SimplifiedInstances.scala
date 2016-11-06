@@ -29,5 +29,5 @@ object SimplifiedInstances {
   }
 
   implicit def zipper[A](implicit default: ToRefTree[Zipper[A]]): ToRefTree[Zipper[A]] =
-    default.suppressField(3)
+    default.highlightField(1).suppressField(3)
 }

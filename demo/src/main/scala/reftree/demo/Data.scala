@@ -62,12 +62,16 @@ object Data {
 
   val simpleTree = Tree(1, List(Tree(2), Tree(3), Tree(4), Tree(5, List(Tree(6), Tree(7)))))
 
-  val vowelTraversal = new PTraversal[String, String, Char, Char] {
+  def letterTraversal(predicate: Char ⇒ Boolean) = new PTraversal[String, String, Char, Char] {
     override def modifyF[F[_]: Applicative](f: Char ⇒ F[Char])(s: String): F[String] = {
       Applicative[F].sequence(s.toList map {
-        case v @ ('A' | 'E' | 'I' | 'O' | 'U' | 'a' | 'e' | 'i' | 'o' | 'u') ⇒ f(v)
+        case x if predicate(x) ⇒ f(x)
         case x ⇒ Applicative[F].point(x)
       }).map(_.mkString)
     }
   }
+
+  val vowels = Set('A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u')
+  val vowelTraversal = letterTraversal(vowels)
+  val consonantTraversal = letterTraversal(x ⇒ !vowels(x))
 }

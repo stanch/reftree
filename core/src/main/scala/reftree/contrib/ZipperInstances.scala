@@ -5,6 +5,9 @@ import zipper.Zipper
 import com.softwaremill.quicklens._
 
 object ZipperInstances {
+  implicit def zipper[A](implicit default: ToRefTree[Zipper[A]]): ToRefTree[Zipper[A]] =
+    default.highlightField(1)
+
   case class ZipperFocus[A](zipper: Zipper[A], target: A)
 
   object ZipperFocus {

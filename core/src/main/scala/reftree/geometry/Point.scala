@@ -2,10 +2,22 @@ package reftree.geometry
 
 import monocle.macros.GenLens
 
+trait Translatable[A] {
+  def translate(value: A, delta: Point): A
+}
+
+object Translatable {
+  implicit def `List Translatable`[A](implicit t: Translatable[A]): Translatable[List[A]] =
+    new Translatable[List[A]] {
+      def translate(value: List[A], delta: Point) = value.map(t.translate(_, delta))
+    }
+}
+
 case class Point(x: Double, y: Double) {
   def +(delta: Point) = Point(x + delta.x, y + delta.y)
   def -(delta: Point) = Point(x - delta.x, y - delta.y)
   def *(factor: Double) = Point(x * factor, y * factor)
+  def unary_- = Point(-x, -y)
 
   def norm = Math.sqrt(x * x + y * y)
   def distance(that: Point) = (this - that).norm
@@ -17,7 +29,7 @@ case class Point(x: Double, y: Double) {
 }
 
 object Point {
-  def zero = Point(0, 0)
+  val zero = Point(0, 0)
 
   def sum(points: Seq[Point]) = points.foldLeft(zero)(_ + _)
 
@@ -36,11 +48,14 @@ object Point {
     c2 * 3 * Math.pow(t, 2) * (1 - t) +
     r * Math.pow(t, 3)
   }
+
+  implicit object `Point Translatable` extends Translatable[Point] {
+    def translate(value: Point, delta: Point): Point = value + delta
+  }
 }
 
 case class Polyline(points: Seq[Point]) {
   def +(delta: Point) = copy(points.map(_ + delta))
-  def -(delta: Point) = copy(points.map(_ - delta))
 
   def concatTailOf(that: Polyline) = Polyline(this.points ++ that.points.tail)
 
@@ -56,7 +71,12 @@ object Polyline {
     }
   }
 
-  val interpolation = Interpolation.seq(Point.interpolation).lensLeft(GenLens[Polyline](_.points))
+  val interpolation = GenLens[Polyline](_.points)
+    .interpolateEachWith(Point.interpolation)
+
+  implicit object `Polyline Translatable` extends Translatable[Polyline] {
+    def translate(value: Polyline, delta: Point): Polyline = value + delta
+  }
 }
 
 case class Rectangle(topLeft: Point, bottomRight: Point) {
@@ -79,5 +99,9 @@ object Rectangle {
   def fromString(string: String) = {
     val Polyline(Seq(topLeft, widthHeight)) = Polyline.fromString(string)
     Rectangle(topLeft, topLeft + widthHeight)
+  }
+
+  implicit object `Rectangle Translatable` extends Translatable[Rectangle] {
+    def translate(value: Rectangle, delta: Point): Rectangle = value + delta
   }
 }
