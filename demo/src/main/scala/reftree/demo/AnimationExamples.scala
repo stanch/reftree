@@ -87,7 +87,7 @@ object Zippers extends App {
     .build(z ⇒ Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
     .toNamespace("tree")
 
-  (zippers addInParallel trees).render("tree+zipper")
+  (zippers + trees).render("tree+zipper")
 }
 
 object Lenses extends App {
@@ -148,7 +148,7 @@ object Teaser extends App {
     .build(Diagram(_).withCaption("Zipper").withAnchor("zipper"))
     .toNamespace("zippers")
 
-  (queues addInParallel lenses addInParallel zippers).mirror.render("teaser")
+  (queues + lenses + zippers).mirror.render("teaser")
 }
 
 object All extends App {

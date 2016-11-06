@@ -4,13 +4,19 @@ import reftree.core._
 import zipper.Zipper
 import com.softwaremill.quicklens._
 
+/**
+ * [[ToRefTree]] instances for a [[Zipper]]
+ */
 object ZipperInstances {
+  // This is called “zipper” to allow overriding with SimplifiedInstances.zipper
   implicit def zipper[A](implicit default: ToRefTree[Zipper[A]]): ToRefTree[Zipper[A]] =
     default.highlightField(1)
 
+  /** A class to represent a [[Zipper]] together with its target */
   case class ZipperFocus[A](zipper: Zipper[A], target: A)
 
   object ZipperFocus {
+    /** Construct a [[ZipperFocus]] from a [[Zipper]], using its focus as the target */
     def apply[A](zipper: Zipper[A]): ZipperFocus[A] = ZipperFocus(zipper, zipper.commit)
   }
 

@@ -1,10 +1,17 @@
 package reftree.svg
 
+/**
+ * A very crude approximation of the CSS selectors, which is enough for our purposes
+ *
+ * Use `Selector.fromString` to construct a selector.
+ * Alternatively, this package provides a shorthand string interpolator: sel"g.node, path".
+ */
 case class Selector(clauses: Set[Selector.Clause]) {
   def matches(svg: xml.Node) = clauses.exists(_.matches(svg))
 }
 
 object Selector {
+  /** A single selector clause */
   case class Clause(element: Option[String], classes: Set[String]) {
     def matches(svg: xml.Node) =
     element.forall(_ == svg.label) &&

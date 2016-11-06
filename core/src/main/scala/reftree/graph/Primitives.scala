@@ -50,21 +50,21 @@ object Primitives {
   }
 
   private def cellLabel(tree: RefTree): String = tree match {
-    case RefTree.Val(value: Int, Some(RefTree.Val.Bin), _) ⇒ value.toBinaryString
-    case RefTree.Val(value, _, _) ⇒ value.toString.replace(" ", "_")
+    case _ if tree.elide ⇒ "&hellip;"
+    case RefTree.Val(value: Int, Some(RefTree.Val.Bin), _, _) ⇒ value.toBinaryString
+    case RefTree.Val(value, _, _, _) ⇒ value.toString.replace(" ", "_")
     case _: RefTree.Null ⇒ "&empty;"
-    case _: RefTree.Elided ⇒ "&hellip;"
-    case RefTree.Ref(_, id, _, _) ⇒ "&middot;"
+    case RefTree.Ref(_, id, _, _, _) ⇒ "&middot;"
   }
 
   private def cell(tree: RefTree, i: Int, color: Color): String = {
     val label = cellLabel(tree)
     val port = tree match {
-      case RefTree.Ref(_, id, _, _) ⇒ s"""port="$id-$i""""
+      case RefTree.Ref(_, id, _, _, false) ⇒ s"""port="$id-$i""""
       case _ ⇒ ""
     }
     val background = ((tree, tree.highlight) match {
-      case (_, false) | (_: RefTree.Ref, _) ⇒ defaultBackground
+      case (_, false) | (RefTree.Ref(_, _, _, _, false), _) ⇒ defaultBackground
       case _ ⇒ color.opacify(0.25)
     }).toRgbaString
     s"""<td $port bgcolor="$background">$label</td>"""
@@ -72,7 +72,7 @@ object Primitives {
 
   def edge(id: String, tree: RefTree, i: Int, color: Color, namespace: Seq[String]): Option[EdgeStatement] =
     tree match {
-      case RefTree.Ref(_, refId, _, _) ⇒
+      case RefTree.Ref(_, refId, _, _, false) ⇒
         val sourceId = namespaced(id, namespace)
         val targetId = namespaced(refId, namespace)
         val edgeId = namespaced(s"$id-$i-$refId", namespace)

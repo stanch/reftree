@@ -17,6 +17,7 @@ import scala.sys.process.{Process, BasicIO}
 object AnimatedGifRenderer {
   private lazy val saxParserFactory = {
     val instance = SAXParserFactory.newInstance()
+    // This prevents the parser from going to the Internet every time!
     instance.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
     instance
   }
@@ -60,6 +61,7 @@ object AnimatedGifRenderer {
   ): Unit = {
     val svgs = svgPreprocessing(graphs.map(renderSvg))
     val images = svgs.par.map(renderImage(_, renderingOptions)).to[Seq]
+    // TODO: move this logic back into the preprocessing pipeline
     val duplicated = Seq.fill(animationOptions.keyFrames)(images.head) ++
       images.tail.grouped(animationOptions.interpolationFrames + 1).flatMap {
         case init :+ last ⇒ init ++ Seq.fill(animationOptions.keyFrames)(last)

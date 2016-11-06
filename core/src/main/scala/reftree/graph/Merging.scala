@@ -8,7 +8,7 @@ import uk.co.turingatemyhamster.graphvizs.dsl.AttributeAssignment.AnyAttributeAs
 import uk.co.turingatemyhamster.graphvizs.dsl._
 
 object Merging {
-  // Get a unique statement identifier, if any
+  /** Get a unique statement identifier, if any */
   private def statementId(statement: Statement) = statement match {
     case n: NodeStatement ⇒
       Some(n.node.id.asInstanceOf[ID.Quoted].value)
@@ -17,12 +17,12 @@ object Merging {
     case _ ⇒ None
   }
 
-  // A mapping between a sequence of rgba color strings and sequence of colors
+  /** A mapping between a sequence of rgba color strings and sequence of colors */
   private val colorSequenceLens: Lens[Seq[String], Seq[Color]] =
     Lenses.partitionLens[String](_.startsWith("#")) composeIso
     Iso[Seq[String], Seq[Color]](_.map(Color.fromRgbaString(_)))(_.map(_.toRgbaString))
 
-  // A mapping between the node label and the background colors specified inside it
+  /** A mapping between the node label and the background colors specified inside it */
   private val nodeColorLens: Lens[NodeStatement, Seq[Color]] =
     Lens[NodeStatement, Seq[String]] { statement ⇒
       val label = statement.attributes.get.attrs
@@ -36,7 +36,7 @@ object Merging {
       }.setTo(ID.Identifier(label.mkString))
     } composeLens colorSequenceLens
 
-  // Merge node statements by mixing highlight colors inside them
+  /** Merge node statements by mixing highlight colors inside them */
   private def mergeNodeStatements(statements: Seq[NodeStatement], keepLeft: Boolean, mixColor: Boolean) = {
     val keeper = if (keepLeft) statements.head else statements.last
     val colors = statements.map(nodeColorLens.get)
@@ -57,7 +57,7 @@ object Merging {
     }
   }
 
-  // Merge statements with the same ids to eliminate duplicates
+  /** Merge statements with the same ids to eliminate duplicates */
   private def merge(statements: Seq[Statement], keepLeft: Boolean, mixColor: Boolean): Seq[Statement] = {
     val groupedById = statements.zipWithIndex.groupBy { case (s, i) ⇒ statementId(s) }.values.toSeq
     val merged = groupedById.flatMap {
@@ -73,9 +73,11 @@ object Merging {
     merged.sortBy(_._2).map(_._1)
   }
 
-  def mergeLeft(statements: Seq[Statement]): Seq[Statement] =
+  /** Merge statements belonging to the same layer */
+  def mergeLayer(statements: Seq[Statement]): Seq[Statement] =
     merge(statements, keepLeft = true, mixColor = true)
 
-  def mergeRight(statements: Seq[Statement]): Seq[Statement] =
+  /** Merge statements belonging to different onion skin layers */
+  def mergeLayers(statements: Seq[Statement]): Seq[Statement] =
     merge(statements, keepLeft = false, mixColor = false)
 }

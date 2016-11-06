@@ -630,7 +630,7 @@ val zippers = movement
   .build(Diagram(_).withCaption("Zipper").withAnchor("zipper").withColor(2))
   .toNamespace("zipper")
 
-(trees addInParallel zippers).render("tree+zipper")
+(trees + zippers).render("tree+zipper")
 ```
 
 <p align="center"><img src="images/zippers/tree+zipper.gif" /></p>

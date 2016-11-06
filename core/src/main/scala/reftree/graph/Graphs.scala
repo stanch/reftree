@@ -21,7 +21,7 @@ object Graphs {
       namespace: Seq[String],
       depth: Int
     ): Seq[Statement] = tree match {
-      case r @ RefTree.Ref(_, id, children, _) ⇒
+      case r @ RefTree.Ref(_, id, children, _, false) ⇒
         Seq(Primitives.node(r, color, anchorId, namespace)) ++
           children.flatMap(inner(_, color, None, namespace, depth + 1)) ++
           children.zipWithIndex.flatMap { case (c, i) ⇒ Primitives.edge(id, c, i, color, namespace) }
@@ -44,7 +44,7 @@ object Graphs {
 
   def graph(options: RenderingOptions)(diagram: Diagram): Graph = {
     val statements = graphAttributes(options) ++
-      Merging.mergeLeft(graphStatements(diagram, options))
+      Merging.mergeLayer(graphStatements(diagram, options))
     NonStrictDigraph("diagram", statements: _*)
   }
 
@@ -59,7 +59,7 @@ object Graphs {
       }
       val statementLayers = onionSkin :+ graphStatements(diagrams.last, options)
       val statements = graphAttributes(options) ++
-        Merging.mergeRight(statementLayers.flatMap(Merging.mergeLeft))
+        Merging.mergeLayers(statementLayers.flatMap(Merging.mergeLayer))
       NonStrictDigraph("diagram", statements: _*)
     }
   }

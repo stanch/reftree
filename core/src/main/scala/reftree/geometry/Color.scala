@@ -3,7 +3,13 @@ package reftree.geometry
 import monocle.Iso
 import com.softwaremill.quicklens._
 
+/**
+ * A simple, portable color implementation that supports RGBA and HSLA
+ *
+ * Use `Color.fromRgbaString`, `Color.RGBA` or `Color.HSLA` to construct colors.
+ */
 sealed trait Color {
+  /** The alpha value */
   def a: Double
 
   def toRgba: Color.RGBA
@@ -18,28 +24,30 @@ sealed trait Color {
     case hsla: Color.HSLA ⇒ hsla.copy(a = hsla.a * factor min 1.0)
   }
 
+  /** Produces a string like #fe76a1 */
   def toRgbString = {
     val rgba = toRgba
     f"#${(rgba.r * 255).toInt}%02x${(rgba.g * 255).toInt}%02x${(rgba.b * 255).toInt}%02x"
   }
 
+  /** Produces a string like #fe76a133 (including the alpha value) */
   def toRgbaString = f"$toRgbString${(a * 255).toInt}%02x"
 }
 
 object Color {
-  val rgbaComponents = Iso[RGBA, Seq[Double]] { color ⇒
+  private[geometry] val rgbaComponents = Iso[RGBA, Seq[Double]] { color ⇒
     Seq(color.r, color.g, color.b, color.a)
   } {
     case Seq(r, g, b, a) ⇒ RGBA(r, g, b, a)
   }
 
-  val hslaComponents = Iso[HSLA, Seq[Double]] { color ⇒
+  private[geometry] val hslaComponents = Iso[HSLA, Seq[Double]] { color ⇒
     Seq(color.h, color.s, color.l, color.a)
   } {
     case Seq(h, s, l, a) ⇒ HSLA(h, s, l, a)
   }
 
-  val color2rgba = Iso[Color, RGBA](_.toRgba)(identity)
+  private val color2rgba = Iso[Color, RGBA](_.toRgba)(identity)
 
   case class RGBA(r: Double, g: Double, b: Double, a: Double) extends Color {
     def toRgba = this
@@ -82,7 +90,9 @@ object Color {
     }
   }
 
-  def fromRgbaString(string: String, defaultAlpha: Double = 1.0) = rgbaParser(defaultAlpha).parse(string).get.value
+  /** Parse a color from an RGB(A) string. If the alpha component is missing, `defaultAlpha` is used */
+  def fromRgbaString(string: String, defaultAlpha: Double = 1.0) =
+    rgbaParser(defaultAlpha).parse(string).get.value
 
   private def rgbaParser(defaultAlpha: Double) = {
     import fastparse.all._
@@ -94,9 +104,11 @@ object Color {
     }
   }
 
+  /** Interpolate colors by interpolating the RGBA components */
   val interpolation = (color2rgba composeIso rgbaComponents).asLens
     .interpolateEachWith(Interpolation.double)
 
+  /** Mix the provided colors together by averaging their RGBA components */
   def mix(colors: Seq[Color]) = rgbaComponents.reverseGet {
     colors.map(_.toRgba).map(rgbaComponents.get).transpose.map(values ⇒ values.sum / values.length)
   }

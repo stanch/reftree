@@ -186,7 +186,7 @@ val queue2 = (Animation
   .build()
   .toNamespace("two"))
 
-(queue1 addInParallel queue2).render("animation-parallel")
+(queue1 + queue2).render("animation-parallel")
 ```
 
 <p align="center"><img src="images/usage/animation-parallel.gif" /></p>

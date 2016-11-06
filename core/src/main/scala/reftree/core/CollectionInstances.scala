@@ -3,6 +3,11 @@ package scala.collection.immutable
 import reftree.core._
 import reftree.util.Reflection.PrivateFields
 
+/**
+ * [[ToRefTree]] instances for Scala immutable collections
+ *
+ * The package name is intentionally changed so that we can get access to some private fields and classes.
+ */
 trait CollectionInstances {
   implicit def `Option RefTree`[A: ToRefTree]: ToRefTree[Option[A]] = ToRefTree[Option[A]] {
     case value @ Some(a) ⇒ RefTree.Ref(value, Seq(a.refTree))
@@ -37,7 +42,7 @@ trait CollectionInstances {
 
   implicit def `Vector RefTree`[A: ToRefTree]: ToRefTree[Vector[A]] = ToRefTree[Vector[A]] { value ⇒
     val focus = value.privateField[Int]("focus")
-    val binFocus = RefTree.Val(focus, Some(RefTree.Val.Bin), highlight = false)
+    val binFocus = RefTree.Val(focus, Some(RefTree.Val.Bin), highlight = false, elide = false)
     val layers = Seq(
       value.display0, value.display1,
       value.display2, value.display3,
@@ -91,7 +96,7 @@ trait CollectionInstances {
           val size = trie.privateField[Int]("size0")
           val bitmap = trie.privateField[Int]("bitmap")
           val elems = trie.privateField[Array[HashSet[A]]]("elems")
-          val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false)
+          val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false, elide = false)
           RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).rename("HashSet.HashTrieSet")
       }
     }
@@ -114,7 +119,7 @@ trait CollectionInstances {
           val size = trie.privateField[Int]("size0")
           val bitmap = trie.privateField[Int]("bitmap")
           val elems = trie.privateField[Array[HashMap[A, B]]]("elems")
-          val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false)
+          val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false, elide = false)
           RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).rename("HashMap.HashTrieMap")
       }
     }

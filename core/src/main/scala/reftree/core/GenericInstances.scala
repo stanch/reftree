@@ -2,6 +2,12 @@ package reftree.core
 
 import shapeless._
 
+/**
+ * Generic derivation for [[ToRefTree]]
+ *
+ * This works for case class-like types, where for each field an instance of [[ToRefTree]]
+ * exists or can be derived using this same facility.
+ */
 trait GenericInstances {
   implicit val `HNil RefTree`: ToRefTree[HNil] =
     ToRefTree[HNil](RefTree.Ref(_, Seq.empty))
@@ -11,7 +17,7 @@ trait GenericInstances {
   ): ToRefTree[H :: T] =
     ToRefTree[H :: T] { value ⇒
       RefTree.Ref(value, headAsTree.value.refTree(value.head) +: (value.tail.refTree match {
-        case RefTree.Ref(_, _, children, _) ⇒ children
+        case RefTree.Ref(_, _, children, _, _) ⇒ children
         case x ⇒ Seq(x)
       }))
     }

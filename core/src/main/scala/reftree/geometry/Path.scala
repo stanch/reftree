@@ -2,9 +2,11 @@ package reftree.geometry
 
 import monocle.Iso
 
+/** A segment of an SVG-like path */
 sealed trait PathSegment {
   import PathSegment._
 
+  /** The final point of the segment */
   def to: Point
 
   def +(delta: Point): PathSegment = this match {
@@ -19,15 +21,19 @@ sealed trait PathSegment {
     case Bezier(from, c1, c2, to) ⇒ Bezier(from - delta, c1 - delta, c2 - delta, to - delta)
   }
 
+  /** Estimate the length of this segment */
   def length: Double = this match {
     case m: Move ⇒ 0
     case Line(from, to) ⇒ from distance to
-    case b: Bezier ⇒ toPolyline(4).length
+    case b: Bezier ⇒ toPolyline(4).length // for splines we do a crude estimation
   }
 
+  /** Approximate the segment with a polyline using the given number of points */
   def toPolyline(points: Int): Polyline = this match {
     case Move(to) ⇒ Polyline(Seq(to))
     case Line(from, to) ⇒
+      // Even though 2 points is enough, we want to use all the points,
+      // so that this line can morph into a different shape uniformly.
       Polyline(Point.interpolation.sample(from, to, points, inclusive = true))
     case Bezier(from, c1, c2, to) ⇒
       Polyline(Point.bezierInterpolation(c1, c2).sample(from, to, points, inclusive = true))
@@ -46,20 +52,27 @@ object PathSegment {
   }
 }
 
+/** A path defined by a sequence of linear or Bezier segments, modeled after SVG paths */
 case class Path(segments: Seq[PathSegment]) {
   def +(delta: Point) = copy(segments.map(_ + delta))
 
   def +(segment: PathSegment) = copy(segments :+ segment)
   def last = segments.last.to
 
+  /** Approximate the path with a polyline, using the specified number of points */
   def simplify(points: Int) = {
+    // first, estimate the lengths of the segments
     val lengths = segments.map(_.length)
     val totalLength = lengths.sum
+    // distribute the points proportionally to segment lengths
     val pointDistribution = lengths.map(l ⇒ Math.max(points * l / totalLength, 1).toInt)
     val diff = pointDistribution.sum - points
+    // we might be off by a few points...
     val compensatedPointDistribution = if (diff == 0) {
+      // lucky!
       pointDistribution
     } else {
+      // let’s add/remove the extra points to/from the segment that has the most
       val (index, max) = pointDistribution.zipWithIndex.maxBy(_._2)
       pointDistribution.patch(index, Seq(Math.max(max + diff, 0)), 1)
     }
@@ -74,8 +87,10 @@ case class Path(segments: Seq[PathSegment]) {
 object Path {
   def empty = Path(Seq.empty)
 
+  /** Parse an SVG path */
   def fromString(string: String) = parser.parse(string).get.value
 
+  /** Convert a polyline into a path */
   def fromPolyline(polyline: Polyline) = {
     val move = PathSegment.Move(polyline.points.head)
     val lines = polyline.points.sliding(2).toSeq map {
@@ -113,6 +128,7 @@ object Path {
     cycle(Path.empty, acc ⇒ move(acc) | line(acc) | bezier(acc))
   }
 
+  /** Interpolate by converting to a polyline */
   val interpolation = Iso[Path, Polyline](_.simplify(100))(fromPolyline).asLens
     .interpolateWith(Polyline.interpolation)
 

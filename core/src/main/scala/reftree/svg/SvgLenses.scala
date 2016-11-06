@@ -77,6 +77,10 @@ object SvgLenses { lenses ⇒
     attr("stroke-width") composeIso
     Iso[Option[String], Double](_.map(_.toDouble).getOrElse(1.0))(t ⇒ Some(t.toString))
 
+  /**
+   * Makes sure that translation is propagated when moving up and down the SVG nodes,
+   * as well as when obtaining attributes that have coordinates inside.
+   */
   private def translated[A](optional: Optional[xml.Node, A])(implicit t: Translatable[A]) =
     Optional[xml.Node, A] { svg ⇒
       val translation = lenses.translation.getOption(svg).getOrElse(Point.zero)

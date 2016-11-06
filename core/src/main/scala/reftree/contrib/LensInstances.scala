@@ -3,13 +3,22 @@ package reftree.contrib
 import monocle.{Traversal, Lens}
 import reftree.core._
 
+import scala.annotation.implicitNotFound
+
+/**
+ * [[ToRefTree]] instances for [[LensInstances.LensFocus]] that show optics together with their focuses
+ */
 object LensInstances {
+  /** A class to represent a [[Traversal]] together with its target */
   case class LensFocus[A, B](lens: Traversal[A, B], target: A)
 
   object LensFocus {
+    /** Construct a [[LensFocus]] from a lens and its target */
     def apply[A, B](lens: Lens[A, B], target: A): LensFocus[A, B] = LensFocus(lens.asTraversal, target)
   }
 
+  /** A typeclass for generating values of a certain type */
+  @implicitNotFound("Could not find a way to generate a value of type ${A}")
   trait Example[A] {
     def exemplify: A
   }
@@ -38,6 +47,8 @@ object LensInstances {
     }
   }
 
+  /** A typeclass for marking values of a certain type */
+  @implicitNotFound("Could not find a way to mark a value of type ${A}")
   trait Marker[A] {
     def mark(value: A): A
   }
@@ -79,7 +90,7 @@ object LensInstances {
         // the example is a Val, and we found two mismatching Val trees
         x.copy(highlight = true)
 
-      case (RefTree.Ref(name, _, _, _), x: RefTree.Ref, y: RefTree.Ref) if x != y && x.name == name ⇒
+      case (RefTree.Ref(name, _, _, _, _), x: RefTree.Ref, y: RefTree.Ref) if x != y && x.name == name ⇒
         // the example is a Ref, and we found two mismatching Ref trees with the same name
         x.copy(highlight = true)
 

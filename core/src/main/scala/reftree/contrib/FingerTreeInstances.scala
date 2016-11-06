@@ -4,6 +4,9 @@ import de.sciss.fingertree.FingerTree
 import reftree.core._
 import reftree.util.Reflection.PrivateFields
 
+/**
+ * [[ToRefTree]] instances for a [[FingerTree]]
+ */
 object FingerTreeInstances {
   private def fingerTreeRefTree[V: ToRefTree, A: ToRefTree](tree: AnyRef, depth: Int): RefTree = {
     val measure = tree.privateField[V]("measure").refTree

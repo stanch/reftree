@@ -33,25 +33,33 @@ object SvgGraphAlignment {
       Point.mean(next.map(nodePosition.getOption(_).get))
   }
 
+  /** Align two adjacent animation frames */
   def align(prev: xml.Node, next: xml.Node) = {
     val prevNodes = nodes.get(prev)
     val nextNodes = nodes.get(next)
     val prevAnchors = groupByAnchor(prevNodes)
     val nextAnchors = groupByAnchor(nextNodes)
     val delta =
+      // try aligning the common anchors...
       mapDelta(prevAnchors, nextAnchors) orElse
+      // or the center of mass of the common nodes...
       mapDelta(prevNodes, nextNodes) getOrElse
+      // fallback to aligning the center of mass of all nodes
       seqDelta(prevNodes.values.toSeq, nextNodes.values.toSeq)
+    // we need to update the viewbox
     val withBox = SvgLenses.viewBox.modify(_ + delta)(next)
+    // and the translation of the root node
     (graph composeOptional SvgLenses.translation).modify(_ + delta)(withBox)
   }
 }
 
 object SvgGraphInterpolation {
+  // In the first third of the animation time interval we fade out disappearing nodes and edges.
   private val fadeOut = SvgLenses.opacity
     .semiInterpolateWith(Interpolation.double.withRight(0))
     .timespan(0, 1/3.0)
 
+  // The new nodes and edges fade in during the last third of the animation time interval.
   private val fadeIn = SvgLenses.opacity
     .semiInterpolateWith(Interpolation.double.withLeft(0))
     .timespan(2/3.0, 1)
@@ -65,6 +73,8 @@ object SvgGraphInterpolation {
     .interpolateWith(Interpolation.double)
     .timespan(0, 1)
 
+  // We move the node as a whole, since nothing inside changes position between frames.
+  // Movement happens in the second third of the animation time interval.
   private val nodePosition = {
     SvgLenses.onlyFor(sel"g.node") composeOptional
     SvgLenses.groupPosition(
@@ -73,6 +83,7 @@ object SvgGraphInterpolation {
   }.interpolateWith(Point.interpolation)
     .timespan(1/3.0, 2/3.0)
 
+  // To move an edge, we need to move the curve and the arrow separately.
   private val edgePosition = {
     SvgLenses.onlyFor(sel"g.edge") composeLens
     SvgLenses.collectByIndex(sel"path, polygon")
@@ -95,12 +106,16 @@ object SvgGraphInterpolation {
 }
 
 object SvgGraphAnimation {
+  /** Prevent ugly rendering artifacts */
   private def improveRendering(svg: xml.Node): xml.Node =
     SvgLenses.attr("shape-rendering").set(Some("geometricPrecision")) andThen
     SvgLenses.attr("text-rendering").set(Some("geometricPrecision")) apply svg
 
+  /**
+   * Graphviz does not set the fill-opacity attribute on text,
+   * so we copy it from the sibling path node.
+   */
   private def fixTextColor(svg: xml.Node) = {
-    // Graphviz does not set the fill-opacity attribute on text
     val nodes = SvgLenses.collectAll(sel"g.node")
     val texts = SvgLenses.collectAll(sel"text")
     val nodeColor = SvgLenses.collectLast(sel"path") composeOptional SvgLenses.strokeColor
@@ -110,6 +125,7 @@ object SvgGraphAnimation {
     }(svg)
   }
 
+  /** Make the newly appeared nodes and edges thicker */
   private def accentuatePairwise(svgs: Seq[xml.Node]) = {
     val nodesAndEdges = SvgLenses.collectById(sel"g.node, g.edge")
     val thickness = SvgLenses.collectAll(sel"path, polygon") composeOptional SvgLenses.thickness
@@ -125,7 +141,7 @@ object SvgGraphAnimation {
 
     svgs.head +: svgs.sliding(2).toSeq.map {
       case Seq(prev, next) ⇒ accentuate(prev, next)
-    } :+ svgs.last
+    } :+ svgs.last // this duplicates the last frame, so that it can lose thickness at the end
   }
 
   private def alignPairwise(svgs: Seq[xml.Node]) =
