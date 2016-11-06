@@ -6,9 +6,11 @@ trait GenericInstances {
   implicit val `HNil RefTree`: ToRefTree[HNil] =
     ToRefTree[HNil](RefTree.Ref(_, Seq.empty))
 
-  implicit def `HCons RefTree`[H: ToRefTree, T <: HList: ToRefTree]: ToRefTree[H :: T] =
+  implicit def `HCons RefTree`[H, T <: HList](
+    implicit headAsTree: Lazy[ToRefTree[H]], tailAsTree: ToRefTree[T]
+  ): ToRefTree[H :: T] =
     ToRefTree[H :: T] { value ⇒
-      RefTree.Ref(value, value.head.refTree +: (value.tail.refTree match {
+      RefTree.Ref(value, headAsTree.value.refTree(value.head) +: (value.tail.refTree match {
         case RefTree.Ref(_, _, children, _) ⇒ children
         case x ⇒ Seq(x)
       }))

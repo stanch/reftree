@@ -8,31 +8,33 @@ val commonSettings = Seq(
   licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
 )
 
+//crossScalaVersions := Seq("2.11.8", "2.12.0")
+
 val core = project.settings(commonSettings: _*).settings(
   name := "reftree",
   version := "0.7.2",
+  crossScalaVersions := Seq("2.11.8", "2.12.0"),
   libraryDependencies ++= Seq(
-    "com.chuusai" %% "shapeless" % "2.2.5",
-    "com.lihaoyi" %% "sourcecode" % "0.1.2",
-    "com.lihaoyi" %% "fastparse" % "0.4.1",
-    "org.stanch" %% "zipper" % "0.3.1",
-    "com.softwaremill.quicklens" %% "quicklens" % "1.4.7",
+    "com.chuusai" %% "shapeless" % "2.3.2",
+    "com.lihaoyi" %% "sourcecode" % "0.1.3",
+    "com.lihaoyi" %% "fastparse" % "0.4.2",
+    "org.stanch" %% "zipper" % "0.4.0",
+    "com.softwaremill.quicklens" %% "quicklens" % "1.4.8",
     "uk.co.turingatemyhamster" %% "gv-core" % "0.3.2",
-    "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
+    "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     "batik" % "batik-transcoder" % "1.6-1" exclude("fop", "fop"),
     "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.7",
-    "com.github.julien-truffaut" %% "monocle-macro" % "1.2.2",
+    "com.github.julien-truffaut" %% "monocle-macro" % "1.3.2",
     "de.sciss" %% "fingertree" % "1.5.2",
     "org.scalatest" %% "scalatest" % "3.0.0" % Test,
-    "org.scalacheck" %% "scalacheck" % "1.13.2" % Test
+    "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
   )
 )
 
 val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
   publishArtifact := false,
   libraryDependencies ++= Seq(
-    "com.softwaremill.quicklens" %% "quicklens" % "1.4.7",
-    "com.lihaoyi" % "ammonite" % "0.7.7" % Test cross CrossVersion.full
+    "com.lihaoyi" % "ammonite" % "0.7.8" % Test cross CrossVersion.full
   ),
   initialCommands in (Test, console) := {
     val predef = Seq(
