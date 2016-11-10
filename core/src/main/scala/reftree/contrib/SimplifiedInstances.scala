@@ -9,8 +9,7 @@ import zipper.Zipper
  *  - `option` “unboxes” [[Option]], representing [[None]] with `null` and [[Some]] with its inner value;
  *  - `list` and `seq` hide implementation details from [[List]]s and [[Seq]]s respectively,
  *     as if they were simple [[Array]]s;
- *  - `map` represents a “fictional” high-level map with no internal structure;
- *  - `zipper` elides the parent zipper field from a [[Zipper]] visualization.
+ *  - `map` represents a “fictional” high-level map with no internal structure.
  */
 object SimplifiedInstances {
   /** An “unboxed” [[Option]], representing [[None]] with `null` and [[Some]] with its inner value */
@@ -40,8 +39,4 @@ object SimplifiedInstances {
       }).rename("Map")
     }
   }
-
-  /** A simplified representation of a [[Zipper]], eliding its parent */
-  implicit def zipper[A](implicit default: ToRefTree[Zipper[A]]): ToRefTree[Zipper[A]] =
-    default.highlightField(1).elideField(3)
 }

@@ -58,8 +58,8 @@ object FingerTrees extends App {
 }
 
 object Zippers extends App {
+  import reftree.contrib.SimplifiedInstances.{list, option}
   import reftree.contrib.ZipperInstances._
-  import reftree.contrib.SimplifiedInstances.{list, option, zipper}
 
   val renderer = Renderer(
     renderingOptions = RenderingOptions(density = 75),
@@ -116,6 +116,7 @@ object Lenses extends App {
 
 object Teaser extends App {
   import reftree.contrib.LensInstances._
+  import reftree.contrib.ZipperInstances._
 
   val renderer = Renderer(directory = Paths.get("images", "usage"))
   import renderer._
@@ -139,8 +140,9 @@ object Teaser extends App {
       .withCaption("Vowel Traversal").withAnchor("lens")
   )).toNamespace("lenses")
 
+  import reftree.contrib.SimplifiedInstances.{list, option}
+
   val tree = Data.Tree(1, List(Data.Tree(2), Data.Tree(3), Data.Tree(4)))
-  import reftree.contrib.SimplifiedInstances.{list, option, zipper}
 
   val zippers = Animation
     .startWith(Zipper(tree).moveDownLeft)

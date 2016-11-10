@@ -73,11 +73,20 @@ object Merging {
     merged.sortBy(_._2).map(_._1)
   }
 
+  /** Remove edges pointing to elided objects which are not explicitly included */
+  private def removeDanglingEdges(statements: Seq[Statement]): Seq[Statement] = {
+    val ids = statements.flatMap(statementId).toSet
+    statements filter {
+      case EdgeStatement(source, Seq((_, NodeId(id, _))), _) if !ids(id.asInstanceOf[ID.Quoted].value) ⇒ false
+      case _ ⇒ true
+    }
+  }
+
   /** Merge statements belonging to the same layer */
   def mergeLayer(statements: Seq[Statement]): Seq[Statement] =
-    merge(statements, keepLeft = true, mixColor = true)
+    merge(removeDanglingEdges(statements), keepLeft = true, mixColor = true)
 
   /** Merge statements belonging to different onion skin layers */
-  def mergeLayers(statements: Seq[Statement]): Seq[Statement] =
-    merge(statements, keepLeft = false, mixColor = false)
+  def mergeLayers(statements: Seq[Seq[Statement]]): Seq[Statement] =
+    merge(removeDanglingEdges(statements.flatMap(mergeLayer)), keepLeft = false, mixColor = false)
 }

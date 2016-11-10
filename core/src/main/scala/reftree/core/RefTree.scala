@@ -113,7 +113,7 @@ object RefTree {
  * A typeclass for mapping data to [[RefTree]] representations
  */
 @implicitNotFound("To render a diagram for type ${A}, implement an instance of reftree.core.ToRefTree[${A}]")
-trait ToRefTree[-A] { self ⇒
+trait ToRefTree[A] { self ⇒
   def refTree(value: A): RefTree
 
   /** Obtain a new mapping where the field at `index` is highlighted */
@@ -125,6 +125,13 @@ trait ToRefTree[-A] { self ⇒
   def elideField(index: Int) = ToRefTree[A] { value ⇒
     self.refTree(value).modify(_.when[RefTree.Ref].children.at(index)).using(_.withElide(true))
   }
+
+  /** Obtain a new mapping where the field at `index` is elided if the condition is met */
+  def elideFieldIf(index: Int, predicate: A ⇒ Boolean) = ToRefTree[A] { value ⇒
+    if (!predicate(value)) self.refTree(value) else {
+      self.refTree(value).modify(_.when[RefTree.Ref].children.at(index)).using(_.withElide(true))
+    }
+  }
 }
 
 object ToRefTree extends CollectionInstances with GenericInstances {
@@ -133,7 +140,7 @@ object ToRefTree extends CollectionInstances with GenericInstances {
     def refTree(value: A) = toRefTree(value)
   }
 
-  implicit def `AnyVal RefTree`: ToRefTree[AnyVal] = ToRefTree[AnyVal](RefTree.Val.apply)
+  implicit def `AnyVal RefTree`[A <: AnyVal]: ToRefTree[A] = ToRefTree[A](RefTree.Val.apply)
 
   implicit def `String RefTree`: ToRefTree[String] = ToRefTree[String] { value ⇒
     RefTree.Ref(value, value.map(RefTree.Val.apply))

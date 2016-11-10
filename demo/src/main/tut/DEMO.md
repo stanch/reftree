@@ -532,11 +532,7 @@ val zipper2 = zipper1.moveDownLeft
 The new Zipper links to the old one,
 which will allow us to return to the root of the tree when we are done applying changes.
 This link however prevents us from seeing the picture clearly.
-Let’s elide the parent field:
-
-```tut:silent
-import reftree.contrib.SimplifiedInstances.zipper
-```
+Let’s look at the second zipper alone:
 
 ```tut:silent
 diagram(zipper2).render("zipper2b")

@@ -43,8 +43,7 @@ object Graphs {
   }
 
   def graph(options: RenderingOptions)(diagram: Diagram): Graph = {
-    val statements = graphAttributes(options) ++
-      Merging.mergeLayer(graphStatements(diagram, options))
+    val statements = graphAttributes(options) ++ Merging.mergeLayer(graphStatements(diagram, options))
     NonStrictDigraph("diagram", statements: _*)
   }
 
@@ -58,8 +57,7 @@ object Graphs {
           graphStatements(diagram.withoutAnchors.withoutCaptions, onionPalette)
       }
       val statementLayers = onionSkin :+ graphStatements(diagrams.last, options)
-      val statements = graphAttributes(options) ++
-        Merging.mergeLayers(statementLayers.flatMap(Merging.mergeLayer))
+      val statements = graphAttributes(options) ++ Merging.mergeLayers(statementLayers)
       NonStrictDigraph("diagram", statements: _*)
     }
   }

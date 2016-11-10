@@ -60,7 +60,7 @@ object Primitives {
   private def cell(tree: RefTree, i: Int, color: Color): String = {
     val label = cellLabel(tree)
     val port = tree match {
-      case RefTree.Ref(_, id, _, _, false) ⇒ s"""port="$id-$i""""
+      case RefTree.Ref(_, id, _, _, _) ⇒ s"""port="$id-$i""""
       case _ ⇒ ""
     }
     val background = ((tree, tree.highlight) match {
@@ -72,7 +72,7 @@ object Primitives {
 
   def edge(id: String, tree: RefTree, i: Int, color: Color, namespace: Seq[String]): Option[EdgeStatement] =
     tree match {
-      case RefTree.Ref(_, refId, _, _, false) ⇒
+      case RefTree.Ref(_, refId, _, _, _) ⇒
         val sourceId = namespaced(id, namespace)
         val targetId = namespaced(refId, namespace)
         val edgeId = namespaced(s"$id-$i-$refId", namespace)

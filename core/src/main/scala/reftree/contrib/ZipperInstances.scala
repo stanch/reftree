@@ -8,9 +8,8 @@ import com.softwaremill.quicklens._
  * [[ToRefTree]] instances for a [[Zipper]]
  */
 object ZipperInstances {
-  // This is called “zipper” to allow overriding with SimplifiedInstances.zipper
-  implicit def zipper[A](implicit default: ToRefTree[Zipper[A]]): ToRefTree[Zipper[A]] =
-    default.highlightField(1)
+  implicit def `Zipper RefTree`[A](implicit default: ToRefTree[Zipper[A]]): ToRefTree[Zipper[A]] =
+    default.highlightField(1).elideFieldIf(3, _.top.isDefined)
 
   /** A class to represent a [[Zipper]] together with its target */
   case class ZipperFocus[A](zipper: Zipper[A], target: A)

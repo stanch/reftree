@@ -10,7 +10,7 @@ import shapeless._
  */
 trait GenericInstances {
   /** We use a different typeclass to avoid defining nonsense ToRefTree instances */
-  trait GenericToRefTree[-A] {
+  trait GenericToRefTree[A] {
     def refTree(value: A): RefTree
   }
 
@@ -47,9 +47,9 @@ trait GenericInstances {
     }
 
   implicit def `Generic RefTree`[A <: AnyRef, R](
-    implicit generic: Generic.Aux[A, R], listAsTree: Lazy[GenericToRefTree[R]]
+    implicit generic: Generic.Aux[A, R], genericAsTree: Lazy[GenericToRefTree[R]]
   ): ToRefTree[A] = ToRefTree[A] { value ⇒
-    listAsTree.value.refTree(generic.to(value)) match {
+    genericAsTree.value.refTree(generic.to(value)) match {
       case r: RefTree.Ref ⇒ RefTree.Ref(value, r.children)
       case x ⇒ x
     }
