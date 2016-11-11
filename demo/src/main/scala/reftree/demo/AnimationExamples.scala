@@ -3,9 +3,11 @@ package reftree.demo
 import java.nio.file.Paths
 
 import de.sciss.fingertree.{FingerTree, Measure}
+import com.softwaremill.quicklens._
 import monocle.function.all._
 import monocle.macros.GenLens
 import monocle.std.list._
+import reftree.core.RefTree
 import reftree.diagram.{Diagram, Animation}
 import reftree.render.{AnimationOptions, RenderingOptions, Renderer}
 import zipper.Zipper
@@ -153,11 +155,51 @@ object Teaser extends App {
   (queues + lenses + zippers).mirror.render("teaser")
 }
 
+object Quiz extends App {
+  import reftree.contrib.FingerTreeInstances._
+  implicit val measure = Measure.Indexed
+
+  val renderer = Renderer(
+    renderingOptions = RenderingOptions(verticalSpacing = 2, density = 75),
+    directory = Paths.get("images", "quiz")
+  )
+  import renderer._
+
+  def anonymize(tree: RefTree): RefTree = tree match {
+    case ref: RefTree.Ref ⇒ ref.rename("�").copy(children = ref.children.map(anonymize))
+    case other ⇒ other
+  }
+
+  def anonymize(diagram: Diagram.Single): Diagram.Single =
+    diagram.modify(_.tree).using(anonymize)
+
+  def number(i: Int) = Math.pow(2, i + 1).toInt
+
+  Animation
+    .startWith(FingerTree(1))
+    .iterateWithIndex(14)((s, i) ⇒ s :+ number(i))
+    .build(t ⇒ anonymize(Diagram(t).withAnchor("tree")))
+    .render("1")
+
+  Animation
+    .startWith(HashSet(1))
+    .iterateWithIndex(10)((s, i) ⇒ s + number(i))
+    .build(s ⇒ anonymize(Diagram(s).withAnchor("set")))
+    .render("2")
+
+  Animation
+    .startWith(TreeSet(1))
+    .iterateWithIndex(14)((s, i) ⇒ s + number(i))
+    .build(s ⇒ anonymize(Diagram(s).withAnchor("set")))
+    .render("3")
+}
+
 object All extends App {
   Lists.main(Array.empty)
   Queues.main(Array.empty)
   FingerTrees.main(Array.empty)
   Zippers.main(Array.empty)
   Lenses.main(Array.empty)
+  Quiz.main(Array.empty)
   Teaser.main(Array.empty)
 }
