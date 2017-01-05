@@ -5,7 +5,7 @@ Here are some past and future presentations:
 
 * [LX Scala, April 2016](http://www.lxscala.com/schedule/#session-2) ([video](https://vimeo.com/162214356)).
 * [Pixels Camp, October 2016](https://github.com/PixelsCamp/talks/blob/master/unzipping-immutability_nick-stanchenko.md) ([video](https://www.youtube.com/watch?v=yeMvhuD689A)).
-* [Scala By The Bay, November 2016](http://sched.co/7iTv).
+* [Scala By The Bay, November 2016](http://sched.co/7iTv) ([video](https://www.youtube.com/watch?v=dOj-wk5MQ3k)).
 
 You can use this page in two ways:
 
@@ -22,7 +22,7 @@ Here is an overview:
 Throughout this page we will assume the following
 declarations (each section might add its own):
 
-```scala
+```tut:silent
 import reftree.core._
 import reftree.diagram._
 import reftree.render._
@@ -46,7 +46,7 @@ already has all the necessary imports in scope.*
 
 ### Immutable data structures
 
-```scala
+```tut:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
@@ -60,12 +60,11 @@ import renderer._
 We’ll start with one of the simplest structures: a list.
 It consists of a number of cells pointing to each other:
 
-```scala
-scala> val list = List(1, 2, 3)
-list: List[Int] = List(1, 2, 3)
+```tut
+val list = List(1, 2, 3)
 ```
 
-```scala
+```tut:silent
 diagram(list).render("list")
 ```
 
@@ -76,15 +75,12 @@ because we can share the same cells across several lists.
 This would not be possible with a mutable list,
 since modifying the shared part would modify every data structure making use of it.
 
-```scala
-scala> val add = 0 :: list
-add: List[Int] = List(0, 1, 2, 3)
-
-scala> val remove = list.tail
-remove: List[Int] = List(2, 3)
+```tut
+val add = 0 :: list
+val remove = list.tail
 ```
 
-```scala
+```tut:silent
 (diagram(list) + diagram(add) + diagram(remove)).render("lists")
 ```
 
@@ -121,15 +117,12 @@ Animation
 If we want to add elements on both sides efficiently, we need a different data structure: a queue.
 The queue below, also known as a “Banker’s Queue”, has two lists: one for prepending and one for appending.
 
-```scala
-scala> val queue1 = Queue(1, 2, 3)
-queue1: scala.collection.immutable.Queue[Int] = Queue(1, 2, 3)
-
-scala> val queue2 = (queue1 :+ 4).tail
-queue2: scala.collection.immutable.Queue[Int] = Queue(2, 3, 4)
+```tut
+val queue1 = Queue(1, 2, 3)
+val queue2 = (queue1 :+ 4).tail
 ```
 
-```scala
+```tut:silent
 (diagram(queue1) + diagram(queue2)).render("queues", _.withVerticalSpacing(1.2))
 ```
 
@@ -166,15 +159,12 @@ be stored is limited by 2^31).
 The internal 32-element arrays form the basic structural sharing blocks.
 For small vectors they will be recreated on most operations:
 
-```scala
-scala> val vector1 = (1 to 20).toVector
-vector1: Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
-
-scala> val vector2 = vector1 :+ 21
-vector2: scala.collection.immutable.Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21)
+```tut
+val vector1 = (1 to 20).toVector
+val vector2 = vector1 :+ 21
 ```
 
-```scala
+```tut:silent
 (diagram(vector1) + diagram(vector2)).render("vectors", _.withVerticalSpacing(2))
 ```
 
@@ -182,15 +172,12 @@ vector2: scala.collection.immutable.Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8,
 
 However as more layers leap into action, a huge chunk of the data can be shared:
 
-```scala
-scala> val vector1 = (1 to 100).toVector
-vector1: Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100)
-
-scala> val vector2 = vector1 :+ 21
-vector2: scala.collection.immutable.Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 21)
+```tut
+val vector1 = (1 to 100).toVector
+val vector2 = vector1 :+ 21
 ```
 
-```scala
+```tut:silent
 (diagram(vector1) + diagram(vector2)).render("big-vectors", _.withVerticalSpacing(2))
 ```
 
@@ -235,12 +222,9 @@ case class Employee(
 )
 ```
 
-```scala
-scala> employee
-res6: reftree.demo.Data.Employee = Employee(Michael,4000)
-
-scala> val raisedEmployee = employee.copy(salary = employee.salary + 10)
-raisedEmployee: reftree.demo.Data.Employee = Employee(Michael,4010)
+```tut
+employee
+val raisedEmployee = employee.copy(salary = employee.salary + 10)
 ```
 
 However once composition comes into play, the resulting nested immutable data structures
@@ -259,19 +243,16 @@ case class Startup(
 )
 ```
 
-```scala
-scala> startup
-res7: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
-
-scala> val raisedFounder = startup.copy(
-     |   founder = startup.founder.copy(
-     |     salary = startup.founder.salary + 10
-     |   )
-     | )
-raisedFounder: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
+```tut
+startup
+val raisedFounder = startup.copy(
+  founder = startup.founder.copy(
+    salary = startup.founder.salary + 10
+  )
+)
 ```
 
-```scala
+```tut:silent
 // extra declarations for this section
 import reftree.contrib.SimplifiedInstances.list
 import reftree.contrib.LensInstances._
@@ -283,7 +264,7 @@ val renderer = Renderer(
 import renderer._
 ```
 
-```scala
+```tut:silent
 (diagram(startup) + diagram(raisedFounder)).render("startup")
 ```
 
@@ -297,22 +278,16 @@ It’s called a lens because it focuses on some part of the data and allows to u
 For example, here is a lens that focuses on an employee’s salary
 (using the excellent [Monocle library](https://github.com/julien-truffaut/Monocle)):
 
-```scala
-scala> import monocle.macros.GenLens
+```tut
 import monocle.macros.GenLens
 
-scala> val salaryLens = GenLens[Employee](_.salary)
-warning: there was one feature warning; re-run with -feature for details
-salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@434cc760
+val salaryLens = GenLens[Employee](_.salary)
 
-scala> salaryLens.get(startup.founder)
-res11: Long = 4000
-
-scala> salaryLens.modify(s => s + 10)(startup.founder)
-res12: reftree.demo.Data.Employee = Employee(Michael,4010)
+salaryLens.get(startup.founder)
+salaryLens.modify(s => s + 10)(startup.founder)
 ```
 
-```scala
+```tut:silent
 diagram(LensFocus(salaryLens, startup.founder)).render("salaryLens")
 ```
 
@@ -320,16 +295,13 @@ diagram(LensFocus(salaryLens, startup.founder)).render("salaryLens")
 
 We can also define a lens that focuses on the startup’s founder:
 
-```scala
-scala> val founderLens = GenLens[Startup](_.founder)
-warning: there was one feature warning; re-run with -feature for details
-founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@7e407bbd
+```tut
+val founderLens = GenLens[Startup](_.founder)
 
-scala> founderLens.get(startup)
-res14: reftree.demo.Data.Employee = Employee(Michael,4000)
+founderLens.get(startup)
 ```
 
-```scala
+```tut:silent
 diagram(LensFocus(founderLens, startup)).render("founderLens")
 ```
 
@@ -337,18 +309,14 @@ diagram(LensFocus(founderLens, startup)).render("founderLens")
 
 It’s not apparent yet how this would help, but the trick is that lenses can be composed:
 
-```scala
-scala> val founderSalaryLens = founderLens composeLens salaryLens
-founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@2ce83973
+```tut
+val founderSalaryLens = founderLens composeLens salaryLens
 
-scala> founderSalaryLens.get(startup)
-res16: Long = 4000
-
-scala> founderSalaryLens.modify(s => s + 10)(startup)
-res17: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
+founderSalaryLens.get(startup)
+founderSalaryLens.modify(s => s + 10)(startup)
 ```
 
-```scala
+```tut:silent
 diagram(LensFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 ```
 
@@ -357,7 +325,7 @@ diagram(LensFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 One interesting thing is that lenses can focus on anything, not just direct attributes of the data.
 Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
-```scala
+```tut:silent
 diagram(LensFocus(vowelTraversal, "example")).render("vowelTraversal")
 ```
 
@@ -365,19 +333,14 @@ diagram(LensFocus(vowelTraversal, "example")).render("vowelTraversal")
 
 We can use it to give our founder a funny name:
 
-```scala
-scala> val employeeNameLens = GenLens[Employee](_.name)
-warning: there was one feature warning; re-run with -feature for details
-employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@6b556b92
+```tut
+val employeeNameLens = GenLens[Employee](_.name)
+val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
 
-scala> val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
-founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@40efc410
-
-scala> founderVowelTraversal.modify(v => v.toUpper)(startup)
-res20: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
+founderVowelTraversal.modify(v => v.toUpper)(startup)
 ```
 
-```scala
+```tut:silent
 diagram(LensFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
 ```
 
@@ -389,21 +352,18 @@ However most of the time our goal is just to update data.
 In Scala there is a great library called [quicklens](https://github.com/adamw/quicklens)
 that allows to do exactly that, creating all the necessary lenses under the hood:
 
-```scala
-scala> import com.softwaremill.quicklens._
+```tut
 import com.softwaremill.quicklens._
 
-scala> val raisedCeo = startup.modify(_.founder.salary).using(s => s + 10)
-raisedCeo: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
+val raisedCeo = startup.modify(_.founder.salary).using(s => s + 10)
 ```
 
 You might think this is approaching the syntax for updating mutable data,
 but actually we have already surpassed it, since lenses are much more flexible:
 
 
-```scala
-scala> val raisedEveryone = startup.modifyAll(_.founder.salary, _.team.each.salary).using(s => s + 10)
-raisedEveryone: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Employee(Adam,2110), Employee(Bella,2110), Employee(Chad,1990), Employee(Delia,1860)))
+```tut
+val raisedEveryone = startup.modifyAll(_.founder.salary, _.team.each.salary).using(s => s + 10)
 ```
 
 
@@ -432,7 +392,7 @@ case class Company(
 The `Hierarchy` class refers to itself.
 Let’s grab a company object and display its hierarchy as a tree:
 
-```scala
+```tut:silent
 // extra declarations for this section
 import zipper._
 import reftree.contrib.SimplifiedInstances.option
@@ -445,7 +405,7 @@ val renderer = Renderer(
 import renderer._
 ```
 
-```scala
+```tut:silent
 diagram(company.hierarchy).render("company")
 ```
 
@@ -463,11 +423,11 @@ All the changes made to the tree can be committed, yielding a new modified versi
 
 Here is how we would insert a new employee into the hierarchy:
 
-```scala
+```tut:silent
 val updatedHierarchy = Zipper(company.hierarchy).moveDownRight.moveDownRight.insertRight(newHire).commit
 ```
 
-```scala
+```tut:silent
 (diagram(company.hierarchy) + diagram(updatedHierarchy)).render("updatedHierarchy")
 ```
 
@@ -484,12 +444,11 @@ case class Tree(x: Int, c: List[Tree] = List.empty)
 
 and a simple tree:
 
-```scala
-scala> simpleTree
-res26: reftree.demo.Data.Tree = Tree(1,List(Tree(2,List()), Tree(3,List()), Tree(4,List()), Tree(5,List(Tree(6,List()), Tree(7,List())))))
+```tut
+simpleTree
 ```
 
-```scala
+```tut:silent
 diagram(simpleTree).render("simpleTree")
 ```
 
@@ -497,11 +456,11 @@ diagram(simpleTree).render("simpleTree")
 
 When we wrap a Zipper around this tree, it does not look very interesting yet:
 
-```scala
+```tut:silent
 val zipper1 = Zipper(simpleTree)
 ```
 
-```scala
+```tut:silent
 (diagram(simpleTree) + diagram(zipper1)).render("zipper1")
 ```
 
@@ -524,11 +483,11 @@ and the parent zipper does not exist, since we are at the top level.
 
 One thing we can do right away is modify the focus:
 
-```scala
+```tut:silent
 val zipper2 = zipper1.update(focus ⇒ focus.copy(x = focus.x + 99))
 ```
 
-```scala
+```tut:silent
 (diagram(simpleTree) + diagram(zipper1) + diagram(zipper2)).render("zipper2")
 ```
 
@@ -536,11 +495,11 @@ val zipper2 = zipper1.update(focus ⇒ focus.copy(x = focus.x + 99))
 
 We just created a new tree! To obtain it, we have to commit the changes:
 
-```scala
+```tut:silent
 val tree2 = zipper2.commit
 ```
 
-```scala
+```tut:silent
 (diagram(simpleTree) + diagram(tree2)).render("tree2")
 ```
 
@@ -550,7 +509,7 @@ If you were following closely,
 you would notice that nothing spectacular happened yet:
 we could’ve easily obtained the same result by modifying the tree directly:
 
-```scala
+```tut:silent
 val tree2b = simpleTree.copy(x = simpleTree.x + 99)
 
 assert(tree2b == tree2)
@@ -560,11 +519,11 @@ The power of Zipper becomes apparent when we go one or more levels deep.
 To move down the tree, we “unzip” it, separating the child nodes into
 the focused node and its left and right siblings:
 
-```scala
+```tut:silent
 val zipper2 = zipper1.moveDownLeft
 ```
 
-```scala
+```tut:silent
 (diagram(zipper1) + diagram(zipper2)).render("zipper1+2")
 ```
 
@@ -575,7 +534,7 @@ which will allow us to return to the root of the tree when we are done applying 
 This link however prevents us from seeing the picture clearly.
 Let’s look at the second zipper alone:
 
-```scala
+```tut:silent
 diagram(zipper2).render("zipper2b")
 ```
 
@@ -583,11 +542,11 @@ diagram(zipper2).render("zipper2b")
 
 Great! We have `2` in focus and `3, 4, 5` as right siblings. What happens if we move right a bit?
 
-```scala
+```tut:silent
 val zipper3 = zipper2.moveRightBy(2)
 ```
 
-```scala
+```tut:silent
 diagram(zipper3).render("zipper3")
 ```
 
@@ -599,11 +558,11 @@ adjacent to the focus is always at the head of the list.
 
 This also allows us to insert new siblings easily:
 
-```scala
+```tut:silent
 val zipper4 = zipper3.insertLeft(Tree(34))
 ```
 
-```scala
+```tut:silent
 diagram(zipper4).render("zipper4")
 ```
 
@@ -611,11 +570,11 @@ diagram(zipper4).render("zipper4")
 
 And, as you might know, we can delete nodes and update the focus:
 
-```scala
+```tut:silent
 val zipper5 = zipper4.deleteAndMoveRight.set(Tree(45))
 ```
 
-```scala
+```tut:silent
 diagram(zipper5).render("zipper5")
 ```
 
@@ -624,11 +583,11 @@ diagram(zipper5).render("zipper5")
 Finally, when we move up, the siblings at the current level are “zipped”
 together and their parent node is updated:
 
-```scala
+```tut:silent
 val zipper6 = zipper5.moveUp
 ```
 
-```scala
+```tut:silent
 diagram(zipper6).render("zipper6")
 ```
 
@@ -637,7 +596,7 @@ diagram(zipper6).render("zipper6")
 You can probably guess by now that `.commit` is a shorthand for going
 all the way up (applying all the changes) and returning the focus:
 
-```scala
+```tut:silent
 val tree3a = zipper5.moveUp.focus
 val tree3b = zipper5.commit
 

@@ -6,7 +6,7 @@ This project aims to provide visualizations for common functional data structure
 The visualizations are generated automatically from code, which allows to use them in an interactive fashion.
 To use this library you will need to have [GraphViz](http://www.graphviz.org/) installed (and have `dot` on your `PATH`).
 
-For more examples see the [materials for my talk “Unzipping Immutability”](DEMO.md).
+For more examples see the [materials for my talk “Unzipping Immutability”](demo.md).
 
 <p align="center"><img src="images/data/queue.gif" width="40%" /></p>
 
@@ -191,7 +191,7 @@ val queue2 = (Animation
 
 <p align="center"><img src="images/usage/animation-parallel.gif" /></p>
 
-See the [materials for my talk “Unzipping Immutability”](DEMO.md) for more inspiration!
+See the [materials for my talk “Unzipping Immutability”](demo.md) for more inspiration!
 
 ### Usage
 
