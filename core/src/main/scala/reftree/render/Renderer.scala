@@ -6,6 +6,10 @@ import reftree.diagram.{Animation, Diagram}
 import reftree.graph.Graphs
 import reftree.svg.SvgGraphAnimation
 
+sealed trait ExportFormat
+case object JPG extends ExportFormat
+case object PNG extends ExportFormat
+
 /**
  * This class provides functionality for rendering diagrams and animations
  *
@@ -20,7 +24,8 @@ import reftree.svg.SvgGraphAnimation
  *
  *   val renderer = Renderer(
  *     renderingOptions = RenderingOptions(density = 75),
- *     directory = Paths.get("images", "usage")
+ *     directory = Paths.get("images", "usage"),
+ *     format = JPG
  *   )
  *
  *   // Conventional usage
@@ -37,7 +42,8 @@ import reftree.svg.SvgGraphAnimation
 case class Renderer(
   renderingOptions: RenderingOptions = RenderingOptions(),
   animationOptions: AnimationOptions = AnimationOptions(),
-  directory: Path = Paths.get(".")
+  directory: Path = Paths.get("."),
+  format: ExportFormat = PNG
 ) { self ⇒
   /** Tweak the rendering options with the provided funciton */
   def tweakRendering(tweak: RenderingOptions ⇒ RenderingOptions) =
@@ -47,14 +53,19 @@ case class Renderer(
   def tweakAnimation(tweak: AnimationOptions ⇒ AnimationOptions) =
     copy(animationOptions = tweak(animationOptions))
 
-  /** Render a diagram to a PNG file with the given name (do not include the extension) */
+  /** Render a diagram to a file with the given name (do not include the extension) */
   def render(name: String, diagram: Diagram): Unit = {
     val graph = Graphs.graph(renderingOptions)(diagram)
-    PngRenderer.renderPng(
-      graph,
-      directory.resolve(s"$name.png"),
-      renderingOptions
-    )
+    format match {
+      case PNG => PngRenderer.renderPng(
+        graph,
+        directory.resolve(s"$name.png"),
+        renderingOptions)
+      case JPG => JpgRenderer.renderJpg(
+        graph,
+        directory.resolve(s"$name.jpg"),
+        renderingOptions)
+    }
   }
 
   /** Render an animation to a GIF file with the given name (do not include the extension) */
