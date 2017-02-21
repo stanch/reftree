@@ -7,11 +7,12 @@ import uk.co.turingatemyhamster.graphvizs.exec._
 
 import scala.sys.process.{Process, BasicIO}
 
-object PngRenderer {
-  def renderPng(graph: Graph, output: Path, options: RenderingOptions): Unit = {
+object ImageRenderer {
+  def render(graph: Graph, output: Path,
+    options: RenderingOptions, format: String): Unit = {
     val args = Seq(
       "-K", "dot",
-      "-T", "png",
+      "-T", format,
       s"-Gdpi=${options.density}",
       "-o", output.toString
     )

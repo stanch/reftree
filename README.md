@@ -66,7 +66,7 @@ import scala.collection.immutable.Queue
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
   directory = Paths.get("images", "usage"),
-  format = PNG  // or JPG
+  format = "png" // Or "svg", "ps" and others supported by dot
 )
 ```
 
