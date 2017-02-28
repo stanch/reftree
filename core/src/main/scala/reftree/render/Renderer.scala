@@ -23,6 +23,13 @@ import reftree.svg.SvgGraphAnimation
  *     directory = Paths.get("images", "usage")
  *   )
  *
+ *   // With custom output format
+ *   val renderer = Renderer(
+ *     renderingOptions = RenderingOptions(density = 75),
+ *     directory = Paths.get("images", "usage"),
+ *     format = "ps" // Or any other format that compatible with dot -T
+ *   )
+ *
  *   // Conventional usage
  *   renderer
  *     .tweakRendering(_.withVerticalSpacing(2))
@@ -37,7 +44,8 @@ import reftree.svg.SvgGraphAnimation
 case class Renderer(
   renderingOptions: RenderingOptions = RenderingOptions(),
   animationOptions: AnimationOptions = AnimationOptions(),
-  directory: Path = Paths.get(".")
+  directory: Path = Paths.get("."),
+  format: String = "png"
 ) { self ⇒
   /** Tweak the rendering options with the provided funciton */
   def tweakRendering(tweak: RenderingOptions ⇒ RenderingOptions) =
@@ -47,13 +55,14 @@ case class Renderer(
   def tweakAnimation(tweak: AnimationOptions ⇒ AnimationOptions) =
     copy(animationOptions = tweak(animationOptions))
 
-  /** Render a diagram to a PNG file with the given name (do not include the extension) */
+  /** Render a diagram to a file with the given name (do not include the extension) */
   def render(name: String, diagram: Diagram): Unit = {
     val graph = Graphs.graph(renderingOptions)(diagram)
-    PngRenderer.renderPng(
+    DotRenderer.render(
       graph,
-      directory.resolve(s"$name.png"),
-      renderingOptions
+      directory.resolve(s"$name.$format"),
+      renderingOptions,
+      format
     )
   }
 
