@@ -65,10 +65,13 @@ import scala.collection.immutable.Queue
 
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
-  directory = Paths.get("images", "usage"),
-  format = "png" // Or "svg", "ps" and others supported by dot
+  directory = Paths.get("images", "usage")
 )
 ```
+
+You can also pass a `format` parameter as a String to the `Renderer` constructor
+to specify the format you require. The default is `png`. You can specify any
+file type supported by `dot -T`.
 
 There are two ways to use it:
 

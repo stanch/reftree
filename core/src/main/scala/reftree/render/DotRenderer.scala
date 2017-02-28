@@ -7,9 +7,10 @@ import uk.co.turingatemyhamster.graphvizs.exec._
 
 import scala.sys.process.{Process, BasicIO}
 
-object ImageRenderer {
+object DotRenderer {
   def render(graph: Graph, output: Path,
-    options: RenderingOptions, format: String): Unit = {
+    options: RenderingOptions, format: String
+  ): Unit = {
     val args = Seq(
       "-K", "dot",
       "-T", format,

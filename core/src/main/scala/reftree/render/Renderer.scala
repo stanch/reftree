@@ -20,8 +20,14 @@ import reftree.svg.SvgGraphAnimation
  *
  *   val renderer = Renderer(
  *     renderingOptions = RenderingOptions(density = 75),
+ *     directory = Paths.get("images", "usage")
+ *   )
+ *
+ *   // With custom output format
+ *   val renderer = Renderer(
+ *     renderingOptions = RenderingOptions(density = 75),
  *     directory = Paths.get("images", "usage"),
- *     format = "jpg"
+ *     format = "ps" // Or any other format that compatible with dot -T
  *   )
  *
  *   // Conventional usage
@@ -52,11 +58,12 @@ case class Renderer(
   /** Render a diagram to a file with the given name (do not include the extension) */
   def render(name: String, diagram: Diagram): Unit = {
     val graph = Graphs.graph(renderingOptions)(diagram)
-    ImageRenderer.render(
+    DotRenderer.render(
       graph,
       directory.resolve(s"$name.$format"),
       renderingOptions,
-      format)
+      format
+    )
   }
 
   /** Render an animation to a GIF file with the given name (do not include the extension) */

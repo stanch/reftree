@@ -69,6 +69,10 @@ val renderer = Renderer(
 )
 ```
 
+You can also pass a `format` parameter as a String to the `Renderer` constructor
+to specify the format you require. The default is `png`. You can specify any
+file type supported by `dot -T`.
+
 There are two ways to use it:
 
 ```tut:silent
