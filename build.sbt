@@ -8,12 +8,9 @@ val commonSettings = Seq(
   licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
 )
 
-//crossScalaVersions := Seq("2.11.8", "2.12.0")
-
 val core = project.settings(commonSettings: _*).settings(
   name := "reftree",
-  version := "0.8.0",
-  crossScalaVersions := Seq("2.11.8", "2.12.0"),
+  version := "0.8.1",
   libraryDependencies ++= Seq(
     "com.chuusai" %% "shapeless" % "2.3.2",
     "com.lihaoyi" %% "sourcecode" % "0.1.3",
@@ -23,18 +20,19 @@ val core = project.settings(commonSettings: _*).settings(
     "uk.co.turingatemyhamster" %% "gv-core" % "0.3.2",
     "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     "batik" % "batik-transcoder" % "1.6-1" exclude("fop", "fop"),
-    "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.7",
+    "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.8",
     "com.github.julien-truffaut" %% "monocle-macro" % "1.3.2",
     "de.sciss" %% "fingertree" % "1.5.2",
-    "org.scalatest" %% "scalatest" % "3.0.0" % Test,
+    "org.scalatest" %% "scalatest" % "3.0.1" % Test,
     "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
   )
 )
 
 val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
-  publishArtifact := false,
+  publish := {},
+  publishLocal := {},
   libraryDependencies ++= Seq(
-    "com.lihaoyi" % "ammonite" % "0.7.8" % Test cross CrossVersion.full
+    "com.lihaoyi" % "ammonite" % "0.8.2" % Test cross CrossVersion.full
   ),
   initialCommands in (Test, console) := {
     val predef = Seq(
@@ -58,3 +56,6 @@ val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
 )
 
 addCommandAlias("demo", "demo/test:console")
+
+publish := {}
+publishLocal := {}
