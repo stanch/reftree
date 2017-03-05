@@ -15,6 +15,8 @@ import uk.co.turingatemyhamster.graphvizs.exec._
 import scala.sys.process.{Process, BasicIO}
 
 object AnimatedGifRenderer {
+  case class RenderingException(message: String) extends Exception(message)
+
   private lazy val saxParserFactory = {
     val instance = SAXParserFactory.newInstance()
     // This prevents the parser from going to the Internet every time!
@@ -27,8 +29,12 @@ object AnimatedGifRenderer {
     val args = Seq("-K", "dot", "-T", "svg")
     val process = Process("dot", args)
     val output = new StringWriter
-    val io = BasicIO.standard(GraphInputHandler.handle(graph) _).withOutput(BasicIO.processFully(output))
+    val error = new StringWriter
+    val io = BasicIO.standard(GraphInputHandler.handle(graph) _)
+      .withOutput(BasicIO.processFully(output))
+      .withError(BasicIO.processFully(error))
     (process run io).exitValue()
+    if (error.toString.nonEmpty) throw RenderingException(error.toString)
     XML.loadString(output.toString)
   }
 

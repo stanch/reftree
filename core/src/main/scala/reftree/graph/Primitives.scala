@@ -11,10 +11,13 @@ object Primitives {
   private def namespaced(id: String, namespace: Seq[String]) =
     s"${namespace.mkString("/")}-$id"
 
+  private def escapeHtml(label: String) =
+    label.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+
   def caption(caption: String, tree: RefTree, color: Color, namespace: Seq[String]): Seq[Statement] = {
     val captionNodeId = namespaced(s"${tree.id}-caption-${caption.hashCode}", namespace)
     val captionNode = captionNodeId :| (
-      AttributeAssignment("label", ID.Identifier(s"<<i>$caption</i>>")),
+      AttributeAssignment("label", ID.Identifier(s"<<i>${escapeHtml(caption)}</i>>")),
       "id" := captionNodeId,
       "fontcolor" := color.saturate(0.8).lighten(0.8).toRgbaString
     )
@@ -34,7 +37,7 @@ object Primitives {
       s"""style="rounded" cellspacing="0" cellpadding="6" cellborder="0" columns="*" bgcolor="$background""""
     val label = tree match {
       case ref: RefTree.Ref ⇒
-        val title = s"""<td port="n">${ref.name}</td>"""
+        val title = s"""<td port="n">${escapeHtml(ref.name)}</td>"""
         val cells = ref.children.zipWithIndex map { case (c, i) ⇒ cell(c, i, color) }
         s"""<<table $style><tr>${(title +: cells).mkString}</tr></table>>"""
       case _ ⇒
@@ -52,7 +55,7 @@ object Primitives {
   private def cellLabel(tree: RefTree): String = tree match {
     case _ if tree.elide ⇒ "&hellip;"
     case RefTree.Val(value: Int, Some(RefTree.Val.Bin), _, _) ⇒ value.toBinaryString
-    case RefTree.Val(value, _, _, _) ⇒ value.toString.replace(" ", "_")
+    case RefTree.Val(value, _, _, _) ⇒ escapeHtml(value.toString.replace(" ", "_"))
     case _: RefTree.Null ⇒ "&empty;"
     case RefTree.Ref(_, id, _, _, _) ⇒ "&middot;"
   }
