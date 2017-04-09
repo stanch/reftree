@@ -1,5 +1,6 @@
 package reftree.geometry
 
+import monocle.Iso
 import monocle.macros.GenLens
 
 import scala.annotation.implicitNotFound
@@ -46,6 +47,14 @@ object Point {
     Point(x, y)
   }
 
+  /** An isomorphism between (x, y) string pairs [[Point]] */
+  val stringPairIso: Iso[(String, String), Point] =
+    Iso[(String, String), Point] {
+      case (x, y) ⇒ Point(x.toDouble, y.toDouble)
+    } { point ⇒
+      (point.x.toString, point.y.toString)
+    }
+
   val interpolation = Interpolation[Point]((l, r, t) ⇒ l * (1 - t) + r * t)
 
   /** Interpolate between two points on a cubic Bezier curve */
@@ -79,6 +88,10 @@ object Polyline {
       case Array(x, y) ⇒ Point(x, y)
     }
   }
+
+  /** An isomorphism between SVG polylines and [[Polyline]] */
+  val stringIso: Iso[String, Polyline] =
+    Iso[String, Polyline](fromString)(_.toString)
 
   val interpolation = GenLens[Polyline](_.points)
     .interpolateEachWith(Point.interpolation)

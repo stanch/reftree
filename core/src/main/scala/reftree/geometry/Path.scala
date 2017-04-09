@@ -90,6 +90,10 @@ object Path {
   /** Parse an SVG path */
   def fromString(string: String) = parser.parse(string).get.value
 
+  /** An isomorphism between SVG paths and [[Path]] */
+  val stringIso: Iso[String, Path] =
+    Iso[String, Path](fromString)(_.toString)
+
   /** Convert a polyline into a path */
   def fromPolyline(polyline: Polyline) = {
     val move = PathSegment.Move(polyline.points.head)

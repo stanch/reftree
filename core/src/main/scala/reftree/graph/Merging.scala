@@ -2,7 +2,7 @@ package reftree.graph
 
 import monocle.{Iso, Lens}
 import reftree.geometry.Color
-import reftree.util.Lenses
+import reftree.util.Optics
 import com.softwaremill.quicklens._
 import uk.co.turingatemyhamster.graphvizs.dsl.AttributeAssignment.AnyAttributeAssignment
 import uk.co.turingatemyhamster.graphvizs.dsl._
@@ -19,7 +19,7 @@ object Merging {
 
   /** A mapping between a sequence of rgba color strings and sequence of colors */
   private val colorSequenceLens: Lens[Seq[String], Seq[Color]] =
-    Lenses.partitionLens[String](_.startsWith("#")) composeIso
+    Optics.partitionLens[String](_.startsWith("#")) composeIso
     Iso[Seq[String], Seq[Color]](_.map(Color.fromRgbaString(_)))(_.map(_.toRgbaString))
 
   /** A mapping between the node label and the background colors specified inside it */

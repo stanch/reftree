@@ -6,14 +6,14 @@ package reftree.svg
  * Use `Selector.fromString` to construct a selector.
  * Alternatively, this package provides a shorthand string interpolator: sel"g.node, path".
  */
-case class Selector(clauses: Set[Selector.Clause]) {
-  def matches(svg: xml.Node) = clauses.exists(_.matches(svg))
+case class Selector(clauses: Set[Selector.Clause]) extends (xml.Node ⇒ Boolean) {
+  def apply(svg: xml.Node) = clauses.exists(_(svg))
 }
 
 object Selector {
   /** A single selector clause */
-  case class Clause(element: Option[String], classes: Set[String]) {
-    def matches(svg: xml.Node) =
+  case class Clause(element: Option[String], classes: Set[String]) extends (xml.Node ⇒ Boolean) {
+    def apply(svg: xml.Node) =
     element.forall(_ == svg.label) &&
       (classes.isEmpty || classes((svg \ "@class").text))
   }

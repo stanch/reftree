@@ -15,7 +15,7 @@ val core = project.settings(commonSettings: _*).settings(
     "com.chuusai" %% "shapeless" % "2.3.2",
     "com.lihaoyi" %% "sourcecode" % "0.1.3",
     "com.lihaoyi" %% "fastparse" % "0.4.2",
-    "org.stanch" %% "zipper" % "0.4.0",
+    "org.stanch" %% "zipper" % "0.5.0",
     "com.softwaremill.quicklens" %% "quicklens" % "1.4.8",
     "uk.co.turingatemyhamster" %% "gv-core" % "0.3.2",
     "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
