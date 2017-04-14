@@ -6,7 +6,6 @@ import de.sciss.fingertree.{FingerTree, Measure}
 import com.softwaremill.quicklens._
 import monocle.function.all._
 import monocle.macros.GenLens
-import monocle.std.list._
 import reftree.core.RefTree
 import reftree.diagram.{Diagram, Animation}
 import reftree.render.{AnimationOptions, RenderingOptions, Renderer}

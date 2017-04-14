@@ -1,7 +1,6 @@
 package reftree.contrib
 
 import reftree.core._
-import zipper.Zipper
 
 /**
  * This object includes several simplified [[RefTree]] representations

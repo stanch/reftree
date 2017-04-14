@@ -1,13 +1,19 @@
 val commonSettings = Seq(
   organization := "org.stanch",
   scalaVersion := "2.11.8",
+  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  scalacOptions ++= Seq(
+    "-feature", "-deprecation",
+    "-Xlint", "-Ywarn-unused-import", "-Xfatal-warnings"
+  ),
+  scalacOptions in (Compile, doc) += "-no-link-warnings",
   resolvers += Resolver.bintrayRepo("stanch", "maven"),
   licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
 )
 
 val core = project.settings(commonSettings: _*).settings(
   name := "reftree",
-  version := "0.8.2",
+  version := "0.9.0",
   libraryDependencies ++= Seq(
     "com.chuusai" %% "shapeless" % "2.3.2",
     "com.lihaoyi" %% "sourcecode" % "0.1.3",
@@ -53,5 +59,6 @@ val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
 
 addCommandAlias("demo", "demo/test:console")
 
+commonSettings
 publish := {}
 publishLocal := {}

@@ -11,7 +11,7 @@ import reftree.util.Reflection.PrivateFields
 trait CollectionInstances {
   implicit def `Option RefTree`[A: ToRefTree]: ToRefTree[Option[A]] = ToRefTree[Option[A]] {
     case value @ Some(a) ⇒ RefTree.Ref(value, Seq(a.refTree))
-    case value @ None ⇒ RefTree.Ref(value, Seq.empty).rename("None")
+    case value ⇒ RefTree.Ref(value, Seq.empty).rename("None")
   }
 
   implicit def `Array RefTree`[A: ToRefTree]: ToRefTree[Array[A]] = ToRefTree[Array[A]] { value ⇒
@@ -80,48 +80,44 @@ trait CollectionInstances {
     }
 
   implicit def `HashSet RefTree`[A: ToRefTree]: ToRefTree[HashSet[A]] =
-    ToRefTree[HashSet[A]] { value ⇒
-      if (value.isEmpty) {
-        RefTree.Ref(value, Seq.empty).rename("HashSet.EmptyHashSet")
-      } else value match {
-        case leaf: HashSet.HashSet1[A] ⇒
-          val hash = leaf.privateField[Int]("hash")
-          val key = leaf.privateField[A]("key")
-          RefTree.Ref(leaf, Seq(hash.refTree, key.refTree)).rename("HashSet.HashSet1")
-        case collision: HashSet.HashSetCollision1[A] ⇒
-          val hash = collision.privateField[Int]("hash")
-          val ks = collision.privateField[ListSet[A]]("ks")
-          RefTree.Ref(collision, Seq(hash.refTree, ks.refTree)).rename("HashSet.HashSetCollision1")
-        case trie: HashSet.HashTrieSet[A] ⇒
-          val size = trie.privateField[Int]("size0")
-          val bitmap = trie.privateField[Int]("bitmap")
-          val elems = trie.privateField[Array[HashSet[A]]]("elems")
-          val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false, elide = false)
-          RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).rename("HashSet.HashTrieSet")
-      }
+    ToRefTree[HashSet[A]] {
+      case leaf: HashSet.HashSet1[A] ⇒
+        val hash = leaf.privateField[Int]("hash")
+        val key = leaf.privateField[A]("key")
+        RefTree.Ref(leaf, Seq(hash.refTree, key.refTree)).rename("HashSet.HashSet1")
+      case collision: HashSet.HashSetCollision1[A] ⇒
+        val hash = collision.privateField[Int]("hash")
+        val ks = collision.privateField[ListSet[A]]("ks")
+        RefTree.Ref(collision, Seq(hash.refTree, ks.refTree)).rename("HashSet.HashSetCollision1")
+      case trie: HashSet.HashTrieSet[A] ⇒
+        val size = trie.privateField[Int]("size0")
+        val bitmap = trie.privateField[Int]("bitmap")
+        val elems = trie.privateField[Array[HashSet[A]]]("elems")
+        val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false, elide = false)
+        RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).rename("HashSet.HashTrieSet")
+      case empty ⇒
+        RefTree.Ref(empty, Seq.empty).rename("HashSet.EmptyHashSet")
     }
 
   implicit def `HashMap RefTree`[A: ToRefTree, B: ToRefTree]: ToRefTree[HashMap[A, B]] =
-    ToRefTree[HashMap[A, B]] { value ⇒
-      if (value.isEmpty) {
-        RefTree.Ref(value, Seq.empty).rename("HashMap.EmptyHashMap")
-      } else value match {
-        case leaf: HashMap.HashMap1[A, B] ⇒
-          val hash = leaf.privateField[Int]("hash")
-          val key = leaf.privateField[A]("key")
-          val value = leaf.privateField[A]("value")
-          RefTree.Ref(leaf, Seq(hash.refTree, key.refTree, value.refTree)).rename("HashMap.HashMap1")
-        case collision: HashMap.HashMapCollision1[A, B] ⇒
-          val hash = collision.privateField[Int]("hash")
-          val kvs = collision.privateField[ListMap[A, B]]("kvs")
-          RefTree.Ref(collision, Seq(hash.refTree, kvs.refTree)).rename("HashMap.HashMapCollision1")
-        case trie: HashMap.HashTrieMap[A, B] ⇒
-          val size = trie.privateField[Int]("size0")
-          val bitmap = trie.privateField[Int]("bitmap")
-          val elems = trie.privateField[Array[HashMap[A, B]]]("elems")
-          val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false, elide = false)
-          RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).rename("HashMap.HashTrieMap")
-      }
+    ToRefTree[HashMap[A, B]] {
+      case leaf: HashMap.HashMap1[A, B] ⇒
+        val hash = leaf.privateField[Int]("hash")
+        val key = leaf.privateField[A]("key")
+        val value = leaf.privateField[A]("value")
+        RefTree.Ref(leaf, Seq(hash.refTree, key.refTree, value.refTree)).rename("HashMap.HashMap1")
+      case collision: HashMap.HashMapCollision1[A, B] ⇒
+        val hash = collision.privateField[Int]("hash")
+        val kvs = collision.privateField[ListMap[A, B]]("kvs")
+        RefTree.Ref(collision, Seq(hash.refTree, kvs.refTree)).rename("HashMap.HashMapCollision1")
+      case trie: HashMap.HashTrieMap[A, B] ⇒
+        val size = trie.privateField[Int]("size0")
+        val bitmap = trie.privateField[Int]("bitmap")
+        val elems = trie.privateField[Array[HashMap[A, B]]]("elems")
+        val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false, elide = false)
+        RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).rename("HashMap.HashTrieMap")
+      case empty ⇒
+        RefTree.Ref(empty, Seq.empty).rename("HashMap.EmptyHashMap")
     }
 
   private def redBlackTreeRefTree[A: ToRefTree, B: ToRefTree](
