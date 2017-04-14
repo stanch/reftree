@@ -2,7 +2,6 @@ package reftree.util
 
 import monocle._
 import monocle.function.all.each
-import monocle.std.list.listEach
 import zipper.{Unzip, Zipper}
 
 import scala.collection.immutable.ListMap
@@ -86,8 +85,8 @@ object Optics {
         if (pred(z.focus)) (z.tryAdvanceRightDepthFirst, m.updated(key(z.focus), z.focus))
         else (z.tryAdvanceRightDepthFirst, m)
       }._2
-    } { children ⇒ svg ⇒
-      val (zipper, remaining) = Zipper(svg).loopAccum(children) { (z, m) ⇒
+    } { children ⇒ node ⇒
+      val (zipper, remaining) = Zipper(node).loopAccum(children) { (z, m) ⇒
         if (!pred(z.focus)) (z.tryAdvanceRightDepthFirst, m) else {
           val i = key(z.focus)
           if (m contains i) (z.set(m(i)).tryAdvanceRightDepthFirst, m - i)
@@ -149,13 +148,13 @@ object Optics {
 
   /** Focuses on a given optional attribute of an XML node */
   def xmlPrefixedAttribute(uri: String, attr: String): Lens[xml.Node, Option[String]] =
-    Lens[xml.Node, Option[String]] { svg ⇒
-      svg.attribute(uri, attr).map(_.text)
-    } { value ⇒ svg ⇒
-      svg.asInstanceOf[xml.Elem].copy(
+    Lens[xml.Node, Option[String]] { node ⇒
+      node.attribute(uri, attr).map(_.text)
+    } { value ⇒ node ⇒
+      node.asInstanceOf[xml.Elem].copy(
         // TODO: how to remove a prefixed attribute?
-        attributes = value.fold(svg.attributes.remove(attr)) { v ⇒
-          svg.attributes append new xml.PrefixedAttribute(uri, attr, v, xml.Null)
+        attributes = value.fold(node.attributes.remove(attr)) { v ⇒
+          node.attributes append new xml.PrefixedAttribute(uri, attr, v, xml.Null)
         }
       )
     }

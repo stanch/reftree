@@ -1,7 +1,7 @@
 package reftree.graph
 
 import com.softwaremill.quicklens._
-import monocle.{Lens, Optional}
+import monocle.Lens
 import reftree.geometry.Color
 import reftree.util.Optics
 import zipper.Unzip
@@ -26,7 +26,7 @@ object Merging {
       Color.rgbaStringIso
 
     val elementsWithColor: Lens[xml.Node, List[xml.Node]] = Optics.collectLeftByIndex(
-      Optics.xmlAttribute("bgcolor").get(_).isDefined
+      Optics.xmlAttribute("bgcolor").exist(_.nonEmpty)
     )
 
     val colors: Lens[xml.Node, List[Color]] =
