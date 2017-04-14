@@ -1,8 +1,9 @@
 package reftree.demo
 
-import reftree.core.ToRefTree
+import reftree.core._
 import reftree.diagram.Diagram
-import reftree.render.Renderer
+import reftree.graph.{Graph, Graphs}
+import reftree.render.{AnimatedGifRenderer, RenderingOptions, Renderer}
 
 object Shortcuts {
   val renderer = Renderer()
@@ -26,4 +27,10 @@ object Shortcuts {
     "diagram",
     Diagram.sourceCodeCaption(value1) + Diagram.sourceCodeCaption(value2) + Diagram.sourceCodeCaption(value3)
   )
+
+  def graph[A: ToRefTree](value: A): Graph =
+    Graphs.graph(RenderingOptions())(Diagram(value))
+
+  def svg[A: ToRefTree](value: A): xml.Node =
+    AnimatedGifRenderer.renderSvg(graph(value))
 }

@@ -25,7 +25,7 @@ object AnimatedGifRenderer {
   }
   private lazy val XML = xml.XML.withSAXParser(saxParserFactory.newSAXParser())
 
-  private def renderSvg(graph: Graph): xml.Node = {
+  def renderSvg(graph: Graph): xml.Node = {
     val args = Seq("-K", "dot", "-T", "svg")
     val process = Process("dot", args)
     val output = new StringWriter

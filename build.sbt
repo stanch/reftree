@@ -43,6 +43,7 @@ val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
       "import monocle.macros.GenLens",
       "import com.softwaremill.quicklens._",
       "import zipper._",
+      "import reftree.core._",
       "import reftree.diagram._",
       "import reftree.contrib.FingerTreeInstances._",
       "import reftree.contrib.LensInstances._",
