@@ -1,10 +1,10 @@
 package reftree.render
 
-import java.io.StringWriter
-import java.nio.file.Path
+import reftree.graph.Graph
 
-import uk.co.turingatemyhamster.graphvizs.dsl.Graph
-import uk.co.turingatemyhamster.graphvizs.exec._
+import java.io.StringWriter
+import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 
 import scala.sys.process.{Process, BasicIO}
 
@@ -22,8 +22,10 @@ object DotRenderer {
     )
     val process = Process("dot", args)
     val error = new StringWriter
-    val io = BasicIO.standard(GraphInputHandler.handle(graph) _)
-      .withError(BasicIO.processFully(error))
+    val io = BasicIO.standard { stream ⇒
+      stream.write(graph.toString.getBytes(StandardCharsets.UTF_8))
+      stream.close()
+    }.withError(BasicIO.processFully(error))
     (process run io).exitValue()
     if (error.toString.nonEmpty) throw RenderingException(error.toString)
     ()

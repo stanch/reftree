@@ -2,6 +2,7 @@ package reftree.render
 
 import java.awt.image.BufferedImage
 import java.io.{ByteArrayInputStream, StringWriter}
+import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import javax.xml.parsers.SAXParserFactory
 
@@ -9,8 +10,7 @@ import com.sksamuel.scrimage.Image
 import com.sksamuel.scrimage.nio.GifSequenceWriter
 import org.apache.batik.transcoder.{TranscoderInput, SVGAbstractTranscoder, TranscoderOutput}
 import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
-import uk.co.turingatemyhamster.graphvizs.dsl.Graph
-import uk.co.turingatemyhamster.graphvizs.exec._
+import reftree.graph.Graph
 
 import scala.sys.process.{Process, BasicIO}
 
@@ -30,9 +30,10 @@ object AnimatedGifRenderer {
     val process = Process("dot", args)
     val output = new StringWriter
     val error = new StringWriter
-    val io = BasicIO.standard(GraphInputHandler.handle(graph) _)
-      .withOutput(BasicIO.processFully(output))
-      .withError(BasicIO.processFully(error))
+    val io = BasicIO.standard { stream ⇒
+      stream.write(graph.toString.getBytes(StandardCharsets.UTF_8))
+      stream.close()
+    }.withOutput(BasicIO.processFully(output)).withError(BasicIO.processFully(error))
     (process run io).exitValue()
     if (error.toString.nonEmpty) throw RenderingException(error.toString)
     XML.loadString(output.toString)

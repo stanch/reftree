@@ -30,6 +30,14 @@ object Optics {
       }._1
     }
 
+  /** Transforms a lens into a lens of lists */
+  def sequenceLens[A, B](lens: Lens[A, B]): Lens[List[A], List[B]] =
+    Lens[List[A], List[B]] { as ⇒
+      as.map(lens.get)
+    } { bs ⇒ as ⇒
+      (bs zip as).map { case (b, a) ⇒ lens.set(b)(a) }
+    }
+
   /** A prism that matches values satisfying a predicate */
   def only[A](pred: A ⇒ Boolean): Prism[A, A] =
     Prism[A, A] { value ⇒

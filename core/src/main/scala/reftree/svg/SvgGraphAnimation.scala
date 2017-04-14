@@ -6,7 +6,9 @@ import reftree.svg.SvgOptics.unzipSvg
 
 object SvgGraphAlignment {
   private val graph = Optics.collectFirst(sel"g.graph")
-  private val nodes = Optics.collectLeftByKey(sel"g.node")(_ \ "@id" text)
+  private val nodes = Optics.collectLeftByKey(sel"g.node")(
+    Optics.xmlMandatoryAttribute("id").get
+  )
 
   private val nodeAnchor = Optics.collectFirst(sel"a") composeLens
     Optics.xmlPrefixedAttribute("http://www.w3.org/1999/xlink", "title")
@@ -101,7 +103,9 @@ object SvgGraphInterpolation {
 
   val interpolation: Interpolation[xml.Node] =
     Optics.collectFirst(sel"g.graph").interpolateWith(
-      Optics.collectLeftByKey(sel"g.node, g.edge")(_ \ "@id" text).interpolateEachWith(
+      Optics.collectLeftByKey(sel"g.node, g.edge")(
+        Optics.xmlMandatoryAttribute("id").get
+      ).interpolateEachWith(
         nodeOrEdge.option(fadeOut, fadeIn)
       )
     )
@@ -129,7 +133,9 @@ object SvgGraphAnimation {
 
   /** Make the newly appeared nodes and edges thicker */
   private def accentuatePairwise(svgs: Seq[xml.Node]) = {
-    val nodesAndEdges = Optics.collectLeftByKey(sel"g.node, g.edge")(_ \ "@id" text)
+    val nodesAndEdges = Optics.collectLeftByKey(sel"g.node, g.edge")(
+      Optics.xmlMandatoryAttribute("id").get
+    )
     val thickness = Optics.collectAllLeft(sel"path, polygon") composeOptional SvgOptics.thickness
 
     def accentuate(prev: xml.Node, next: xml.Node) = {

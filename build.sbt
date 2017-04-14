@@ -1,10 +1,7 @@
 val commonSettings = Seq(
   organization := "org.stanch",
   scalaVersion := "2.11.8",
-  resolvers ++= Seq(
-    Resolver.bintrayRepo("stanch", "maven"),
-    Resolver.bintrayRepo("drdozer", "maven")
-  ),
+  resolvers += Resolver.bintrayRepo("stanch", "maven"),
   licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
 )
 
@@ -17,7 +14,6 @@ val core = project.settings(commonSettings: _*).settings(
     "com.lihaoyi" %% "fastparse" % "0.4.2",
     "org.stanch" %% "zipper" % "0.5.0",
     "com.softwaremill.quicklens" %% "quicklens" % "1.4.8",
-    "uk.co.turingatemyhamster" %% "gv-core" % "0.3.2",
     "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     "batik" % "batik-transcoder" % "1.6-1" exclude("fop", "fop"),
     "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.8",

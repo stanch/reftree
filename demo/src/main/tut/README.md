@@ -214,10 +214,7 @@ You can depend on the library by adding these lines to your `build.sbt`
 [ ![Download](https://api.bintray.com/packages/stanch/maven/reftree/images/download.svg) ](https://bintray.com/stanch/maven/reftree/_latestVersion)):
 
 ```scala
-resolvers ++= Seq(
-  Resolver.bintrayRepo("stanch", "maven"),
-  Resolver.bintrayRepo("drdozer", "maven")
-)
+resolvers += Resolver.bintrayRepo("stanch", "maven")
 
 libraryDependencies += "org.stanch" %% "reftree" % "latest-version"
 ```

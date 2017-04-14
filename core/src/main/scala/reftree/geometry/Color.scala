@@ -104,6 +104,10 @@ object Color {
     }
   }
 
+  /** An isomorphism between RGBA color strings and [[Color]] */
+  val rgbaStringIso: Iso[String, Color] =
+    Iso[String, Color](fromRgbaString(_))(_.toRgbaString)
+
   /** Interpolate colors by interpolating the RGBA components */
   val interpolation = (color2rgba composeIso rgbaComponents).asLens
     .interpolateEachWith(Interpolation.double)

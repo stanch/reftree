@@ -4,23 +4,23 @@ import reftree.geometry.Color
 import reftree.render.RenderingOptions
 import reftree.diagram.{Animation, Diagram}
 import reftree.core.RefTree
-import uk.co.turingatemyhamster.graphvizs.dsl._
+import reftree.graph.Attr.AttrSyntax
 
 object Graphs {
-  private def graphAttributes(options: RenderingOptions): Seq[Statement] = Seq(
-    "graph" :| ("ranksep" := options.verticalSpacing),
-    "node" :| ("shape" := "plaintext", "fontname" := "consolas", "fontcolor" := "#000000"),
-    "edge" :| ("arrowsize" := "0.7", "color" := "#000000")
+  private def graphAttributes(options: RenderingOptions): Seq[GraphStatement] = Seq(
+    Attrs.Graph("ranksep" := options.verticalSpacing),
+    Attrs.Node("shape" := "plaintext", "fontname" := "consolas", "fontcolor" := "#000000"),
+    Attrs.Edge("arrowsize" := "0.7", "color" := "#000000")
   )
 
-  private def graphStatements(diagram: Diagram, options: RenderingOptions): Seq[Statement] = {
+  private def graphStatements(diagram: Diagram, options: RenderingOptions): Seq[GraphStatement] = {
     def inner(
       tree: RefTree,
       color: Color,
       anchorId: Option[String],
       namespace: Seq[String],
       depth: Int
-    ): Seq[Statement] = tree match {
+    ): Seq[GraphStatement] = tree match {
       case r @ RefTree.Ref(_, id, children, _, false) ⇒
         Seq(Primitives.node(r, color, anchorId, namespace)) ++
           children.flatMap(inner(_, color, None, namespace, depth + 1)) ++
@@ -44,7 +44,7 @@ object Graphs {
 
   def graph(options: RenderingOptions)(diagram: Diagram): Graph = {
     val statements = graphAttributes(options) ++ Merging.mergeLayer(graphStatements(diagram, options))
-    NonStrictDigraph("diagram", statements: _*)
+    Graph(strict = false, directed = true, statements: _*)
   }
 
   def graphs(options: RenderingOptions, onionSkinLayers: Int)(animation: Animation): Seq[Graph] = {
@@ -58,7 +58,7 @@ object Graphs {
       }
       val statementLayers = onionSkin :+ graphStatements(diagrams.last, options)
       val statements = graphAttributes(options) ++ Merging.mergeLayers(statementLayers)
-      NonStrictDigraph("diagram", statements: _*)
+      Graph(strict = false, directed = true, statements: _*)
     }
   }
 }

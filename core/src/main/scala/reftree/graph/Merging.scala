@@ -1,43 +1,49 @@
 package reftree.graph
 
-import monocle.{Iso, Lens}
+import com.softwaremill.quicklens._
+import monocle.{Lens, Optional}
 import reftree.geometry.Color
 import reftree.util.Optics
-import com.softwaremill.quicklens._
-import uk.co.turingatemyhamster.graphvizs.dsl.AttributeAssignment.AnyAttributeAssignment
-import uk.co.turingatemyhamster.graphvizs.dsl._
+import zipper.Unzip
 
 object Merging {
   /** Get a unique statement identifier, if any */
-  private def statementId(statement: Statement) = statement match {
-    case n: NodeStatement ⇒
-      Some(n.node.id.asInstanceOf[ID.Quoted].value)
-    case e: EdgeStatement ⇒
-      Some(e.attributes.get.attrs.find(_.name == ID("id")).get.value.get.asInstanceOf[ID.Quoted].value)
+  private def statementId(statement: GraphStatement) = statement match {
+    case n: Node ⇒
+      Some(n.id)
+    case e: Edge ⇒
+      Some(e.attrs.find(_.name == "id").get.value)
     case _ ⇒ None
   }
 
-  /** A mapping between a sequence of rgba color strings and sequence of colors */
-  private val colorSequenceLens: Lens[Seq[String], Seq[Color]] =
-    Optics.partitionLens[String](_.startsWith("#")) composeIso
-    Iso[Seq[String], Seq[Color]](_.map(Color.fromRgbaString(_)))(_.map(_.toRgbaString))
+  /** Enable navigating through XML with a zipper */
+  implicit val unzipXml: Unzip[xml.Node] =
+    Optics.unzip(Optics.xmlImmediateChildren)
 
   /** A mapping between the node label and the background colors specified inside it */
-  private val nodeColorLens: Lens[NodeStatement, Seq[Color]] =
-    Lens[NodeStatement, Seq[String]] { statement ⇒
-      val label = statement.attributes.get.attrs
-        .find(_.name == ID("label")).get
-        .value.get.asInstanceOf[ID.Identifier].value
-      label.replaceAll("""bgcolor="(.+?)"""", """bgcolor="<>$1<>"""").split("<>")
-    } { label ⇒ statement ⇒
-      statement.modify {
-        _.attributes.each.attrs.eachWhere(_.name == ID("label"))
-          .when[AnyAttributeAssignment].value.each
-      }.setTo(ID.Identifier(label.mkString))
-    } composeLens colorSequenceLens
+  val nodeColorLens: Lens[Node, List[Color]] = {
+    val color: Lens[xml.Node, Color] = Optics.xmlMandatoryAttribute("bgcolor") composeIso
+      Color.rgbaStringIso
+
+    val elementsWithColor: Lens[xml.Node, List[xml.Node]] = Optics.collectLeftByIndex(
+      Optics.xmlAttribute("bgcolor").get(_).isDefined
+    )
+
+    val colors: Lens[xml.Node, List[Color]] =
+      elementsWithColor composeLens Optics.sequenceLens(color)
+
+    val nodeLabel: Lens[Node, xml.Node] =
+      Lens[Node, xml.Node](
+        _.attrs.find(_.name == "label").get.value.asInstanceOf[Identifier.Html].value
+      ) { html ⇒ node ⇒
+        node.modify(_.attrs.eachWhere(_.name == "label").value.when[Identifier.Html].value).setTo(html)
+      }
+
+    nodeLabel composeLens colors
+  }
 
   /** Merge node statements by mixing highlight colors inside them */
-  private def mergeNodeStatements(statements: Seq[NodeStatement], keepLeft: Boolean, mixColor: Boolean) = {
+  private def mergeNodeStatements(statements: Seq[Node], keepLeft: Boolean, mixColor: Boolean) = {
     val keeper = if (keepLeft) statements.head else statements.last
     val colors = statements.map(nodeColorLens.get)
     if (colors.exists(_.isEmpty)) keeper else {
@@ -53,20 +59,20 @@ object Merging {
         // otherwise pick the winning color
         else if (keepLeft) ignoreDefault.head else ignoreDefault.last
       }
-      nodeColorLens.set(mixedColors)(keeper)
+      nodeColorLens.set(mixedColors.toList)(keeper)
     }
   }
 
   /** Merge statements with the same ids to eliminate duplicates */
-  private def merge(statements: Seq[Statement], keepLeft: Boolean, mixColor: Boolean): Seq[Statement] = {
+  private def merge(statements: Seq[GraphStatement], keepLeft: Boolean, mixColor: Boolean): Seq[GraphStatement] = {
     val groupedById = statements.zipWithIndex.groupBy { case (s, i) ⇒ statementId(s) }.values.toSeq
     val merged = groupedById.flatMap {
       case single @ Seq(_) ⇒ single
-      case nodes @ Seq((n: NodeStatement, _), _*) ⇒
+      case nodes @ Seq((n: Node, _), _*) ⇒
         val index = if (keepLeft) nodes.head._2 else nodes.last._2
-        val merged = mergeNodeStatements(nodes.map(_._1.asInstanceOf[NodeStatement]), keepLeft, mixColor)
+        val merged = mergeNodeStatements(nodes.map(_._1.asInstanceOf[Node]), keepLeft, mixColor)
         Seq((merged, index))
-      case edges @ Seq((n: EdgeStatement, _), _*) ⇒
+      case edges @ Seq((n: Edge, _), _*) ⇒
         if (!keepLeft) edges.takeRight(1) else edges.take(1)
       case other ⇒ other
     }
@@ -74,19 +80,19 @@ object Merging {
   }
 
   /** Remove edges pointing to elided objects which are not explicitly included */
-  private def removeDanglingEdges(statements: Seq[Statement]): Seq[Statement] = {
+  private def removeDanglingEdges(statements: Seq[GraphStatement]): Seq[GraphStatement] = {
     val ids = statements.flatMap(statementId).toSet
     statements filter {
-      case EdgeStatement(source, Seq((_, NodeId(id, _))), _) if !ids(id.asInstanceOf[ID.Quoted].value) ⇒ false
+      case Edge(_, NodeId(id, _, _), _*) if !ids(id) ⇒ false
       case _ ⇒ true
     }
   }
 
   /** Merge statements belonging to the same layer */
-  def mergeLayer(statements: Seq[Statement]): Seq[Statement] =
+  def mergeLayer(statements: Seq[GraphStatement]): Seq[GraphStatement] =
     merge(removeDanglingEdges(statements), keepLeft = true, mixColor = true)
 
   /** Merge statements belonging to different onion skin layers */
-  def mergeLayers(statements: Seq[Seq[Statement]]): Seq[Statement] =
+  def mergeLayers(statements: Seq[Seq[GraphStatement]]): Seq[GraphStatement] =
     merge(removeDanglingEdges(statements.flatMap(mergeLayer)), keepLeft = false, mixColor = false)
 }
