@@ -1,7 +1,5 @@
 package reftree.core
 
-import com.softwaremill.quicklens._
-
 import scala.annotation.implicitNotFound
 import scala.collection.immutable.CollectionInstances
 
@@ -48,6 +46,9 @@ sealed trait RefTree {
     case tree: RefTree.Null ⇒ tree.copy(elide = elide)
     case tree: RefTree.Ref ⇒ tree.copy(elide = elide)
   }
+
+  /** Convert to a field usable in other trees */
+  def toField: RefTree.Ref.Field = RefTree.Ref.Field(this)
 }
 
 object RefTree {
@@ -64,12 +65,16 @@ object RefTree {
     elide: Boolean
   ) extends RefTree {
     def id = value.toString
+
+    /* Add a visualization hint */
+    def withHint(hint: Val.Hint) = copy(hint = Some(hint))
   }
 
   object Val {
-    /** Special visualiation hints */
+    /** Special visualization hints */
     sealed trait Hint
     case object Bin extends Hint
+    case object Hex extends Hint
 
     /** Construct a [[RefTree]] for a value */
     def apply(value: AnyVal): Val = Val(value, None, highlight = false, elide = false)
@@ -83,21 +88,28 @@ object RefTree {
   case class Ref private (
     name: String,
     id: String,
-    children: Seq[RefTree],
+    children: Seq[Ref.Field],
     highlight: Boolean,
     elide: Boolean
   ) extends RefTree {
+    /** Change the name of the object */
     def rename(name: String) = copy(name = name)
   }
 
   object Ref {
+    /** A name-value pair for storing object fields */
+    case class Field(value: RefTree, name: Option[String] = None) {
+      /** Add a name */
+      def withName(name: String) = copy(name = Some(name))
+    }
+
     /**
      * Construct a [[RefTree]] for an object
      *
      * The identifier of the tree will be derived automatically.
      * Only modify it (e.g. via `copy`) if you know what you are doing ;)
      */
-    def apply(value: AnyRef, children: Seq[RefTree]): Ref = Ref(
+    def apply(value: AnyRef, children: Seq[Ref.Field]): Ref = Ref(
       // getSimpleName sometimes does not work, see https://issues.scala-lang.org/browse/SI-5425
       try { value.getClass.getSimpleName }
       catch { case _: InternalError ⇒ value.getClass.getName.replaceAll("^.+\\$", "") },
@@ -115,23 +127,6 @@ object RefTree {
 @implicitNotFound("To render a diagram for type ${A}, implement an instance of reftree.core.ToRefTree[${A}]")
 trait ToRefTree[A] { self ⇒
   def refTree(value: A): RefTree
-
-  /** Obtain a new mapping where the field at `index` is highlighted */
-  def highlightField(index: Int) = ToRefTree[A] { value ⇒
-    self.refTree(value).modify(_.when[RefTree.Ref].children.at(index)).using(_.withHighlight(true))
-  }
-
-  /** Obtain a new mapping where the field at `index` is elided */
-  def elideField(index: Int) = ToRefTree[A] { value ⇒
-    self.refTree(value).modify(_.when[RefTree.Ref].children.at(index)).using(_.withElide(true))
-  }
-
-  /** Obtain a new mapping where the field at `index` is elided if the condition is met */
-  def elideFieldIf(index: Int, predicate: A ⇒ Boolean) = ToRefTree[A] { value ⇒
-    if (!predicate(value)) self.refTree(value) else {
-      self.refTree(value).modify(_.when[RefTree.Ref].children.at(index)).using(_.withElide(true))
-    }
-  }
 }
 
 object ToRefTree extends CollectionInstances with GenericInstances {
@@ -143,6 +138,6 @@ object ToRefTree extends CollectionInstances with GenericInstances {
   implicit def `AnyVal RefTree`[A <: AnyVal]: ToRefTree[A] = ToRefTree[A](RefTree.Val.apply)
 
   implicit def `String RefTree`: ToRefTree[String] = ToRefTree[String] { value ⇒
-    RefTree.Ref(value, value.map(RefTree.Val.apply))
+    RefTree.Ref(value, value.map(RefTree.Val(_).toField))
   }
 }

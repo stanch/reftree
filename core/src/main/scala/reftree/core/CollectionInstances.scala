@@ -10,26 +10,27 @@ import reftree.util.Reflection.PrivateFields
  */
 trait CollectionInstances {
   implicit def `Option RefTree`[A: ToRefTree]: ToRefTree[Option[A]] = ToRefTree[Option[A]] {
-    case value @ Some(a) ⇒ RefTree.Ref(value, Seq(a.refTree))
+    case value @ Some(a) ⇒ RefTree.Ref(value, Seq(a.refTree.toField))
     case value ⇒ RefTree.Ref(value, Seq.empty).rename("None")
   }
 
   implicit def `Array RefTree`[A: ToRefTree]: ToRefTree[Array[A]] = ToRefTree[Array[A]] { value ⇒
-    RefTree.Ref(value, value.map(_.refTree)).rename("Array")
+    RefTree.Ref(value, value.map(_.refTree.toField)).rename("Array")
   }
 
   implicit def `List RefTree`[A: ToRefTree]: ToRefTree[List[A]] = new ToRefTree[List[A]] {
     def refTree(value: List[A]): RefTree = value match {
-      case head :: tail ⇒ RefTree.Ref(value, Seq(head.refTree, refTree(tail))).rename("Cons")
+      case head :: tail ⇒
+        RefTree.Ref(value, Seq(head.refTree.toField, refTree(tail).toField)).rename("Cons")
       case Nil ⇒ RefTree.Ref(Nil, Seq.empty).rename("Nil")
     }
   }
 
   implicit def `Queue RefTree`[A: ToRefTree](implicit list: ToRefTree[List[A]]): ToRefTree[Queue[A]] =
     ToRefTree[Queue[A]] { value ⇒
-      val in = value.privateField[List[A]]("in")
-      val out = value.privateField[List[A]]("out")
-      RefTree.Ref(value, Seq(out.refTree, in.refTree))
+      val front = value.privateField[List[A]]("out").refTree.toField.withName("front")
+      val back = value.privateField[List[A]]("in").refTree.toField.withName("back")
+      RefTree.Ref(value, Seq(front, back))
     }
 
   private def vectorArrayRefTree[A: ToRefTree](value: Array[AnyRef], depth: Int): RefTree = {
@@ -37,23 +38,26 @@ trait CollectionInstances {
       if (x == null) RefTree.Null()
       else if (depth > 0) vectorArrayRefTree[A](x.asInstanceOf[Array[AnyRef]], depth - 1)
       else x.asInstanceOf[A].refTree
-    }).rename("Array")
+    } map (_.toField)).rename("Array")
   }
 
   implicit def `Vector RefTree`[A: ToRefTree]: ToRefTree[Vector[A]] = ToRefTree[Vector[A]] { value ⇒
-    val focus = value.privateField[Int]("focus")
-    val binFocus = RefTree.Val(focus, Some(RefTree.Val.Bin), highlight = false, elide = false)
+    val start = value.startIndex.refTree.toField.withName("start")
+    val end = value.endIndex.refTree.toField.withName("end")
+    val focus = RefTree.Val(value.privateField[Int]("focus")).withHint(RefTree.Val.Bin)
+      .toField.withName("focus")
+    val depth = value.depth.refTree.toField.withName("depth")
     val layers = Seq(
       value.display0, value.display1,
       value.display2, value.display3,
       value.display4, value.display5
     ).zipWithIndex.map {
-      case (layer, depth) if depth < value.depth ⇒ vectorArrayRefTree[A](layer, depth)
+      case (layer, d) if d < value.depth ⇒ vectorArrayRefTree[A](layer, d)
       case (layer, _) ⇒ RefTree.Null()
-    }
+    }.map(_.toField)
     RefTree.Ref(
       value,
-      Seq(value.startIndex.refTree, value.endIndex.refTree, binFocus, value.depth.refTree) ++ layers
+      Seq(start, end, focus, depth) ++ layers
     )
   }
 
@@ -63,8 +67,10 @@ trait CollectionInstances {
       // to construct the tree representation by direct introspection.
       // I promise it looks just like the real deal!
       def refTree(value: ListSet[A]): RefTree = value.headOption match {
-        case Some(head) ⇒ RefTree.Ref(value, Seq(head.refTree, refTree(value.tail))).rename("ListSet.Node")
-        case None ⇒ RefTree.Ref(ListSet.empty[A], Seq()).rename("ListSet.EmptyListSet")
+        case Some(head) ⇒
+          RefTree.Ref(value, Seq(head.refTree.toField, refTree(value.tail).toField))
+            .rename("ListSet.Node")
+        case None ⇒ RefTree.Ref(ListSet.empty[A], Seq.empty).rename("ListSet.EmptyListSet")
       }
     }
 
@@ -74,27 +80,31 @@ trait CollectionInstances {
       // to construct the tree representation by direct introspection.
       // I promise it looks just like the real deal!
       def refTree(value: ListMap[A, B]): RefTree = value.headOption match {
-        case Some((k, v)) ⇒ RefTree.Ref(value, Seq(k.refTree, v.refTree, refTree(value.tail))).rename("ListMap.Node")
-        case None ⇒ RefTree.Ref(ListMap.empty[A, B], Seq()).rename("ListMap.EmptyListMap")
+        case Some((k, v)) ⇒
+          RefTree.Ref(value, Seq(k.refTree.toField, v.refTree.toField, refTree(value.tail).toField))
+            .rename("ListMap.Node")
+        case None ⇒ RefTree.Ref(ListMap.empty[A, B], Seq.empty).rename("ListMap.EmptyListMap")
       }
     }
 
   implicit def `HashSet RefTree`[A: ToRefTree]: ToRefTree[HashSet[A]] =
     ToRefTree[HashSet[A]] {
       case leaf: HashSet.HashSet1[A] ⇒
-        val hash = leaf.privateField[Int]("hash")
-        val key = leaf.privateField[A]("key")
-        RefTree.Ref(leaf, Seq(hash.refTree, key.refTree)).rename("HashSet.HashSet1")
+        val hash = RefTree.Val(leaf.privateField[Int]("hash")).withHint(RefTree.Val.Hex)
+          .toField.withName("hash")
+        val key = leaf.privateField[A]("key").refTree.toField
+        RefTree.Ref(leaf, Seq(hash, key)).rename("HashSet.HashSet1")
       case collision: HashSet.HashSetCollision1[A] ⇒
-        val hash = collision.privateField[Int]("hash")
-        val ks = collision.privateField[ListSet[A]]("ks")
-        RefTree.Ref(collision, Seq(hash.refTree, ks.refTree)).rename("HashSet.HashSetCollision1")
+        val hash = RefTree.Val(collision.privateField[Int]("hash")).withHint(RefTree.Val.Hex)
+          .toField.withName("hash")
+        val ks = collision.privateField[ListSet[A]]("ks").refTree.toField
+        RefTree.Ref(collision, Seq(hash, ks)).rename("HashSet.HashSetCollision1")
       case trie: HashSet.HashTrieSet[A] ⇒
-        val size = trie.privateField[Int]("size0")
-        val bitmap = trie.privateField[Int]("bitmap")
-        val elems = trie.privateField[Array[HashSet[A]]]("elems")
-        val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false, elide = false)
-        RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).rename("HashSet.HashTrieSet")
+        val size = trie.privateField[Int]("size0").refTree.toField.withName("size")
+        val elems = trie.privateField[Array[HashSet[A]]]("elems").refTree.toField
+        val bitmap = RefTree.Val(trie.privateField[Int]("bitmap")).withHint(RefTree.Val.Bin)
+          .toField.withName("bitmap")
+        RefTree.Ref(trie, Seq(size, bitmap, elems)).rename("HashSet.HashTrieSet")
       case empty ⇒
         RefTree.Ref(empty, Seq.empty).rename("HashSet.EmptyHashSet")
     }
@@ -102,20 +112,22 @@ trait CollectionInstances {
   implicit def `HashMap RefTree`[A: ToRefTree, B: ToRefTree]: ToRefTree[HashMap[A, B]] =
     ToRefTree[HashMap[A, B]] {
       case leaf: HashMap.HashMap1[A, B] ⇒
-        val hash = leaf.privateField[Int]("hash")
-        val key = leaf.privateField[A]("key")
-        val value = leaf.privateField[A]("value")
-        RefTree.Ref(leaf, Seq(hash.refTree, key.refTree, value.refTree)).rename("HashMap.HashMap1")
+        val hash = RefTree.Val(leaf.privateField[Int]("hash")).withHint(RefTree.Val.Hex)
+          .toField.withName("hash")
+        val key = leaf.privateField[A]("key").refTree.toField
+        val value = leaf.privateField[A]("value").refTree.toField
+        RefTree.Ref(leaf, Seq(hash, key, value)).rename("HashMap.HashMap1")
       case collision: HashMap.HashMapCollision1[A, B] ⇒
-        val hash = collision.privateField[Int]("hash")
-        val kvs = collision.privateField[ListMap[A, B]]("kvs")
-        RefTree.Ref(collision, Seq(hash.refTree, kvs.refTree)).rename("HashMap.HashMapCollision1")
+        val hash = RefTree.Val(collision.privateField[Int]("hash")).withHint(RefTree.Val.Hex)
+          .toField.withName("hash")
+        val kvs = collision.privateField[ListMap[A, B]]("kvs").refTree.toField
+        RefTree.Ref(collision, Seq(hash, kvs)).rename("HashMap.HashMapCollision1")
       case trie: HashMap.HashTrieMap[A, B] ⇒
-        val size = trie.privateField[Int]("size0")
-        val bitmap = trie.privateField[Int]("bitmap")
-        val elems = trie.privateField[Array[HashMap[A, B]]]("elems")
-        val binBitmap = RefTree.Val(bitmap, Some(RefTree.Val.Bin), highlight = false, elide = false)
-        RefTree.Ref(trie, Seq(size.refTree, binBitmap, elems.refTree)).rename("HashMap.HashTrieMap")
+        val size = trie.privateField[Int]("size0").refTree.toField.withName("size")
+        val elems = trie.privateField[Array[HashMap[A, B]]]("elems").refTree.toField
+        val bitmap = RefTree.Val(trie.privateField[Int]("bitmap")).withHint(RefTree.Val.Bin)
+          .toField.withName("bitmap")
+        RefTree.Ref(trie, Seq(size, bitmap, elems)).rename("HashMap.HashTrieMap")
       case empty ⇒
         RefTree.Ref(empty, Seq.empty).rename("HashMap.EmptyHashMap")
     }
@@ -125,10 +137,11 @@ trait CollectionInstances {
     includeValue: Boolean
   ): RefTree = {
     if (tree == null) RefTree.Null() else {
-      val left = redBlackTreeRefTree(tree.left, includeValue)
-      val right = redBlackTreeRefTree(tree.right, includeValue)
-      val value = if (includeValue) Seq(tree.value.refTree) else Seq.empty
-      RefTree.Ref(tree, Seq(tree.key.refTree) ++ value ++ Seq(left, right))
+      val key = tree.key.refTree.toField
+      val value = if (includeValue) Seq(tree.value.refTree.toField) else Seq.empty
+      val left = redBlackTreeRefTree(tree.left, includeValue).toField
+      val right = redBlackTreeRefTree(tree.right, includeValue).toField
+      RefTree.Ref(tree, Seq(key) ++ value ++ Seq(left, right))
         .copy(highlight = tree.isInstanceOf[RedBlackTree.RedTree[A, B]])
     }
   }

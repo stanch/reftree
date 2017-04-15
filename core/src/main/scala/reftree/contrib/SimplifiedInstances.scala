@@ -20,13 +20,13 @@ object SimplifiedInstances {
   /** A simplified representation of a [[List]], similar to that of an [[Array]] */
   implicit def list[A: ToRefTree]: ToRefTree[List[A]] = ToRefTree[List[A]] {
     case Nil ⇒ RefTree.Null()
-    case value ⇒ RefTree.Ref(value, value.map(_.refTree)).rename("List")
+    case value ⇒ RefTree.Ref(value, value.map(_.refTree.toField)).rename("List")
   }
 
   /** A simplified representation of any [[Seq]], similar to that of an [[Array]] */
   implicit def seq[A: ToRefTree]: ToRefTree[Seq[A]] = ToRefTree[Seq[A]] { value ⇒
     if (value.isEmpty) RefTree.Null() else {
-      RefTree.Ref(value, value.map(_.refTree)).rename("Seq")
+      RefTree.Ref(value, value.map(_.refTree.toField)).rename("Seq")
     }
   }
 
@@ -34,7 +34,8 @@ object SimplifiedInstances {
   implicit def map[A: ToRefTree, B: ToRefTree]: ToRefTree[Map[A, B]] = ToRefTree[Map[A, B]] { value ⇒
     if (value.isEmpty) RefTree.Null() else {
       RefTree.Ref(value, value.toSeq map {
-        case tuple @ (k, v) ⇒ RefTree.Ref(tuple, Seq(k.refTree, v.refTree)).rename("MapEntry")
+        case tuple @ (k, v) ⇒
+          RefTree.Ref(tuple, Seq(k.refTree.toField, v.refTree.toField)).rename("MapEntry").toField
       }).rename("Map")
     }
   }

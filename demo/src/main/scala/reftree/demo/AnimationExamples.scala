@@ -165,7 +165,7 @@ object Quiz extends App {
   import renderer._
 
   def anonymize(tree: RefTree): RefTree = tree match {
-    case ref: RefTree.Ref ⇒ ref.rename("�").copy(children = ref.children.map(anonymize))
+    case ref: RefTree.Ref ⇒ ref.rename("�").modify(_.children.each.value).using(anonymize)
     case other ⇒ other
   }
 

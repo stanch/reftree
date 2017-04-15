@@ -1,5 +1,7 @@
 package reftree.demo
 
+import reftree.core._
+
 import scala.language.higherKinds
 
 import monocle.PTraversal
@@ -59,6 +61,8 @@ object Data {
   val newHire = Hierarchy(Employee("Bert", 1300))
 
   case class Tree(x: Int, c: List[Tree] = Nil)
+
+  implicit val treeFieldConfig = ToRefTree.FieldConfig[Tree].noName("x").noName("c")
 
   val simpleTree = Tree(1, List(Tree(2), Tree(3), Tree(4), Tree(5, List(Tree(6), Tree(7)))))
 

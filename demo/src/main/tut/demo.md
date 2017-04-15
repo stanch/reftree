@@ -1,11 +1,17 @@
 ## Unzipping Immutability
 
 This page contains the materials for my talk “Unzipping Immutability”.
-Here are some past and future presentations:
+Here are some past presentations:
 
 * [LX Scala, April 2016](http://www.lxscala.com/schedule/#session-2) ([video](https://vimeo.com/162214356)).
 * [Pixels Camp, October 2016](https://github.com/PixelsCamp/talks/blob/master/unzipping-immutability_nick-stanchenko.md) ([video](https://www.youtube.com/watch?v=yeMvhuD689A)).
 * [Scala By The Bay, November 2016](http://sched.co/7iTv) ([video](https://www.youtube.com/watch?v=dOj-wk5MQ3k)).
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=dOj-wk5MQ3k" title="Watch the Scala By The Bay version">
+    <img src="images/usage/talk.png" width="60%" />
+  </a>
+</p>
 
 You can use this page in two ways:
 

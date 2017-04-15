@@ -96,7 +96,9 @@ object LensInstances {
 
       case (_, x: RefTree.Ref, y: RefTree.Ref) ⇒
         // recurse
-        val children = (x.children zip y.children) map { case (cx, cy) ⇒ inner(cx, cy) }
+        val children = (x.children zip y.children) map {
+          case (cx, cy) ⇒ cx.copy(value = inner(cx.value, cy.value))
+        }
         x.copy(children = children)
 
       case _ ⇒ tree1

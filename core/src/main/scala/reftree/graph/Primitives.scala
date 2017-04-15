@@ -33,9 +33,13 @@ object Primitives {
     val background = (if (tree.highlight) color.opacify(0.2) else defaultBackground).toRgbaString
     val labelContent = tree match {
       case ref: RefTree.Ref ⇒
-        val title = <td port="n">{ ref.name }</td>
-        val cells = ref.children.zipWithIndex map { case (c, i) ⇒ cell(c, i, color) }
-        <tr>{ title }{ cells }</tr>
+        val title = <td rowspan="2" port="n">{ ref.name }</td>
+        Seq(true, false).map { firstRow ⇒
+          ref.children.zipWithIndex flatMap { case (c, i) ⇒ cell(c, i, color, firstRow) }
+        } match {
+          case Seq(row1, Seq()) ⇒ <tr>{ title }{ row1 }</tr>
+          case Seq(row1, row2) ⇒ <tr>{ title }{ row1 }</tr><hr/><tr>{ row2 }</tr>
+        }
       case _ ⇒
         val title = <td port="n">{ cellLabel(tree) }</td>;
         <tr>{ title }</tr>
@@ -57,23 +61,30 @@ object Primitives {
   private def cellLabel(tree: RefTree): xml.Node = tree match {
     case _ if tree.elide ⇒ xml.EntityRef("hellip")
     case RefTree.Val(value: Int, Some(RefTree.Val.Bin), _, _) ⇒ xml.Text(value.toBinaryString)
+    case RefTree.Val(value: Int, Some(RefTree.Val.Hex), _, _) ⇒ xml.Text(value.toHexString)
     case RefTree.Val(value, _, _, _) ⇒ xml.Text(value.toString.replace(" ", "_"))
     case _: RefTree.Null ⇒ xml.EntityRef("empty")
     case RefTree.Ref(_, id, _, _, _) ⇒ xml.EntityRef("middot")
   }
 
-  private def cell(tree: RefTree, i: Int, color: Color): xml.Node = {
-    val label = cellLabel(tree)
-    val port = tree match {
-      case RefTree.Ref(_, id, _, _, _) ⇒ Some(xml.Text(s"$id-$i"))
-      case _ ⇒ None
+  private def cell(field: RefTree.Ref.Field, i: Int, color: Color, firstRow: Boolean): Option[xml.Node] =
+    if (!firstRow && field.name.isEmpty) None else Some {
+      val span = if (firstRow && field.name.isEmpty) 2 else 1
+      val label = (firstRow, field.name) match {
+        case (true, Some(name)) ⇒ <i>{ name }</i>
+        case _ ⇒ cellLabel(field.value)
+      }
+      val port = (firstRow, field.name, field.value) match {
+        case (true, Some(_), _) ⇒ None
+        case (_, _, RefTree.Ref(_, id, _, _, _)) ⇒ Some(xml.Text(s"$id-$i"))
+        case _ ⇒ None
+      }
+      val background = ((field.value, field.value.highlight) match {
+        case (_, false) | (RefTree.Ref(_, _, _, _, false), _) ⇒ defaultBackground
+        case _ ⇒ color.opacify(0.25)
+      }).toRgbaString
+      <td rowspan={ span.toString } port={ port } bgcolor={ background }>{ label }</td>
     }
-    val background = ((tree, tree.highlight) match {
-      case (_, false) | (RefTree.Ref(_, _, _, _, false), _) ⇒ defaultBackground
-      case _ ⇒ color.opacify(0.25)
-    }).toRgbaString
-    <td port={ port } bgcolor={ background }>{ label }</td>
-  }
 
   def edge(id: String, tree: RefTree, i: Int, color: Color, namespace: Seq[String]): Option[Edge] =
     tree match {

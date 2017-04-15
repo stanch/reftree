@@ -8,8 +8,8 @@ import com.softwaremill.quicklens._
  * [[ToRefTree]] instances for a [[Zipper]]
  */
 object ZipperInstances {
-  implicit def `Zipper RefTree`[A](implicit default: ToRefTree[Zipper[A]]): ToRefTree[Zipper[A]] =
-    default.highlightField(1).elideFieldIf(3, _.top.isDefined)
+  implicit def zipperFieldConfig[A] =
+    ToRefTree.FieldConfig[Zipper[A]].highlight("focus").elide("top", _.top.isDefined)
 
   /** A class to represent a [[Zipper]] together with its target */
   case class ZipperFocus[A](zipper: Zipper[A], target: A)
@@ -25,7 +25,7 @@ object ZipperInstances {
 
       def inner(tree: RefTree): RefTree = tree match {
         case `focus` ⇒ tree.withHighlight(true)
-        case ref: RefTree.Ref ⇒ ref.modify(_.children.each).using(inner)
+        case ref: RefTree.Ref ⇒ ref.modify(_.children.each.value).using(inner)
         case _ ⇒ tree
       }
 

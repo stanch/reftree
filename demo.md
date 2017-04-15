@@ -1,11 +1,17 @@
 ## Unzipping Immutability
 
 This page contains the materials for my talk “Unzipping Immutability”.
-Here are some past and future presentations:
+Here are some past presentations:
 
 * [LX Scala, April 2016](http://www.lxscala.com/schedule/#session-2) ([video](https://vimeo.com/162214356)).
 * [Pixels Camp, October 2016](https://github.com/PixelsCamp/talks/blob/master/unzipping-immutability_nick-stanchenko.md) ([video](https://www.youtube.com/watch?v=yeMvhuD689A)).
 * [Scala By The Bay, November 2016](http://sched.co/7iTv) ([video](https://www.youtube.com/watch?v=dOj-wk5MQ3k)).
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=dOj-wk5MQ3k" title="Watch the Scala By The Bay version">
+    <img src="images/usage/talk.png" width="60%" />
+  </a>
+</p>
 
 You can use this page in two ways:
 
@@ -302,8 +308,7 @@ scala> import monocle.macros.GenLens
 import monocle.macros.GenLens
 
 scala> val salaryLens = GenLens[Employee](_.salary)
-warning: there was one feature warning; re-run with -feature for details
-salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@434cc760
+salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@624c4e5d
 
 scala> salaryLens.get(startup.founder)
 res11: Long = 4000
@@ -322,8 +327,7 @@ We can also define a lens that focuses on the startup’s founder:
 
 ```scala
 scala> val founderLens = GenLens[Startup](_.founder)
-warning: there was one feature warning; re-run with -feature for details
-founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@7e407bbd
+founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@31478d56
 
 scala> founderLens.get(startup)
 res14: reftree.demo.Data.Employee = Employee(Michael,4000)
@@ -339,7 +343,7 @@ It’s not apparent yet how this would help, but the trick is that lenses can be
 
 ```scala
 scala> val founderSalaryLens = founderLens composeLens salaryLens
-founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@2ce83973
+founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@38153201
 
 scala> founderSalaryLens.get(startup)
 res16: Long = 4000
@@ -367,11 +371,10 @@ We can use it to give our founder a funny name:
 
 ```scala
 scala> val employeeNameLens = GenLens[Employee](_.name)
-warning: there was one feature warning; re-run with -feature for details
-employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@6b556b92
+employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@66848303
 
 scala> val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
-founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@40efc410
+founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@1dbf9cf4
 
 scala> founderVowelTraversal.modify(v => v.toUpper)(startup)
 res20: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
