@@ -10,40 +10,39 @@ import shapeless.labelled.FieldType
  * exists or can be derived using this same facility.
  */
 trait GenericInstances {
-  /** A class that allows to configure how fields of a data structure of type [[A]] are handled */
-  case class FieldConfig[A](
-    renames: Map[String, Option[String]] = Map.empty[String, Option[String]],
-    highlights: Map[String, A ⇒ Boolean] = Map.empty[String, A ⇒ Boolean],
-    elides: Map[String, A ⇒ Boolean] = Map.empty[String, A ⇒ Boolean]
+  /** A class that allows to configure how the derivation of [[ToRefTree]] for [[A]] is done */
+  case class DerivationConfig[A](
+    name: Option[A ⇒ String] = None,
+    omittedFields: Set[String] = Set.empty[String],
+    tweakedFields: Map[String, A ⇒ DerivationConfig.FieldUpdate] =
+      Map.empty[String, A ⇒ DerivationConfig.FieldUpdate]
   ) {
-    /** Rename a field */
-    def rename(field: String, name: String) =
-      copy[A](renames = renames + (field → Some(name)))
+    /** Rename the tree derived for the data structure */
+    def rename(name: String): DerivationConfig[A] =
+      renameWith(_ ⇒ name)
 
-    /** Display the field without any name */
-    def noName(field: String) =
-      copy[A](renames = renames + (field → None))
+    /** Rename the tree derived for the data structure, based on the value being visualized */
+    def renameWith(name: A ⇒ String): DerivationConfig[A] =
+      copy(name = Some(name))
 
-    /** Highlight a field */
-    def highlight(field: String) =
-      copy[A](highlights = highlights + (field → (_ ⇒ true)))
+    /** Omit the field with a given name */
+    def omitField(field: String) =
+      copy[A](omittedFields = omittedFields + field)
 
-    /** Highlight a field if the data structure satisfies a condition */
-    def highlight(field: String, condition: A ⇒ Boolean) =
-      copy[A](highlights = highlights + (field → condition))
+    /** Adjust the field with a given name */
+    def tweakField(field: String, update: DerivationConfig.FieldUpdate): DerivationConfig[A] =
+      tweakFieldWith(field, Function.const(update))
 
-    /** Elide a field */
-    def elide(field: String) =
-      copy[A](elides = elides + (field → (_ ⇒ true)))
-
-    /** Elide a field if the data structure satisfies a condition */
-    def elide(field: String, condition: A ⇒ Boolean) =
-      copy[A](elides = elides + (field → condition))
+    /** Adjust the field with a given name, based on the value being visualized */
+    def tweakFieldWith(field: String, update: A ⇒ DerivationConfig.FieldUpdate): DerivationConfig[A] =
+      copy(tweakedFields = tweakedFields + (field → update))
   }
 
-  object FieldConfig {
-    /** Build a [[FieldConfig]] for type [[A]] */
-    def apply[A]: FieldConfig[A] = FieldConfig[A]()
+  object DerivationConfig {
+    type FieldUpdate = RefTree.Ref.Field ⇒ RefTree.Ref.Field
+
+    /** Build a [[DerivationConfig]] for type [[A]] */
+    def apply[A]: DerivationConfig[A] = DerivationConfig[A]()
   }
 
   /** We use a different typeclass to avoid defining nonsense ToRefTree instances */
@@ -64,19 +63,19 @@ trait GenericInstances {
     implicit witness: Witness.Aux[K],
     headAsTree: Lazy[ToRefTree[H]],
     tailAsTree: GenericToRefTree[A, T],
-    fieldConfig: FieldConfig[A] = FieldConfig[A]()
+    derivationConfig: DerivationConfig[A] = DerivationConfig[A]()
   ): GenericToRefTree[A, FieldType[K, H] :: T] =
     GenericToRefTree[A, FieldType[K, H] :: T] { (value, repr) ⇒
       val fieldName = witness.value.name
-      val head = headAsTree.value.refTree(repr.head: H)
-        .withHighlight(fieldConfig.highlights.get(fieldName).exists(_(value)))
-        .withElide(fieldConfig.elides.get(fieldName).exists(_(value)))
-        .toField.copy(name = fieldConfig.renames.getOrElse(fieldName, Some(fieldName)))
+      val field = headAsTree.value.refTree(repr.head: H).toField.withName(fieldName)
+      val head = if (derivationConfig.omittedFields(fieldName)) None else {
+        Some(derivationConfig.tweakedFields.get(fieldName).fold(field)(_(value)(field)))
+      }
       val tail = tailAsTree.refTree(value, repr.tail) match {
-        case RefTree.Ref(_, _, children, _, _) ⇒ children
+        case RefTree.Ref(_, _, children, _) ⇒ children
         case x ⇒ Seq(x.toField)
       }
-      RefTree.Ref(repr, head +: tail)
+      RefTree.Ref(repr, head.toSeq ++ tail)
     }
 
   implicit def `Generic CNil RefTree`[A]: GenericToRefTree[A, CNil] =
@@ -92,10 +91,14 @@ trait GenericInstances {
     }
 
   implicit def `Generic RefTree`[A <: AnyRef, R](
-    implicit generic: LabelledGeneric.Aux[A, R], genericAsTree: Lazy[GenericToRefTree[A, R]]
+    implicit generic: LabelledGeneric.Aux[A, R],
+    genericAsTree: Lazy[GenericToRefTree[A, R]],
+    derivationConfig: DerivationConfig[A] = DerivationConfig[A]()
   ): ToRefTree[A] = ToRefTree[A] { value ⇒
     genericAsTree.value.refTree(value, generic.to(value)) match {
-      case r: RefTree.Ref ⇒ RefTree.Ref(value, r.children)
+      case r: RefTree.Ref ⇒
+        val tree = RefTree.Ref(value, r.children)
+        derivationConfig.name.fold(tree)(f ⇒ tree.rename(f(value)))
       case x ⇒ x
     }
   }

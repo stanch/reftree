@@ -62,7 +62,9 @@ object Data {
 
   case class Tree(x: Int, c: List[Tree] = Nil)
 
-  implicit val treeFieldConfig = ToRefTree.FieldConfig[Tree].noName("x").noName("c")
+  implicit val treeDerivationConfig = ToRefTree.DerivationConfig[Tree]
+    .tweakField("x", _.withoutName)
+    .tweakField("c", _.withoutName)
 
   val simpleTree = Tree(1, List(Tree(2), Tree(3), Tree(4), Tree(5, List(Tree(6), Tree(7)))))
 

@@ -90,7 +90,7 @@ object LensInstances {
         // the example is a Val, and we found two mismatching Val trees
         x.copy(highlight = true)
 
-      case (RefTree.Ref(name, _, _, _, _), x: RefTree.Ref, y: RefTree.Ref) if x != y && x.name == name ⇒
+      case (RefTree.Ref(name, _, _, _), x: RefTree.Ref, y: RefTree.Ref) if x != y && x.name == name ⇒
         // the example is a Ref, and we found two mismatching Ref trees with the same name
         x.copy(highlight = true)
 

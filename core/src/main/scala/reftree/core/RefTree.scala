@@ -30,21 +30,11 @@ sealed trait RefTree {
   /** Whether this tree should be highlighted during visualization */
   def highlight: Boolean
 
-  /** Whether this tree should be elided during visualization */
-  def elide: Boolean
-
   /** Add or remove highlighting */
   def withHighlight(highlight: Boolean) = this match {
     case tree: RefTree.Val ⇒ tree.copy(highlight = highlight)
     case tree: RefTree.Null ⇒ tree.copy(highlight = highlight)
     case tree: RefTree.Ref ⇒ tree.copy(highlight = highlight)
-  }
-
-  /** Set or unset elision */
-  def withElide(elide: Boolean) = this match {
-    case tree: RefTree.Val ⇒ tree.copy(elide = elide)
-    case tree: RefTree.Null ⇒ tree.copy(elide = elide)
-    case tree: RefTree.Ref ⇒ tree.copy(elide = elide)
   }
 
   /** Convert to a field usable in other trees */
@@ -53,7 +43,7 @@ sealed trait RefTree {
 
 object RefTree {
   /** A special case [[RefTree]] for `null` values. */
-  case class Null(highlight: Boolean = false, elide: Boolean = false) extends RefTree {
+  case class Null(highlight: Boolean = false) extends RefTree {
     def id = "null"
   }
 
@@ -61,8 +51,7 @@ object RefTree {
   case class Val(
     value: AnyVal,
     hint: Option[Val.Hint],
-    highlight: Boolean,
-    elide: Boolean
+    highlight: Boolean
   ) extends RefTree {
     def id = value.toString
 
@@ -77,7 +66,7 @@ object RefTree {
     case object Hex extends Hint
 
     /** Construct a [[RefTree]] for a value */
-    def apply(value: AnyVal): Val = Val(value, None, highlight = false, elide = false)
+    def apply(value: AnyVal): Val = Val(value, None, highlight = false)
   }
 
   /**
@@ -89,8 +78,7 @@ object RefTree {
     name: String,
     id: String,
     children: Seq[Ref.Field],
-    highlight: Boolean,
-    elide: Boolean
+    highlight: Boolean
   ) extends RefTree {
     /** Change the name of the object */
     def rename(name: String) = copy(name = name)
@@ -98,9 +86,22 @@ object RefTree {
 
   object Ref {
     /** A name-value pair for storing object fields */
-    case class Field(value: RefTree, name: Option[String] = None) {
+    case class Field(value: RefTree, name: Option[String] = None, elideRefs: Boolean = false) {
       /** Add a name */
       def withName(name: String) = copy(name = Some(name))
+
+      /** Remove the name */
+      def withoutName = copy(name = None)
+
+      /**
+       * If this field points to a tree of type [[RefTree.Ref]],
+       * configure whether that tree should be elided. It will not be visualized,
+       * unless referenced by some other tree. This setting has no effects on other types of trees.
+       */
+      def withElideRefs(elideRefs: Boolean) = copy(elideRefs = elideRefs)
+
+      /** Configure whether the tree this field points to should be highlighted */
+      def withTreeHighlight(highlight: Boolean) = copy(value = value.withHighlight(highlight))
     }
 
     /**
@@ -115,8 +116,7 @@ object RefTree {
       catch { case _: InternalError ⇒ value.getClass.getName.replaceAll("^.+\\$", "") },
       s"${value.getClass.getName}${System.identityHashCode(value)}",
       children,
-      highlight = false,
-      elide = false
+      highlight = false
     )
   }
 }

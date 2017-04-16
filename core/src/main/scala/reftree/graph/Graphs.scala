@@ -21,9 +21,9 @@ object Graphs {
       namespace: Seq[String],
       depth: Int
     ): Seq[GraphStatement] = tree match {
-      case r @ RefTree.Ref(_, id, children, _, false) ⇒
+      case r @ RefTree.Ref(_, id, children, _) ⇒
         Seq(Primitives.node(r, color, anchorId, namespace)) ++
-          children.flatMap(c ⇒ inner(c.value, color, None, namespace, depth + 1)) ++
+          children.filterNot(_.elideRefs).flatMap(c ⇒ inner(c.value, color, None, namespace, depth + 1)) ++
           children.zipWithIndex.flatMap { case (c, i) ⇒ Primitives.edge(id, c.value, i, color, namespace) }
       case _ if depth == 0 ⇒
         Seq(Primitives.node(tree, color, anchorId, namespace))

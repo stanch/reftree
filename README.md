@@ -62,15 +62,16 @@ import reftree.core.ToRefTree
 
 case class Tree(size: Int, value: Int, children: List[Tree])
 
-implicit val treeFieldConfig = (ToRefTree.FieldConfig[Tree]
-  .rename("size", "s")      // label the field “s”, instead of “size”
-  .highlight("value")       // highlight the field with the value
-  .noName("children"))      // do not label the “children” field
+implicit val treeDerivationConfig = (ToRefTree.DerivationConfig[Tree]
+  .rename("MyTree")                                // display as “MyTree”
+  .tweakField("size", _.withName("s"))             // label the field “s”, instead of “size”
+  .tweakField("value", _.withTreeHighlight(true))  // highlight the value
+  .tweakField("children", _.withoutName))          // do not label the “children” field
 
 implicitly[ToRefTree[Tree]] // auto-derivation will use the configuration above
 ```
 
-For something custom, manual derivation is the way to go:
+For something custom, manual derivation is the way to go, for example:
 
 ```scala
 import reftree.core._

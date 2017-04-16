@@ -58,13 +58,13 @@ object Primitives {
     ).addAttrs(tooltipAttribute: _*)
   }
 
-  private def cellLabel(tree: RefTree): xml.Node = tree match {
-    case _ if tree.elide ⇒ xml.EntityRef("hellip")
-    case RefTree.Val(value: Int, Some(RefTree.Val.Bin), _, _) ⇒ xml.Text(value.toBinaryString)
-    case RefTree.Val(value: Int, Some(RefTree.Val.Hex), _, _) ⇒ xml.Text(value.toHexString)
-    case RefTree.Val(value, _, _, _) ⇒ xml.Text(value.toString.replace(" ", "_"))
+  private def cellLabel(tree: RefTree, elideRefs: Boolean = false): xml.Node = tree match {
+    case RefTree.Val(value: Int, Some(RefTree.Val.Bin), _) ⇒ xml.Text(value.toBinaryString)
+    case RefTree.Val(value: Int, Some(RefTree.Val.Hex), _) ⇒ xml.Text(value.toHexString)
+    case RefTree.Val(value, _, _) ⇒ xml.Text(value.toString.replace(" ", "_"))
     case _: RefTree.Null ⇒ xml.EntityRef("empty")
-    case RefTree.Ref(_, id, _, _, _) ⇒ xml.EntityRef("middot")
+    case RefTree.Ref(_, id, _, _) ⇒
+      if (elideRefs) xml.EntityRef("hellip") else xml.EntityRef("middot")
   }
 
   private def cell(field: RefTree.Ref.Field, i: Int, color: Color, firstRow: Boolean): Option[xml.Node] =
@@ -72,15 +72,15 @@ object Primitives {
       val span = if (firstRow && field.name.isEmpty) 2 else 1
       val label = (firstRow, field.name) match {
         case (true, Some(name)) ⇒ <i>{ name }</i>
-        case _ ⇒ cellLabel(field.value)
+        case _ ⇒ cellLabel(field.value, field.elideRefs)
       }
       val port = (firstRow, field.name, field.value) match {
         case (true, Some(_), _) ⇒ None
-        case (_, _, RefTree.Ref(_, id, _, _, _)) ⇒ Some(xml.Text(s"$id-$i"))
+        case (_, _, RefTree.Ref(_, id, _, _)) ⇒ Some(xml.Text(s"$id-$i"))
         case _ ⇒ None
       }
       val background = ((field.value, field.value.highlight) match {
-        case (_, false) | (RefTree.Ref(_, _, _, _, false), _) ⇒ defaultBackground
+        case (_, false) | (_: RefTree.Ref, _) ⇒ defaultBackground
         case _ ⇒ color.opacify(0.25)
       }).toRgbaString
       <td rowspan={ span.toString } port={ port } bgcolor={ background }>{ label }</td>
@@ -88,7 +88,7 @@ object Primitives {
 
   def edge(id: String, tree: RefTree, i: Int, color: Color, namespace: Seq[String]): Option[Edge] =
     tree match {
-      case RefTree.Ref(_, refId, _, _, _) ⇒
+      case RefTree.Ref(_, refId, _, _) ⇒
         val sourceId = namespaced(id, namespace)
         val targetId = namespaced(refId, namespace)
         val edgeId = namespaced(s"$id-$i-$refId", namespace)
