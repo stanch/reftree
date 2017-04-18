@@ -280,7 +280,7 @@ raisedFounder: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),L
 ```scala
 // extra declarations for this section
 import reftree.contrib.SimplifiedInstances.list
-import reftree.contrib.LensInstances._
+import reftree.contrib.OpticInstances._
 
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
@@ -318,7 +318,7 @@ res12: reftree.demo.Data.Employee = Employee(Michael,4010)
 ```
 
 ```scala
-diagram(LensFocus(salaryLens, startup.founder)).render("salaryLens")
+diagram(OpticFocus(salaryLens, startup.founder)).render("salaryLens")
 ```
 
 <p align="center"><img src="images/lenses/salaryLens.png" width="40%" /></p>
@@ -334,7 +334,7 @@ res14: reftree.demo.Data.Employee = Employee(Michael,4000)
 ```
 
 ```scala
-diagram(LensFocus(founderLens, startup)).render("founderLens")
+diagram(OpticFocus(founderLens, startup)).render("founderLens")
 ```
 
 <p align="center"><img src="images/lenses/founderLens.png" width="100%" /></p>
@@ -353,7 +353,7 @@ res17: reftree.demo.Data.Startup = Startup(Acme,Employee(Michael,4010),List(Empl
 ```
 
 ```scala
-diagram(LensFocus(founderSalaryLens, startup)).render("founderSalaryLens")
+diagram(OpticFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 ```
 
 <p align="center"><img src="images/lenses/founderSalaryLens.png" width="100%" /></p>
@@ -362,7 +362,7 @@ One interesting thing is that lenses can focus on anything, not just direct attr
 Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
 ```scala
-diagram(LensFocus(vowelTraversal, "example")).render("vowelTraversal")
+diagram(OpticFocus(vowelTraversal, "example")).render("vowelTraversal")
 ```
 
 <p align="center"><img src="images/lenses/vowelTraversal.png" width="40%" /></p>
@@ -381,7 +381,7 @@ res20: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Empl
 ```
 
 ```scala
-diagram(LensFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
+diagram(OpticFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
 ```
 
 <p align="center"><img src="images/lenses/founderVowelTraversal.png" width="100%" /></p>

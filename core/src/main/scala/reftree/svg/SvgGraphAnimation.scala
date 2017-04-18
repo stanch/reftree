@@ -2,7 +2,6 @@ package reftree.svg
 
 import reftree.geometry._
 import reftree.util.Optics
-import reftree.svg.SvgOptics.unzipSvg
 
 object SvgGraphAlignment {
   private val graph = Optics.collectFirst(sel"g.graph")

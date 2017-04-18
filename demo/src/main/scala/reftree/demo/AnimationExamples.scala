@@ -93,7 +93,7 @@ object Zippers extends App {
 
 object Lenses extends App {
   import reftree.contrib.SimplifiedInstances.list
-  import reftree.contrib.LensInstances._
+  import reftree.contrib.OpticInstances._
 
   val renderer = Renderer(
     animationOptions = AnimationOptions(onionSkinLayers = 2),
@@ -109,14 +109,14 @@ object Lenses extends App {
     .startWith(List("example"))
     .iterate("sample" :: _, "specimen" :: _.tail)
     .build { words ⇒
-      Diagram(LensFocus(vowels, words)).withCaption("Vowels") +
-      Diagram(LensFocus(consonants, words)).withCaption("Consonants")
+      Diagram(OpticFocus(vowels, words)).withCaption("Vowels") +
+      Diagram(OpticFocus(consonants, words)).withCaption("Consonants")
     }
     .render("vowels+consonants")
 }
 
 object Teaser extends App {
-  import reftree.contrib.LensInstances._
+  import reftree.contrib.OpticInstances._
   import reftree.contrib.ZipperInstances._
 
   val renderer = Renderer(directory = Paths.get("images", "usage"))
@@ -133,11 +133,11 @@ object Teaser extends App {
   val nameLens = GenLens[Person](_.name)
 
   val lenses = Animation(Seq(
-    Diagram(LensFocus(nameLens, person))
+    Diagram(OpticFocus(nameLens, person))
       .withCaption("Name Lens").withAnchor("lens"),
-    Diagram(LensFocus(nameLens composeTraversal Data.consonantTraversal, person))
+    Diagram(OpticFocus(nameLens composeTraversal Data.consonantTraversal, person))
       .withCaption("Consonant Traversal").withAnchor("lens"),
-    Diagram(LensFocus(nameLens composeTraversal Data.vowelTraversal, person))
+    Diagram(OpticFocus(nameLens composeTraversal Data.vowelTraversal, person))
       .withCaption("Vowel Traversal").withAnchor("lens")
   )).toNamespace("lenses")
 

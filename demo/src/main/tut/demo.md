@@ -261,7 +261,7 @@ val raisedFounder = startup.copy(
 ```tut:silent
 // extra declarations for this section
 import reftree.contrib.SimplifiedInstances.list
-import reftree.contrib.LensInstances._
+import reftree.contrib.OpticInstances._
 
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
@@ -294,7 +294,7 @@ salaryLens.modify(s => s + 10)(startup.founder)
 ```
 
 ```tut:silent
-diagram(LensFocus(salaryLens, startup.founder)).render("salaryLens")
+diagram(OpticFocus(salaryLens, startup.founder)).render("salaryLens")
 ```
 
 <p align="center"><img src="images/lenses/salaryLens.png" width="40%" /></p>
@@ -308,7 +308,7 @@ founderLens.get(startup)
 ```
 
 ```tut:silent
-diagram(LensFocus(founderLens, startup)).render("founderLens")
+diagram(OpticFocus(founderLens, startup)).render("founderLens")
 ```
 
 <p align="center"><img src="images/lenses/founderLens.png" width="100%" /></p>
@@ -323,7 +323,7 @@ founderSalaryLens.modify(s => s + 10)(startup)
 ```
 
 ```tut:silent
-diagram(LensFocus(founderSalaryLens, startup)).render("founderSalaryLens")
+diagram(OpticFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 ```
 
 <p align="center"><img src="images/lenses/founderSalaryLens.png" width="100%" /></p>
@@ -332,7 +332,7 @@ One interesting thing is that lenses can focus on anything, not just direct attr
 Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
 ```tut:silent
-diagram(LensFocus(vowelTraversal, "example")).render("vowelTraversal")
+diagram(OpticFocus(vowelTraversal, "example")).render("vowelTraversal")
 ```
 
 <p align="center"><img src="images/lenses/vowelTraversal.png" width="40%" /></p>
@@ -347,7 +347,7 @@ founderVowelTraversal.modify(v => v.toUpper)(startup)
 ```
 
 ```tut:silent
-diagram(LensFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
+diagram(OpticFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
 ```
 
 <p align="center"><img src="images/lenses/founderVowelTraversal.png" width="100%" /></p>

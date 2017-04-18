@@ -11,6 +11,10 @@ import reftree.core._
  *  - `map` represents a “fictional” high-level map with no internal structure.
  */
 object SimplifiedInstances {
+  /** A more compact representation of a [[String]], which jams everything into a single box */
+  implicit def string: ToRefTree[String] =
+    ToRefTree[String](s ⇒ RefTree.Ref(s, Seq.empty).rename(s""""$s""""))
+
   /** An “unboxed” [[Option]], representing [[None]] with `null` and [[Some]] with its inner value */
   implicit def option[A: ToRefTree]: ToRefTree[Option[A]] = ToRefTree[Option[A]] {
     case None ⇒ RefTree.Null()

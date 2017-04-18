@@ -3,7 +3,6 @@ package reftree.svg
 import monocle.{Iso, Optional}
 import reftree.geometry._
 import reftree.util.Optics
-import zipper._
 
 object SvgOptics { optics ⇒
   import Optics.{only, xmlAttribute, xmlMandatoryAttribute}
@@ -60,7 +59,7 @@ object SvgOptics { optics ⇒
    * Makes sure that translation is propagated when moving up and down the SVG nodes,
    * as well as when obtaining attributes that have coordinates inside.
    */
-  private def translated[A](optional: Optional[xml.Node, A])(implicit t: Translatable[A]) =
+  def translated[A](optional: Optional[xml.Node, A])(implicit t: Translatable[A]) =
     Optional[xml.Node, A] { svg ⇒
       val translation = optics.translation.getOption(svg).getOrElse(Point.zero)
       optional.getOption(svg).map(t.translate(_, translation))
@@ -94,12 +93,4 @@ object SvgOptics { optics ⇒
         optics.translation.modify(_ + position - anchorPosition)(svg)
       }
     }
-
-  implicit object `SVG Translatable` extends Translatable[xml.Node] {
-    def translate(value: xml.Node, delta: Point) =
-      optics.translation.modify(_ + delta)(value)
-  }
-
-  implicit val unzipSvg: Unzip[xml.Node] =
-    Optics.unzip(translated(Optics.xmlImmediateChildren))
 }
