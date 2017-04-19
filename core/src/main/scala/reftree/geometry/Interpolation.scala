@@ -53,7 +53,7 @@ trait Interpolation[A] { self ⇒
   /**
    * Sample the range between `left` and `right` using `n` values
    */
-  def sample(left: A, right: A, n: Int, inclusive: Boolean): Seq[A] = {
+  def sample(left: A, right: A, n: Int, inclusive: Boolean = true): Seq[A] = {
     // TODO: consider overriding downstream for optimizations
     val range = if (inclusive) {
       Seq.tabulate(n)(i ⇒ (i + 0.0) / (n - 1))

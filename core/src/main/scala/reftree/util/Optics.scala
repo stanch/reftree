@@ -19,16 +19,6 @@ object Optics {
       case (a, b, c) ⇒ s ⇒ lensC.set(c)(lensB.set(b)(lensA.set(a)(s)))
     }
 
-  /** A view into the subset of elements of a sequence satisfying a predicate */
-  def partitionLens[A](pred: A ⇒ Boolean): Lens[Seq[A], Seq[A]] =
-    Lens[Seq[A], Seq[A]](_.filter(pred)) { updated ⇒ sequence ⇒
-      sequence.foldLeft((Vector.empty[A], updated)) {
-        case ((acc, u), current) ⇒
-          if (pred(current)) (acc :+ u.head, u.tail)
-          else (acc :+ current, u)
-      }._1
-    }
-
   /** Transforms a lens into a lens of lists */
   def sequenceLens[A, B](lens: Lens[A, B]): Lens[List[A], List[B]] =
     Lens[List[A], List[B]] { as ⇒
@@ -125,7 +115,7 @@ object Optics {
     collectLeftByIndex(pred) composeTraversal each
 
   /** Focuses on a given optional attribute of an XML node */
-  def xmlAttribute(attr: String): Lens[xml.Node, Option[String]] =
+  def xmlOptAttr(attr: String): Lens[xml.Node, Option[String]] =
     Lens[xml.Node, Option[String]] { node ⇒
       node.attribute(attr).map(_.text)
     } { value ⇒ node ⇒
@@ -137,7 +127,7 @@ object Optics {
     }
 
   /** Focuses on a given mandatory attribute of an XML node */
-  def xmlMandatoryAttribute(attr: String): Lens[xml.Node, String] =
+  def xmlAttr(attr: String): Lens[xml.Node, String] =
     Lens[xml.Node, String] { node ⇒
       node.attribute(attr).map(_.text).get
     } { value ⇒ node ⇒

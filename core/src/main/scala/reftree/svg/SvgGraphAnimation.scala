@@ -6,7 +6,7 @@ import reftree.util.Optics
 object SvgGraphAlignment {
   private val graph = Optics.collectFirst(sel"g.graph")
   private val nodes = Optics.collectLeftByKey(sel"g.node")(
-    Optics.xmlMandatoryAttribute("id").get
+    Optics.xmlAttr("id").get
   )
 
   private val nodeAnchor = Optics.collectFirst(sel"a") composeLens
@@ -103,7 +103,7 @@ object SvgGraphInterpolation {
   val interpolation: Interpolation[xml.Node] =
     Optics.collectFirst(sel"g.graph").interpolateWith(
       Optics.collectLeftByKey(sel"g.node, g.edge")(
-        Optics.xmlMandatoryAttribute("id").get
+        Optics.xmlAttr("id").get
       ).interpolateEachWith(
         nodeOrEdge.option(fadeOut, fadeIn)
       )
@@ -113,8 +113,8 @@ object SvgGraphInterpolation {
 object SvgGraphAnimation {
   /** Prevent ugly rendering artifacts */
   private def improveRendering(svg: xml.Node): xml.Node =
-    Optics.xmlAttribute("shape-rendering").set(Some("geometricPrecision")) andThen
-    Optics.xmlAttribute("text-rendering").set(Some("geometricPrecision")) apply svg
+    Optics.xmlOptAttr("shape-rendering").set(Some("geometricPrecision")) andThen
+    Optics.xmlOptAttr("text-rendering").set(Some("geometricPrecision")) apply svg
 
   /**
    * Graphviz does not set the fill-opacity attribute on text,
@@ -133,7 +133,7 @@ object SvgGraphAnimation {
   /** Make the newly appeared nodes and edges thicker */
   private def accentuatePairwise(svgs: Seq[xml.Node]) = {
     val nodesAndEdges = Optics.collectLeftByKey(sel"g.node, g.edge")(
-      Optics.xmlMandatoryAttribute("id").get
+      Optics.xmlAttr("id").get
     )
     val thickness = Optics.collectAllLeft(sel"path, polygon") composeOptional SvgOptics.thickness
 

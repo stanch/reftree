@@ -22,11 +22,11 @@ object Merging {
 
   /** A mapping between the node label and the background colors specified inside it */
   val nodeColorLens: Lens[Node, List[Color]] = {
-    val color: Lens[xml.Node, Color] = Optics.xmlMandatoryAttribute("bgcolor") composeIso
+    val color: Lens[xml.Node, Color] = Optics.xmlAttr("bgcolor") composeIso
       Color.rgbaStringIso
 
     val elementsWithColor: Lens[xml.Node, List[xml.Node]] = Optics.collectLeftByIndex(
-      Optics.xmlAttribute("bgcolor").exist(_.nonEmpty)
+      Optics.xmlOptAttr("bgcolor").exist(_.nonEmpty)
     )
 
     val colors: Lens[xml.Node, List[Color]] =

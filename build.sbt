@@ -46,6 +46,7 @@ val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
       "import reftree.core._",
       "import reftree.diagram._",
       "import reftree.svg._",
+      "import reftree.geometry._",
       "import reftree.util.Optics",
       "import reftree.contrib.FingerTreeInstances._",
       "import reftree.contrib.OpticInstances._",

@@ -38,6 +38,7 @@ object OpticInstances {
     }
     implicit val `Int Marker` = Marker[Int](x ⇒ x + 1)
     implicit val `Long Marker` = Marker[Long](x ⇒ x + 1L)
+    implicit val `Double Marker` = Marker[Double](x ⇒ x + 1.0)
     implicit val `Char Marker` = Marker[Char] { case '?' ⇒ '!'; case _ ⇒ '?' }
     implicit val `String Marker` = Marker[String](x ⇒ x + " ")
     implicit val `Xml Marker` = Marker[xml.Node] {

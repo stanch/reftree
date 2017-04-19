@@ -5,12 +5,12 @@ import reftree.geometry._
 import reftree.util.Optics
 
 object SvgOptics { optics ⇒
-  import Optics.{only, xmlAttribute, xmlMandatoryAttribute}
+  import Optics.{only, xmlOptAttr, xmlAttr}
 
   val viewBox = Optics.tupleLensLeft(
-    xmlMandatoryAttribute("viewBox"),
-    xmlAttribute("width"),
-    xmlAttribute("height")
+    xmlAttr("viewBox"),
+    xmlOptAttr("width"),
+    xmlOptAttr("height")
   ) composeIso
     Iso[(String, Option[String], Option[String]), Rectangle] {
       case (box, _, _) ⇒ Rectangle.fromString(box)
@@ -19,7 +19,7 @@ object SvgOptics { optics ⇒
     }
 
   val translation = only(sel"g, path, polygon, text, a") composeLens
-    xmlAttribute("transform") composeIso
+    xmlOptAttr("transform") composeIso
     Iso[Option[String], Point] {
       case None ⇒ Point.zero
       case Some(transform) ⇒
@@ -29,13 +29,13 @@ object SvgOptics { optics ⇒
       case translation ⇒ Some(s"translate($translation)")
     }
 
-  val opacity = xmlAttribute("opacity") composeIso
+  val opacity = xmlOptAttr("opacity") composeIso
     Iso[Option[String], Double](_.fold(1.0)(_.toDouble))(o ⇒ Some(o.toString))
 
   private def color(fillOrStroke: String) =
     Optics.tupleLensLeft(
-      xmlAttribute(fillOrStroke),
-      xmlAttribute(s"$fillOrStroke-opacity")
+      xmlOptAttr(fillOrStroke),
+      xmlOptAttr(s"$fillOrStroke-opacity")
     ) composeIso
     Iso[(Option[String], Option[String]), Option[Color]] {
       case (Some("none"), _) | (None, _) ⇒ None
@@ -52,7 +52,7 @@ object SvgOptics { optics ⇒
     color("stroke")
 
   val thickness = only(sel"path, polygon") composeLens
-    xmlAttribute("stroke-width") composeIso
+    xmlOptAttr("stroke-width") composeIso
     Iso[Option[String], Double](_.map(_.toDouble).getOrElse(1.0))(t ⇒ Some(t.toString))
 
   /**
@@ -70,19 +70,19 @@ object SvgOptics { optics ⇒
 
   val polygonPoints = translated {
     only(sel"polygon") composeLens
-    xmlMandatoryAttribute("points") composeIso
+    xmlAttr("points") composeIso
     Polyline.stringIso
   }
 
   val path = translated {
     only(sel"path") composeLens
-    xmlMandatoryAttribute("d") composeIso
+    xmlAttr("d") composeIso
     Path.stringIso
   }
 
   val textPosition = translated {
     only(sel"text") composeLens
-    Optics.tupleLensLeft(xmlMandatoryAttribute("x"), xmlMandatoryAttribute("y")) composeIso
+    Optics.tupleLensLeft(xmlAttr("x"), xmlAttr("y")) composeIso
     Point.stringPairIso
   }
 
