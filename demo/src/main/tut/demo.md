@@ -9,6 +9,6 @@ the convenience of the “mutable world” with the expressiveness of functional
 
 <p align="center">
   <a href="immutability.md">
-    <img src="images/data/queue.gif" width="40%" />
+    <img src="images/immutability/data/queue.gif" width="40%" />
   </a>
 </p>

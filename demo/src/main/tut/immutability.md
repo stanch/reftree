@@ -9,7 +9,7 @@ Here are some past presentations:
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=dOj-wk5MQ3k" title="Watch the Scala By The Bay version">
-    <img src="images/usage/talk.png" width="60%" />
+    <img src="images/immutability/talk.png" width="60%" />
   </a>
 </p>
 
@@ -56,7 +56,7 @@ already has all the necessary imports in scope.*
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
-  directory = Paths.get("images", "data")
+  directory = Paths.get("images", "immutability", "data")
 )
 import renderer._
 ```
@@ -74,7 +74,7 @@ val list = List(1, 2, 3)
 diagram(list).render("list")
 ```
 
-<p align="center"><img src="images/data/list.png" width="20%" /></p>
+<p align="center"><img src="images/immutability/data/list.png" width="20%" /></p>
 
 Elements can be added to or removed from the front of the list with no effort,
 because we can share the same cells across several lists.
@@ -90,7 +90,7 @@ val remove = list.tail
 (diagram(list) + diagram(add) + diagram(remove)).render("lists")
 ```
 
-<p align="center"><img src="images/data/lists.png" width="20%" /></p>
+<p align="center"><img src="images/immutability/data/lists.png" width="20%" /></p>
 
 However we can’t easily add elements at the end of the list, since the last cell
 is pointing to the empty list (`Nil`) and is immutable, i.e. cannot be changed.
@@ -104,7 +104,7 @@ Animation
   .render("list-append", tweakAnimation = _.withOnionSkinLayers(3))
 ```
 
-<p align="center"><img src="images/data/list-append.gif" width="40%" /></p>
+<p align="center"><img src="images/immutability/data/list-append.gif" width="40%" /></p>
 
 This certainly does not look efficient compared to adding elements at the front:
 
@@ -116,7 +116,7 @@ Animation
   .render("list-prepend")
 ```
 
-<p align="center"><img src="images/data/list-prepend.gif" width="20%" /></p>
+<p align="center"><img src="images/immutability/data/list-prepend.gif" width="20%" /></p>
 
 #### Queues
 
@@ -132,7 +132,7 @@ val queue2 = (queue1 :+ 4).tail
 (diagram(queue1) + diagram(queue2)).render("queues", _.withVerticalSpacing(1.2))
 ```
 
-<p align="center"><img src="images/data/queues.png" width="40%" /></p>
+<p align="center"><img src="images/immutability/data/queues.png" width="40%" /></p>
 
 This way we can add and remove elements very easily at both ends.
 Except when we try to remove an element and the respective list is empty!
@@ -148,7 +148,7 @@ Animation
   .render("queue")
 ```
 
-<p align="center"><img src="images/data/queue.gif" width="40%" /></p>
+<p align="center"><img src="images/immutability/data/queue.gif" width="40%" /></p>
 
 #### Vectors
 
@@ -174,7 +174,7 @@ val vector2 = vector1 :+ 21
 (diagram(vector1) + diagram(vector2)).render("vectors", _.withVerticalSpacing(2))
 ```
 
-<p align="center"><img src="images/data/vectors.png" width="100%" /></p>
+<p align="center"><img src="images/immutability/data/vectors.png" width="100%" /></p>
 
 However as more layers leap into action, a huge chunk of the data can be shared:
 
@@ -187,7 +187,7 @@ val vector2 = vector1 :+ 21
 (diagram(vector1) + diagram(vector2)).render("big-vectors", _.withVerticalSpacing(2))
 ```
 
-<p align="center"><img src="images/data/big-vectors.png" width="100%" /></p>
+<p align="center"><img src="images/immutability/data/big-vectors.png" width="100%" /></p>
 
 If you want to know more, this structure is covered in great detail by Jean Niklas L’orange
 [in his blog](http://hypirion.com/musings/understanding-persistent-vector-pt-1).
@@ -212,7 +212,7 @@ Animation
   .render("finger", _.withDensity(75).withVerticalSpacing(2))
 ```
 
-<p align="center"><img src="images/data/finger.gif" width="100%" /></p>
+<p align="center"><img src="images/immutability/data/finger.gif" width="100%" /></p>
 
 ### Lenses
 
@@ -265,7 +265,7 @@ import reftree.contrib.OpticInstances._
 
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
-  directory = Paths.get("images", "lenses")
+  directory = Paths.get("images", "immutability", "lenses")
 )
 import renderer._
 ```
@@ -274,7 +274,7 @@ import renderer._
 (diagram(startup) + diagram(raisedFounder)).render("startup")
 ```
 
-<p align="center"><img src="images/lenses/startup.png" width="100%" /></p>
+<p align="center"><img src="images/immutability/lenses/startup.png" width="100%" /></p>
 
 Ouch!
 
@@ -297,7 +297,7 @@ salaryLens.modify(s => s + 10)(startup.founder)
 diagram(OpticFocus(salaryLens, startup.founder)).render("salaryLens")
 ```
 
-<p align="center"><img src="images/lenses/salaryLens.png" width="40%" /></p>
+<p align="center"><img src="images/immutability/lenses/salaryLens.png" width="40%" /></p>
 
 We can also define a lens that focuses on the startup’s founder:
 
@@ -311,7 +311,7 @@ founderLens.get(startup)
 diagram(OpticFocus(founderLens, startup)).render("founderLens")
 ```
 
-<p align="center"><img src="images/lenses/founderLens.png" width="100%" /></p>
+<p align="center"><img src="images/immutability/lenses/founderLens.png" width="100%" /></p>
 
 It’s not apparent yet how this would help, but the trick is that lenses can be composed:
 
@@ -326,7 +326,7 @@ founderSalaryLens.modify(s => s + 10)(startup)
 diagram(OpticFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 ```
 
-<p align="center"><img src="images/lenses/founderSalaryLens.png" width="100%" /></p>
+<p align="center"><img src="images/immutability/lenses/founderSalaryLens.png" width="100%" /></p>
 
 One interesting thing is that lenses can focus on anything, not just direct attributes of the data.
 Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
@@ -335,7 +335,7 @@ Here is a traversal — a more generic kind of lens — that focuses on all vowe
 diagram(OpticFocus(vowelTraversal, "example")).render("vowelTraversal")
 ```
 
-<p align="center"><img src="images/lenses/vowelTraversal.png" width="40%" /></p>
+<p align="center"><img src="images/immutability/lenses/vowelTraversal.png" width="40%" /></p>
 
 We can use it to give our founder a funny name:
 
@@ -350,7 +350,7 @@ founderVowelTraversal.modify(v => v.toUpper)(startup)
 diagram(OpticFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
 ```
 
-<p align="center"><img src="images/lenses/founderVowelTraversal.png" width="100%" /></p>
+<p align="center"><img src="images/immutability/lenses/founderVowelTraversal.png" width="100%" /></p>
 
 So far we have replaced the `copy` boilerplate with a number of lens declarations.
 However most of the time our goal is just to update data.
@@ -406,7 +406,7 @@ import reftree.contrib.ZipperInstances._
 
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
-  directory = Paths.get("images", "zippers")
+  directory = Paths.get("images", "immutability", "zippers")
 )
 import renderer._
 ```
@@ -415,7 +415,7 @@ import renderer._
 diagram(company.hierarchy).render("company")
 ```
 
-<p align="center"><img src="images/zippers/company.png" width="100%" /></p>
+<p align="center"><img src="images/immutability/zippers/company.png" width="100%" /></p>
 
 What if we want to navigate through this tree and modify it along the way?
 We can use [lenses](#lenses), but the recursive nature of the tree allows for a better solution.
@@ -437,7 +437,7 @@ val updatedHierarchy = Zipper(company.hierarchy).moveDownRight.moveDownRight.ins
 (diagram(company.hierarchy) + diagram(updatedHierarchy)).render("updatedHierarchy")
 ```
 
-<p align="center"><img src="images/zippers/updatedHierarchy.png" width="100%" /></p>
+<p align="center"><img src="images/immutability/zippers/updatedHierarchy.png" width="100%" /></p>
 
 My [zipper library](https://github.com/stanch/zipper#zipper--an-implementation-of-huets-zipper)
 provides a few useful movements and operations.
@@ -458,7 +458,7 @@ simpleTree
 diagram(simpleTree).render("simpleTree")
 ```
 
-<p align="center"><img src="images/zippers/simpleTree.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/simpleTree.png" width="50%" /></p>
 
 When we wrap a Zipper around this tree, it does not look very interesting yet:
 
@@ -470,7 +470,7 @@ val zipper1 = Zipper(simpleTree)
 (diagram(simpleTree) + diagram(zipper1)).render("zipper1")
 ```
 
-<p align="center"><img src="images/zippers/zipper1.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/zipper1.png" width="50%" /></p>
 
 We can see that it just points to the original tree and has some other empty fields.
 More specifically, a Zipper consists of four pointers:
@@ -497,7 +497,7 @@ val zipper2 = zipper1.update(focus ⇒ focus.copy(x = focus.x + 99))
 (diagram(simpleTree) + diagram(zipper1) + diagram(zipper2)).render("zipper2")
 ```
 
-<p align="center"><img src="images/zippers/zipper2.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/zipper2.png" width="50%" /></p>
 
 We just created a new tree! To obtain it, we have to commit the changes:
 
@@ -509,7 +509,7 @@ val tree2 = zipper2.commit
 (diagram(simpleTree) + diagram(tree2)).render("tree2")
 ```
 
-<p align="center"><img src="images/zippers/tree2.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/tree2.png" width="50%" /></p>
 
 If you were following closely,
 you would notice that nothing spectacular happened yet:
@@ -533,7 +533,7 @@ val zipper2 = zipper1.moveDownLeft
 (diagram(zipper1) + diagram(zipper2)).render("zipper1+2")
 ```
 
-<p align="center"><img src="images/zippers/zipper1+2.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/zipper1+2.png" width="50%" /></p>
 
 The new Zipper links to the old one,
 which will allow us to return to the root of the tree when we are done applying changes.
@@ -544,7 +544,7 @@ Let’s look at the second zipper alone:
 diagram(zipper2).render("zipper2b")
 ```
 
-<p align="center"><img src="images/zippers/zipper2b.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/zipper2b.png" width="50%" /></p>
 
 Great! We have `2` in focus and `3, 4, 5` as right siblings. What happens if we move right a bit?
 
@@ -556,7 +556,7 @@ val zipper3 = zipper2.moveRightBy(2)
 diagram(zipper3).render("zipper3")
 ```
 
-<p align="center"><img src="images/zippers/zipper3.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/zipper3.png" width="50%" /></p>
 
 This is interesting! Notice that the left siblings are “inverted”.
 This allows to move left and right in constant time, because the sibling
@@ -572,7 +572,7 @@ val zipper4 = zipper3.insertLeft(Tree(34))
 diagram(zipper4).render("zipper4")
 ```
 
-<p align="center"><img src="images/zippers/zipper4.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/zipper4.png" width="50%" /></p>
 
 And, as you might know, we can delete nodes and update the focus:
 
@@ -584,7 +584,7 @@ val zipper5 = zipper4.deleteAndMoveRight.set(Tree(45))
 diagram(zipper5).render("zipper5")
 ```
 
-<p align="center"><img src="images/zippers/zipper5.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/zipper5.png" width="50%" /></p>
 
 Finally, when we move up, the siblings at the current level are “zipped”
 together and their parent node is updated:
@@ -597,7 +597,7 @@ val zipper6 = zipper5.moveUp
 diagram(zipper6).render("zipper6")
 ```
 
-<p align="center"><img src="images/zippers/zipper6.png" width="50%" /></p>
+<p align="center"><img src="images/immutability/zippers/zipper6.png" width="50%" /></p>
 
 You can probably guess by now that `.commit` is a shorthand for going
 all the way up (applying all the changes) and returning the focus:
@@ -635,7 +635,7 @@ val zippers = movement
 (trees + zippers).render("tree+zipper")
 ```
 
-<p align="center"><img src="images/zippers/tree+zipper.gif" /></p>
+<p align="center"><img src="images/immutability/zippers/tree+zipper.gif" /></p>
 
 ### Useful resources
 

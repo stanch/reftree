@@ -14,7 +14,7 @@ import zipper.Zipper
 import scala.collection.immutable._
 
 object Lists extends App {
-  val renderer = Renderer(directory = Paths.get("images", "data"))
+  val renderer = Renderer(directory = Paths.get("images", "immutability", "data"))
   import renderer._
 
   Animation
@@ -31,7 +31,7 @@ object Lists extends App {
 }
 
 object Queues extends App {
-  val renderer = Renderer(directory = Paths.get("images", "data"))
+  val renderer = Renderer(directory = Paths.get("images", "immutability", "data"))
   import renderer._
 
   Animation
@@ -47,7 +47,7 @@ object FingerTrees extends App {
 
   val renderer = Renderer(
     renderingOptions = RenderingOptions(verticalSpacing = 2, density = 75),
-    directory = Paths.get("images", "data")
+    directory = Paths.get("images", "immutability", "data")
   )
   import renderer._
 
@@ -64,7 +64,7 @@ object Zippers extends App {
 
   val renderer = Renderer(
     renderingOptions = RenderingOptions(density = 75),
-    directory = Paths.get("images", "zippers")
+    directory = Paths.get("images", "immutability", "zippers")
   )
   import renderer._
 
@@ -97,7 +97,7 @@ object Lenses extends App {
 
   val renderer = Renderer(
     animationOptions = AnimationOptions(onionSkinLayers = 2),
-    directory = Paths.get("images", "lenses")
+    directory = Paths.get("images", "immutability", "lenses")
   )
   import renderer._
 
@@ -119,7 +119,7 @@ object Teaser extends App {
   import reftree.contrib.OpticInstances._
   import reftree.contrib.ZipperInstances._
 
-  val renderer = Renderer(directory = Paths.get("images", "usage"))
+  val renderer = Renderer(directory = Paths.get("images"))
   import renderer._
 
   val queues = Animation

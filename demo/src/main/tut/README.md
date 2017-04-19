@@ -8,7 +8,7 @@ To use this library you will need to have [GraphViz](http://www.graphviz.org/) i
 
 For more examples see the [materials for my talk “Unzipping Immutability”](demo.md).
 
-<p align="center"><img src="images/usage/teaser.gif" /></p>
+<p align="center"><img src="images/teaser.gif" /></p>
 
 * [Features](#features)
 * [Getting Started](#getting-started)
@@ -19,7 +19,7 @@ For more examples see the [materials for my talk “Unzipping Immutability”](d
 
 * Pre-made visualizations of many standard collections.
 
-  <p align="center"><img src="images/data/lists.png" width="20%" /></p>
+  <p align="center"><img src="images/immutability/data/lists.png" width="20%" /></p>
 
 * Automatic visualization of case classes (using
   [shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes)).
@@ -37,7 +37,7 @@ For more examples see the [materials for my talk “Unzipping Immutability”](d
   )
   ```
 
-  <p align="center"><img src="images/lenses/startup.png" /></p>
+  <p align="center"><img src="images/immutability/lenses/startup.png" /></p>
 
 * Static images as well as animations can be generated.
 * Hassle-free captions (using [sourcecode](https://github.com/lihaoyi/sourcecode)).
