@@ -13,7 +13,10 @@ import reftree.core._
 object SimplifiedInstances {
   /** A more compact representation of a [[String]], which jams everything into a single box */
   implicit def string: ToRefTree[String] =
-    ToRefTree[String](s ⇒ RefTree.Ref(s, Seq.empty).rename(s""""$s""""))
+    ToRefTree[String] { s ⇒
+      val shorter = if (s.length <= 60) s else s"${s.take(30)}...${s.takeRight(30)}"
+      RefTree.Ref(s, Seq.empty).rename(s""""$shorter"""")
+    }
 
   /** An “unboxed” [[Option]], representing [[None]] with `null` and [[Some]] with its inner value */
   implicit def option[A: ToRefTree]: ToRefTree[Option[A]] = ToRefTree[Option[A]] {

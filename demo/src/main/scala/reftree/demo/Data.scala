@@ -1,6 +1,7 @@
 package reftree.demo
 
 import reftree.core._
+import reftree.geometry.{Point, Polyline}
 
 import scala.language.higherKinds
 
@@ -80,4 +81,47 @@ object Data {
   val vowels = Set('A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u')
   val vowelTraversal = letterTraversal(vowels)
   val consonantTraversal = letterTraversal(x ⇒ !vowels(x))
+
+  val polyline1 = Polyline(Seq(Point(0, 10), Point(10, 20)))
+  val polyline2 = Polyline(Seq(Point(20, 30), Point(40, 50)))
+
+  val edge1 = xml.Utility.trim {
+    <svg
+      viewBox="50 -200 130 70"
+      height="70pt"
+      width="130pt"
+      shape-rendering="geometricPrecision"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns="http://www.w3.org/2000/svg">
+      <g class="edge">
+        <path d="M84.5,-195C84.5,-165.869 62.5907,-160.925 58.9962,-135.762" stroke="#104e8b" fill="none"/>
+      </g>
+    </svg>
+  }
+
+  val edge2 = xml.Utility.trim {
+    <svg
+      viewBox="50 -200 130 70"
+      height="70pt"
+      width="130pt"
+      shape-rendering="geometricPrecision"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns="http://www.w3.org/2000/svg">
+      <g class="edge">
+        <path d="M131.5,-195C131.5,-164.017 162.095,-162.206 166.875,-135.781" stroke="#104e8b" fill="none"/>
+      </g>
+    </svg>
+  }
+
+  val simpleXml = xml.Utility.trim {
+    <tree value="1">
+      <leaf value="2"/>
+      <leaf value="3"/>
+      <leaf value="4"/>
+      <tree value="5">
+        <leaf value="6"/>
+        <leaf value="7"/>
+      </tree>
+    </tree>
+  }
 }

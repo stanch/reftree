@@ -103,6 +103,10 @@ object Path {
     Path(move +: lines)
   }
 
+  /** An (imprecise) isomorphism between [[Path]] and [[Polyline]] */
+  def polylineIso(points: Int): Iso[Path, Polyline] =
+    Iso[Path, Polyline](_.simplify(points))(fromPolyline)
+
   private val parser = {
     import fastparse.all._
 
@@ -132,8 +136,8 @@ object Path {
     cycle(Path.empty, acc ⇒ move(acc) | line(acc) | bezier(acc))
   }
 
-  /** Interpolate by converting to a polyline */
-  val interpolation = Iso[Path, Polyline](_.simplify(100))(fromPolyline).asLens
+  /** Interpolate via a polyline approximation */
+  def interpolation(points: Int) = polylineIso(points).asLens
     .interpolateWith(Polyline.interpolation)
 
   implicit object `Path Translatable` extends Translatable[Path] {

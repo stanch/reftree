@@ -60,6 +60,18 @@ object AnimatedGifRenderer {
   }
 
   def renderAnimatedGif(
+    svgs: Seq[xml.Node],
+    output: Path,
+    renderingOptions: RenderingOptions,
+    animationOptions: AnimationOptions
+  ): Unit = {
+    val images = svgs.par.map(renderImage(_, renderingOptions)).to[Seq]
+    // TODO: use the streaming writer
+    val writer = GifSequenceWriter(animationOptions.delay, animationOptions.loop)
+    writer.output(images, output)
+  }
+
+  def renderAnimatedGif(
     graphs: Seq[Graph],
     svgPreprocessing: Seq[xml.Node] ⇒ Seq[xml.Node],
     output: Path,

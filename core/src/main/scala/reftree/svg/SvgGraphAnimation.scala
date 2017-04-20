@@ -91,7 +91,7 @@ object SvgGraphInterpolation {
     Optics.only(sel"g.edge") composeLens
     Optics.collectLeftByIndex(sel"path, polygon")
   }.interpolateEachWith(
-    SvgOptics.path.interpolateWith(Path.interpolation) +
+    SvgOptics.path.interpolateWith(Path.interpolation(100)) +
     SvgOptics.polygonPoints.interpolateWith(Polyline.interpolation)
   ).timespan(1/3.0, 2/3.0)
 

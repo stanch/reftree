@@ -1,13 +1,17 @@
 package reftree.demo
 
+import java.nio.file.Paths
+
 import reftree.core._
 import reftree.diagram.Diagram
-import reftree.geometry.Point
+import reftree.geometry.{Interpolation, Point}
 import reftree.graph.{Graph, Graphs}
-import reftree.render.{AnimatedGifRenderer, RenderingOptions, Renderer}
+import reftree.render._
 import reftree.svg._
 import reftree.util.Optics
 import zipper.Zipper
+
+import scala.sys.process.Process
 
 object Shortcuts {
   val renderer = Renderer()
@@ -32,6 +36,10 @@ object Shortcuts {
     Diagram.sourceCodeCaption(value1) + Diagram.sourceCodeCaption(value2) + Diagram.sourceCodeCaption(value3)
   )
 
+  def clear() = DotRenderer.render(
+    Graph(true, true), Paths.get("diagram.png"), RenderingOptions(), "png"
+  )
+
   def graph[A: ToRefTree](value: A): Graph =
     Graphs.graph(RenderingOptions())(Diagram(value))
 
@@ -39,6 +47,22 @@ object Shortcuts {
     Optics.collectFirst(sel"g.graph")
       .composeOptional(SvgOptics.translation)
       .set(Point.zero)(xml.Utility.trim(AnimatedGifRenderer.renderSvg(graph(value))))
+
+  def renderFrames(
+    start: xml.Node,
+    end: xml.Node,
+    interpolation: Interpolation[xml.Node],
+    frames: Int
+  ) = {
+    AnimatedGifRenderer.renderAnimatedGif(
+      start +: interpolation.sample(start, end, frames, inclusive = false) :+ end,
+      Paths.get("diagram.gif"),
+      RenderingOptions(density = 200),
+      AnimationOptions(framesPerSecond = frames / 4)
+    )
+    Process(Seq("gifview", "diagram.gif")).!
+    ()
+  }
 
   private def tapRender[B: ToRefTree](value: B) = { render(value); value }
 
