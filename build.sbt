@@ -13,7 +13,7 @@ val commonSettings = Seq(
 
 val core = project.settings(commonSettings: _*).settings(
   name := "reftree",
-  version := "0.10.0",
+  version := "1.0.0",
   libraryDependencies ++= Seq(
     "com.chuusai" %% "shapeless" % "2.3.2",
     "com.lihaoyi" %% "sourcecode" % "0.1.3",
