@@ -10,6 +10,7 @@ import scala.concurrent.duration._
  *
  * @param verticalSpacing vertical spacing to set for Graphviz
  * @param palette a sequence of colors to be used
+ * @param font the font for text rendering
  * @param density the desired image density, in pixels per inch
  */
 case class RenderingOptions(
@@ -19,9 +20,11 @@ case class RenderingOptions(
     Color.fromRgbaString("#228b22"),
     Color.fromRgbaString("#cd5b45")
   ),
+  font: String = "Source Code Pro",
   density: Int = 100
 ) {
   def withVerticalSpacing(spacing: Double) = copy(verticalSpacing = spacing)
+  def withFont(font: String) = copy(font = font)
   def withDensity(density: Int) = copy(density = density)
   def mapPalette(f: Color ⇒ Color) = this.modify(_.palette.each).using(f)
 }

@@ -5,8 +5,10 @@
 This project aims to provide visualizations for common functional data structures used in Scala.
 The visualizations are generated automatically from code, which allows to use them in an interactive fashion.
 To use this library you will need to have [GraphViz](http://www.graphviz.org/) installed (and have `dot` on your `PATH`).
+I also recommend to install the [Source Code Pro](https://github.com/adobe-fonts/source-code-pro) fonts (regular and italic),
+as I find they look the best among the free options and therefore are used by default.
 
-For more examples see the [materials for my talk “Unzipping Immutability”](demo.md).
+For more examples see the [demo page](demo.md).
 
 <p align="center"><img src="images/teaser.gif" /></p>
 

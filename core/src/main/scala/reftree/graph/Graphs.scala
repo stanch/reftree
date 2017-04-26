@@ -9,7 +9,7 @@ import reftree.graph.Attr.AttrSyntax
 object Graphs {
   private def graphAttributes(options: RenderingOptions): Seq[GraphStatement] = Seq(
     Attrs.Graph("ranksep" := options.verticalSpacing),
-    Attrs.Node("shape" := "plaintext", "fontname" := "consolas", "fontcolor" := "#000000"),
+    Attrs.Node("shape" := "plaintext", "fontname" := options.font, "fontcolor" := "#000000"),
     Attrs.Edge("arrowsize" := "0.7", "color" := "#000000")
   )
 

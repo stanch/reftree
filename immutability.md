@@ -308,7 +308,7 @@ scala> import monocle.macros.GenLens
 import monocle.macros.GenLens
 
 scala> val salaryLens = GenLens[Employee](_.salary)
-salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@70ba9f08
+salaryLens: monocle.Lens[reftree.demo.Data.Employee,Long] = $anon$1@76454286
 
 scala> salaryLens.get(startup.founder)
 res11: Long = 4000
@@ -327,7 +327,7 @@ We can also define a lens that focuses on the startup’s founder:
 
 ```scala
 scala> val founderLens = GenLens[Startup](_.founder)
-founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@9f607ea
+founderLens: monocle.Lens[reftree.demo.Data.Startup,reftree.demo.Data.Employee] = $anon$1@6bcf8793
 
 scala> founderLens.get(startup)
 res14: reftree.demo.Data.Employee = Employee(Michael,4000)
@@ -343,7 +343,7 @@ It’s not apparent yet how this would help, but the trick is that lenses can be
 
 ```scala
 scala> val founderSalaryLens = founderLens composeLens salaryLens
-founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@32166b8a
+founderSalaryLens: monocle.PLens[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Long,Long] = monocle.PLens$$anon$1@60c07e2e
 
 scala> founderSalaryLens.get(startup)
 res16: Long = 4000
@@ -371,10 +371,10 @@ We can use it to give our founder a funny name:
 
 ```scala
 scala> val employeeNameLens = GenLens[Employee](_.name)
-employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@242f2f70
+employeeNameLens: monocle.Lens[reftree.demo.Data.Employee,String] = $anon$1@4affc9a0
 
 scala> val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
-founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@248226a3
+founderVowelTraversal: monocle.PTraversal[reftree.demo.Data.Startup,reftree.demo.Data.Startup,Char,Char] = monocle.PTraversal$$anon$2@77e327f3
 
 scala> founderVowelTraversal.modify(v => v.toUpper)(startup)
 res20: reftree.demo.Data.Startup = Startup(Acme,Employee(MIchAEl,4000),List(Employee(Adam,2100), Employee(Bella,2100), Employee(Chad,1980), Employee(Delia,1850)))
