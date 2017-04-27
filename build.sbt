@@ -21,7 +21,7 @@ val core = project.settings(commonSettings: _*).settings(
     "org.stanch" %% "zipper" % "0.5.0",
     "com.softwaremill.quicklens" %% "quicklens" % "1.4.8",
     "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-    "batik" % "batik-transcoder" % "1.6-1" exclude("fop", "fop"),
+    "org.apache.xmlgraphics" % "batik-transcoder" % "1.9",
     "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.8",
     "com.github.julien-truffaut" %% "monocle-macro" % "1.4.0",
     "de.sciss" %% "fingertree" % "1.5.2",
