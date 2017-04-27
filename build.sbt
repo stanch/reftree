@@ -1,7 +1,7 @@
 val commonSettings = Seq(
   organization := "org.stanch",
-  scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  scalaVersion := "2.11.11",
+  crossScalaVersions := Seq("2.11.11", "2.12.2"),
   scalacOptions ++= Seq(
     "-feature", "-deprecation",
     "-Xlint", "-Ywarn-unused-import", "-Xfatal-warnings"
@@ -25,7 +25,7 @@ val core = project.settings(commonSettings: _*).settings(
     "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.8",
     "com.github.julien-truffaut" %% "monocle-macro" % "1.4.0",
     "de.sciss" %% "fingertree" % "1.5.2",
-    "org.scalatest" %% "scalatest" % "3.0.1" % Test,
+    "org.scalatest" %% "scalatest" % "3.0.3" % Test,
     "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
   )
 )
@@ -34,35 +34,13 @@ val demo = project.settings(commonSettings: _*).dependsOn(core).settings(
   publish := {},
   publishLocal := {},
   libraryDependencies ++= Seq(
-    "com.lihaoyi" % "ammonite" % "0.8.2" % Test cross CrossVersion.full
+    "com.lihaoyi" % "ammonite" % "0.8.3" % Test cross CrossVersion.full
   ),
-  initialCommands in (Test, console) := {
-    val predef = Seq(
-      "import scala.collection.immutable._",
-      "import de.sciss.fingertree._",
-      "import monocle.macros.GenLens",
-      "import com.softwaremill.quicklens._",
-      "import zipper._",
-      "import reftree.core._",
-      "import reftree.diagram._",
-      "import reftree.svg._",
-      "import reftree.geometry._",
-      "import reftree.util.Optics",
-      "import reftree.contrib.FingerTreeInstances._",
-      "import reftree.contrib.OpticInstances._",
-      "import reftree.contrib.ZipperInstances._",
-      "import reftree.contrib.XmlInstances._",
-      "import reftree.contrib.SimplifiedInstances",
-      "import reftree.demo.Data._",
-      "import reftree.demo.Shortcuts._"
-    ).mkString(";")
-    s"""ammonite.Main("$predef").run(); System.exit(0)"""
-  },
   tutSettings,
   tutTargetDirectory := baseDirectory.value / ".."
 )
 
-addCommandAlias("demo", "demo/test:console")
+addCommandAlias("demo", "demo/test:run")
 
 commonSettings
 publish := {}
