@@ -7,11 +7,12 @@ import java.nio.file.Path
 import javax.xml.parsers.SAXParserFactory
 
 import com.sksamuel.scrimage.Image
-import com.sksamuel.scrimage.nio.GifSequenceWriter
+import com.sksamuel.scrimage.nio.StreamingGifWriter
 import org.apache.batik.transcoder.{TranscoderInput, SVGAbstractTranscoder, TranscoderOutput}
 import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
 import reftree.graph.Graph
 
+import scala.annotation.tailrec
 import scala.sys.process.{Process, BasicIO}
 
 object AnimatedGifRenderer {
@@ -59,16 +60,27 @@ object AnimatedGifRenderer {
     Image.fromAwt(image)
   }
 
+  @tailrec def spans[A](xs: List[A], acc: List[(A, Int)] = Nil): List[(A, Int)] =
+    (xs, acc) match {
+      case (Nil, _) ⇒ acc.reverse
+      case (head :: tail, (last, c) :: prev) if head == last ⇒ spans(tail, (last, c + 1) :: prev)
+      case (head :: tail, prev) ⇒ spans(tail, (head, 1) :: prev)
+    }
+
   def renderAnimatedGif(
     svgs: Seq[xml.Node],
     output: Path,
     renderingOptions: RenderingOptions,
     animationOptions: AnimationOptions
   ): Unit = {
-    val images = svgs.par.map(renderImage(_, renderingOptions)).to[Seq]
-    // TODO: use the streaming writer
-    val writer = GifSequenceWriter(animationOptions.delay, animationOptions.loop)
-    writer.output(images, output)
+    val writer = StreamingGifWriter(animationOptions.delay, animationOptions.loop)
+    val stream = writer.prepareStream(output, BufferedImage.TYPE_INT_ARGB)
+    spans(svgs.toList) foreach {
+      case (svg, count) ⇒
+        val image = renderImage(svg, renderingOptions)
+        Seq.fill(count)(stream.writeFrame(image))
+    }
+    stream.finish()
   }
 
   def renderAnimatedGif(
@@ -77,16 +89,6 @@ object AnimatedGifRenderer {
     output: Path,
     renderingOptions: RenderingOptions,
     animationOptions: AnimationOptions
-  ): Unit = {
-    val svgs = svgPreprocessing(graphs.map(renderSvg))
-    val images = svgs.par.map(renderImage(_, renderingOptions)).to[Seq]
-    // TODO: move this logic back into the preprocessing pipeline
-    val duplicated = Seq.fill(animationOptions.keyFrames)(images.head) ++
-      images.tail.grouped(animationOptions.interpolationFrames + 1).flatMap {
-        case init :+ last ⇒ init ++ Seq.fill(animationOptions.keyFrames)(last)
-      }
-    // TODO: use the streaming writer
-    val writer = GifSequenceWriter(animationOptions.delay, animationOptions.loop)
-    writer.output(duplicated, output)
-  }
+  ): Unit =
+    renderAnimatedGif(svgPreprocessing(graphs.map(renderSvg)), output, renderingOptions, animationOptions)
 }

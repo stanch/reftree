@@ -71,7 +71,7 @@ case class Renderer(
     val graphs = Graphs.graphs(renderingOptions, animationOptions.onionSkinLayers)(animation)
     AnimatedGifRenderer.renderAnimatedGif(
       graphs,
-      SvgGraphAnimation(ScalaXmlSvgApi).animate(animationOptions.interpolationFrames),
+      SvgGraphAnimation(ScalaXmlSvgApi).animate(animationOptions.keyFrames, animationOptions.interpolationFrames),
       directory.resolve(s"$name.gif"),
       renderingOptions,
       animationOptions

@@ -165,21 +165,21 @@ case class SvgGraphAnimation[Svg](api: SvgApi[Svg]) {
       case ((acc :+ prev), next) ⇒ acc :+ prev :+ SvgGraphAlignment(api).align(prev, next)
     }
 
-  private def interpolatePairwise(svgs: Seq[Svg], interpolationFrames: Int) =
-    svgs.head +: svgs.sliding(2).toSeq.flatMap {
+  private def interpolatePairwise(svgs: Seq[Svg], keyFrames: Int, interpolationFrames: Int) =
+    Seq.fill(keyFrames)(svgs.head) ++ svgs.sliding(2).toSeq.flatMap {
       case Seq(prev, next) ⇒
         SvgGraphInterpolation(api).interpolation
-          .sample(prev, next, interpolationFrames, inclusive = false) :+ next
+          .sample(prev, next, interpolationFrames, inclusive = false) ++ Seq.fill(keyFrames)(next)
     }
 
-  def animate(interpolationFrames: Int)(svgs: Seq[Svg]) = {
+  def animate(keyFrames: Int, interpolationFrames: Int)(svgs: Seq[Svg]) = {
     val preprocessed = svgs.map(improveRendering).map(fixTextColor)
     if (svgs.length < 2) preprocessed else {
       val accentuated = accentuatePairwise(preprocessed)
       val aligned = alignPairwise(accentuated)
       val maxViewBox = Rectangle.union(aligned.map(api.viewBox.get))
       val resized = aligned.map(api.viewBox.set(maxViewBox))
-      interpolatePairwise(resized, interpolationFrames)
+      interpolatePairwise(resized, keyFrames, interpolationFrames)
     }
   }
 }
