@@ -12,10 +12,12 @@ trait Translatable[A] {
 }
 
 object Translatable {
+  def apply[A](f: (A, Point) ⇒ A): Translatable[A] = new Translatable[A] {
+    def translate(value: A, delta: Point) = f(value, delta)
+  }
+
   implicit def `List Translatable`[A](implicit t: Translatable[A]): Translatable[List[A]] =
-    new Translatable[List[A]] {
-      def translate(value: List[A], delta: Point) = value.map(t.translate(_, delta))
-    }
+    Translatable((value, delta) ⇒ value.map(t.translate(_, delta)))
 }
 
 /** A point on a plane */
@@ -65,9 +67,8 @@ object Point {
     r * Math.pow(t, 3)
   }
 
-  implicit object `Point Translatable` extends Translatable[Point] {
-    def translate(value: Point, delta: Point): Point = value + delta
-  }
+  implicit val `Point Translatable`: Translatable[Point] =
+    Translatable(_ + _)
 }
 
 /** A polyline is a sequence of points */
@@ -96,9 +97,8 @@ object Polyline {
   val interpolation = GenLens[Polyline](_.points)
     .interpolateEachWith(Point.interpolation)
 
-  implicit object `Polyline Translatable` extends Translatable[Polyline] {
-    def translate(value: Polyline, delta: Point): Polyline = value + delta
-  }
+  implicit val `Polyline Translatable`: Translatable[Polyline] =
+    Translatable(_ + _)
 }
 
 /** A rectangle defined by its top-left and bottom-right corners */
@@ -127,7 +127,6 @@ object Rectangle {
     Rectangle(topLeft, topLeft + widthHeight)
   }
 
-  implicit object `Rectangle Translatable` extends Translatable[Rectangle] {
-    def translate(value: Rectangle, delta: Point): Rectangle = value + delta
-  }
+  implicit val `Rectangle Translatable`: Translatable[Rectangle] =
+    Translatable(_ + _)
 }

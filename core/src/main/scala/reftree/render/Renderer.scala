@@ -4,7 +4,7 @@ import java.nio.file.{Paths, Path}
 
 import reftree.diagram.{Animation, Diagram}
 import reftree.graph.Graphs
-import reftree.svg.SvgGraphAnimation
+import reftree.svg.{ScalaXmlSvgApi, SvgGraphAnimation}
 
 /**
  * This class provides functionality for rendering diagrams and animations
@@ -71,7 +71,7 @@ case class Renderer(
     val graphs = Graphs.graphs(renderingOptions, animationOptions.onionSkinLayers)(animation)
     AnimatedGifRenderer.renderAnimatedGif(
       graphs,
-      SvgGraphAnimation.animate(animationOptions.interpolationFrames),
+      SvgGraphAnimation(ScalaXmlSvgApi).animate(animationOptions.interpolationFrames),
       directory.resolve(s"$name.gif"),
       renderingOptions,
       animationOptions

@@ -140,7 +140,6 @@ object Path {
   def interpolation(points: Int) = polylineIso(points).asLens
     .interpolateWith(Polyline.interpolation)
 
-  implicit object `Path Translatable` extends Translatable[Path] {
-    def translate(value: Path, delta: Point): Path = value + delta
-  }
+  implicit val `Path Translatable`: Translatable[Path] =
+    Translatable(_ + _)
 }

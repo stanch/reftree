@@ -10,6 +10,7 @@ object Ammonite extends App {
     "import reftree.core._",
     "import reftree.diagram._",
     "import reftree.svg._",
+    "import reftree.svg.ScalaXmlSvgApi.svgUnzip",
     "import reftree.geometry._",
     "import reftree.util.Optics",
     "import reftree.contrib.FingerTreeInstances._",

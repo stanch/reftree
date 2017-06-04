@@ -43,10 +43,12 @@ object Shortcuts {
   def graph[A: ToRefTree](value: A): Graph =
     Graphs.graph(RenderingOptions())(Diagram(value))
 
-  def svg[A: ToRefTree](value: A): xml.Node =
-    Optics.collectFirst(sel"g.graph")
-      .composeOptional(SvgOptics.translation)
+  def svg[A: ToRefTree](value: A): xml.Node = {
+    import ScalaXmlSvgApi.svgUnzip
+    Optics.collectFirst(ScalaXmlSvgApi.select("g.graph"))
+      .composeOptional(ScalaXmlSvgApi.translation)
       .set(Point.zero)(xml.Utility.trim(AnimatedGifRenderer.renderSvg(graph(value))))
+  }
 
   def renderFrames(
     start: xml.Node,

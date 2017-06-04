@@ -3,25 +3,30 @@ package reftree.svg
 import reftree.geometry._
 import reftree.util.Optics
 
-object SvgGraphAlignment {
-  private val graph = Optics.collectFirst(sel"g.graph")
-  private val nodes = Optics.collectLeftByKey(sel"g.node")(
-    Optics.xmlAttr("id").get
+case class SvgGraphAlignment[Svg](api: SvgApi[Svg]) {
+  import api.svgUnzip
+
+  private val graph = Optics.collectFirst(api.select("g.graph"))
+
+  private val nodes = Optics.collectLeftByKey(api.select("g.node"))(
+    api.elementId.get(_).get
   )
 
-  private val nodeAnchor = Optics.collectFirst(sel"a") composeLens
-    Optics.xmlPrefixedAttribute("http://www.w3.org/1999/xlink", "title")
+  private val nodeAnchor = Optics.collectFirst(api.select("a")) composePrism
+    api.anchors composeLens
+    api.anchorTitle
 
-  private val nodePosition = Optics.collectFirst(sel"text") composeOptional
-    SvgOptics.textPosition
+  private val nodePosition = Optics.collectFirst(api.select("text")) composePrism
+    api.texts composeLens
+    api.textPosition
 
-  private def groupByAnchor(nodes: Map[String, xml.Node]) =
+  private def groupByAnchor(nodes: Map[String, Svg]) =
     nodes.values.groupBy(nodeAnchor.getOption(_).flatten) flatMap {
       case (Some(anchor), group) ⇒ Some((anchor, group.head))
       case _ ⇒ None
     }
 
-  private def mapDelta(prev: Map[String, xml.Node], next: Map[String, xml.Node]) = {
+  private def mapDelta(prev: Map[String, Svg], next: Map[String, Svg]) = {
     val common = prev.keySet & next.keySet
     if (common.isEmpty) None else {
       val deltas = common map { id ⇒
@@ -31,13 +36,13 @@ object SvgGraphAlignment {
     }
   }
 
-  private def seqDelta(prev: Seq[xml.Node], next: Seq[xml.Node]) = {
+  private def seqDelta(prev: Seq[Svg], next: Seq[Svg]) = {
     Point.mean(prev.map(nodePosition.getOption(_).get)) -
       Point.mean(next.map(nodePosition.getOption(_).get))
   }
 
   /** Align two adjacent animation frames */
-  def align(prev: xml.Node, next: xml.Node) = {
+  def align(prev: Svg, next: Svg) = {
     val prevNodes = nodes.get(prev)
     val nextNodes = nodes.get(next)
     val prevAnchors = groupByAnchor(prevNodes)
@@ -50,94 +55,98 @@ object SvgGraphAlignment {
       // fallback to aligning the center of mass of all nodes
       seqDelta(prevNodes.values.toSeq, nextNodes.values.toSeq)
     // we need to update the viewbox
-    val withBox = SvgOptics.viewBox.modify(_ + delta)(next)
+    val withBox = api.viewBox.modify(_ + delta)(next)
     // and the translation of the root node
-    (graph composeOptional SvgOptics.translation).modify(_ + delta)(withBox)
+    (graph composeOptional api.translation).modify(_ + delta)(withBox)
   }
 }
 
-object SvgGraphInterpolation {
+case class SvgGraphInterpolation[Svg](api: SvgApi[Svg]) {
+  import api.svgUnzip
+
   // In the first third of the animation time interval we fade out disappearing nodes and edges.
-  private val fadeOut = SvgOptics.opacity
+  private val fadeOut = api.opacity
     .semiInterpolateWith(Interpolation.double.withRight(0))
     .timespan(0, 1/3.0)
 
   // The new nodes and edges fade in during the last third of the animation time interval.
-  private val fadeIn = SvgOptics.opacity
+  private val fadeIn = api.opacity
     .semiInterpolateWith(Interpolation.double.withLeft(0))
     .timespan(2/3.0, 1)
 
   private val color = (
-    SvgOptics.fillColor.interpolateWith(Color.interpolation.option(_.opacify(0))) +
-    SvgOptics.strokeColor.interpolateWith(Color.interpolation.option(_.opacify(0)))
+    api.fillColor.interpolateWith(Color.interpolation.option(_.opacify(0))) +
+    api.strokeColor.interpolateWith(Color.interpolation.option(_.opacify(0)))
   ).timespan(1/3.0, 1)
 
-  private val thickness = SvgOptics.thickness
+  private val thickness = api.strokeWidth
     .interpolateWith(Interpolation.double)
     .timespan(0, 1)
 
   // We move the node as a whole, since nothing inside changes position between frames.
   // Movement happens in the second third of the animation time interval.
   private val nodePosition = {
-    Optics.only(sel"g.node") composeOptional
-    SvgOptics.groupPosition(
-      Optics.collectFirst(sel"text") composeOptional SvgOptics.textPosition
+    Optics.only(api.select("g.node")) composeOptional
+    api.groupPosition(
+      Optics.collectFirst(api.select("text")) composePrism api.texts composeLens api.textPosition
     )
   }.interpolateWith(Point.interpolation)
     .timespan(1/3.0, 2/3.0)
 
   // To move an edge, we need to move the curve and the arrow separately.
   private val edgePosition = {
-    Optics.only(sel"g.edge") composeLens
-    Optics.collectLeftByIndex(sel"path, polygon")
+    Optics.only(api.select("g.edge")) composeLens
+    Optics.collectLeftByIndex(api.select("path, polygon"))
   }.interpolateEachWith(
-    SvgOptics.path.interpolateWith(Path.interpolation(100)) +
-    SvgOptics.polygonPoints.interpolateWith(Polyline.interpolation)
+    (api.paths composeLens api.pathPath).interpolateWith(Path.interpolation(100)) +
+    (api.polygons composeLens api.polygonPoints).interpolateWith(Polyline.interpolation)
   ).timespan(1/3.0, 2/3.0)
 
   private val nodeOrEdge =
     nodePosition +
     edgePosition +
-    Optics.collectLeftByIndex(sel"path, polygon, text").interpolateEachWith(color + thickness)
+    Optics.collectLeftByIndex(api.select("path, polygon, text")).interpolateEachWith(color + thickness)
 
-  val interpolation: Interpolation[xml.Node] =
-    Optics.collectFirst(sel"g.graph").interpolateWith(
-      Optics.collectLeftByKey(sel"g.node, g.edge")(
-        Optics.xmlAttr("id").get
+  val interpolation: Interpolation[Svg] =
+    Optics.collectFirst(api.select("g.graph")).interpolateWith(
+      Optics.collectLeftByKey(api.select("g.node, g.edge"))(
+        api.elementId.get(_).get
       ).interpolateEachWith(
         nodeOrEdge.option(fadeOut, fadeIn)
       )
     )
 }
 
-object SvgGraphAnimation {
+case class SvgGraphAnimation[Svg](api: SvgApi[Svg]) {
+  import api.svgUnzip
+
   /** Prevent ugly rendering artifacts */
-  private def improveRendering(svg: xml.Node): xml.Node =
-    Optics.xmlOptAttr("shape-rendering").set(Some("geometricPrecision")) andThen
-    Optics.xmlOptAttr("text-rendering").set(Some("geometricPrecision")) apply svg
+  private def improveRendering(svg: Svg): Svg =
+    api.shapeRendering.set(Some("geometricPrecision")) andThen
+    api.textRendering.set(Some("geometricPrecision")) apply svg
 
   /**
    * Graphviz does not set the fill-opacity attribute on text,
    * so we copy it from the sibling path node.
    */
-  private def fixTextColor(svg: xml.Node) = {
-    val nodes = Optics.collectAllLeft(sel"g.node")
-    val texts = Optics.collectAllLeft(sel"text")
-    val nodeColor = Optics.collectLast(sel"path") composeOptional SvgOptics.strokeColor
+  private def fixTextColor(svg: Svg) = {
+    val nodes = Optics.collectAllLeft(api.select("g.node"))
+    val texts = Optics.collectAllLeft(api.select("text"))
+    val nodeColor = Optics.collectLast(api.select("path")) composeLens api.strokeColor
     nodes.modify { node ⇒
       val color = nodeColor.getOption(node)
-      color.fold(node)(c ⇒ texts.modify(SvgOptics.fillColor.set(c))(node))
+      color.fold(node)(c ⇒ texts.modify(api.fillColor.set(c))(node))
     }(svg)
   }
 
   /** Make the newly appeared nodes and edges thicker */
-  private def accentuatePairwise(svgs: Seq[xml.Node]) = {
-    val nodesAndEdges = Optics.collectLeftByKey(sel"g.node, g.edge")(
-      Optics.xmlAttr("id").get
+  private def accentuatePairwise(svgs: Seq[Svg]) = {
+    val nodesAndEdges = Optics.collectLeftByKey(api.select("g.node, g.edge"))(
+      api.elementId.get(_).get
     )
-    val thickness = Optics.collectAllLeft(sel"path, polygon") composeOptional SvgOptics.thickness
+    val thickness = Optics.collectAllLeft(api.select("path, polygon")) composeLens api.strokeWidth
 
-    def accentuate(prev: xml.Node, next: xml.Node) = {
+    def accentuate(prev: Svg, next: Svg) = {
       val prevNodes = nodesAndEdges.get(prev)
       nodesAndEdges.modify(_ map {
         case (id, node) if !prevNodes.contains(id) && !id.contains("-caption-") ⇒
@@ -151,25 +160,25 @@ object SvgGraphAnimation {
     } :+ svgs.last // this duplicates the last frame, so that it can lose thickness at the end
   }
 
-  private def alignPairwise(svgs: Seq[xml.Node]) =
+  private def alignPairwise(svgs: Seq[Svg]) =
     svgs.foldLeft(Vector(svgs.head)) {
-      case ((acc :+ prev), next) ⇒ acc :+ prev :+ SvgGraphAlignment.align(prev, next)
+      case ((acc :+ prev), next) ⇒ acc :+ prev :+ SvgGraphAlignment(api).align(prev, next)
     }
 
-  private def interpolatePairwise(svgs: Seq[xml.Node], interpolationFrames: Int) =
+  private def interpolatePairwise(svgs: Seq[Svg], interpolationFrames: Int) =
     svgs.head +: svgs.sliding(2).toSeq.flatMap {
       case Seq(prev, next) ⇒
-        SvgGraphInterpolation.interpolation
+        SvgGraphInterpolation(api).interpolation
           .sample(prev, next, interpolationFrames, inclusive = false) :+ next
     }
 
-  def animate(interpolationFrames: Int)(svgs: Seq[xml.Node]) = {
+  def animate(interpolationFrames: Int)(svgs: Seq[Svg]) = {
     val preprocessed = svgs.map(improveRendering).map(fixTextColor)
     if (svgs.length < 2) preprocessed else {
       val accentuated = accentuatePairwise(preprocessed)
       val aligned = alignPairwise(accentuated)
-      val maxViewBox = Rectangle.union(aligned.map(SvgOptics.viewBox.get))
-      val resized = aligned.map(SvgOptics.viewBox.set(maxViewBox))
+      val maxViewBox = Rectangle.union(aligned.map(api.viewBox.get))
+      val resized = aligned.map(api.viewBox.set(maxViewBox))
       interpolatePairwise(resized, interpolationFrames)
     }
   }

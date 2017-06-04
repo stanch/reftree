@@ -27,6 +27,7 @@ import reftree.diagram._
 import reftree.render._
 import reftree.geometry._
 import reftree.svg._
+import reftree.svg.ScalaXmlSvgApi.svgUnzip
 import reftree.contrib.XmlInstances._
 import reftree.contrib.OpticInstances._
 import reftree.contrib.ZipperInstances._
@@ -347,13 +348,14 @@ in a rather obscure format. Luckily, we have lenses and other optics at our disp
 to plumb through this mess.
 
 First, let’s get to the `path` element. `reftree` implements a few things that will help us:
-* an optic that focuses on an element deep inside XML or any other recursive data structure: `Optics.collectFirst`;
-  it is actually an `Optional`, not a `Lens`, since the element might be missing;
-* a basic CSS-like selector syntax: `sel"path"` is just a predicate that matches `<path>`.
+* `ScalaXmlSvgApi`, an implementation of several useful SVG operations based on Scala’s `xml.Node`.
+  In particular, if offers a CSS selector-like method for matching elements of certain type and/or class.
+* An optic that focuses on an element deep inside XML or any other recursive data structure: `Optics.collectFirst`.
+  It is actually an `Optional`, not a `Lens`, since the element might be missing.
 
 ```scala
-scala> val edgePathElement = Optics.collectFirst(sel"path")
-edgePathElement: monocle.Optional[scala.xml.Node,scala.xml.Node] = monocle.Optional$$anon$6@19377944
+scala> val edgePathElement = Optics.collectFirst(ScalaXmlSvgApi.select("path"))
+edgePathElement: monocle.Optional[scala.xml.Node,scala.xml.Node] = monocle.Optional$$anon$6@f3b3d30
 
 scala> diagram(OpticFocus(edgePathElement, Data.edge1)).render("edgePathElement")
 ```
