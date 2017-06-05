@@ -22,11 +22,12 @@ abstract class SvgApi[Svg] {
   def elementId: Getter[Svg, Option[String]]
   def elementClasses: Getter[Svg, Set[String]]
 
-  def select(selector: String)(svg: Svg): Boolean =
+  def select(selector: String): Prism[Svg, Svg] = Optics.only { svg ⇒
     Selector.fromString(selector).clauses.exists { clause ⇒
       clause.element.forall(_ == elementName.get(svg)) &&
       clause.classes.subsetOf(elementClasses.get(svg))
     }
+  }
 
   /* Translation */
 

@@ -5,6 +5,7 @@ import monocle.function.all.each
 import zipper.{Unzip, Zipper}
 
 import scala.collection.immutable.ListMap
+import scala.reflect.ClassTag
 
 object Optics {
   /** Tuple two lenses with a common source type */
@@ -33,86 +34,134 @@ object Optics {
       if (pred(value)) Some(value) else None
     }(identity)
 
+  /** A prism that matches values of a given subtype */
+  def only[A, B <: A: ClassTag]: Prism[A, B] =
+    Prism[A, B] {
+      case value: B ⇒ Some(value)
+      case _ ⇒ None
+    }(identity)
+
   /**
    * Given a recursive data structure and a move to traverse it with a zipper,
-   * focuses on the first element within that structure that satisfies a predicate.
+   * focuses on the projection of the first (projectable) element within that structure.
    */
-  private def collectOne[A: Unzip](pred: A ⇒ Boolean, move: Zipper.Move[A]): Optional[A, A] = {
-    Optional[A, A] { value ⇒
-      Zipper(value).tryRepeatWhileNot(pred, move).toOption.map(_.focus)
+  private def collectOne[A: Unzip, B](projection: Optional[A, B], move: Zipper.Move[A]): Optional[A, B] = {
+    Optional[A, B] { value ⇒
+      Zipper(value).tryRepeatWhileNot(projection.nonEmpty, move)
+        .toOption.map(_.focus).flatMap(projection.getOption)
     } { collected ⇒ value ⇒
-      Zipper(value).tryRepeatWhileNot(pred, move).toOption.fold(value)(_.set(collected).commit)
+      Zipper(value).tryRepeatWhileNot(projection.nonEmpty, move)
+        .toOption.fold(value)(_.update(projection.set(collected)).commit)
     }
   }
 
   /**
-   * Focuses on the first element of a recursive structure that satisfies a predicate
+   * Focuses on the projection of the first (projectable) element of a recursive structure
    * (traversal order is depth-first, left-to-right).
    */
-  def collectFirst[A: Unzip](pred: A ⇒ Boolean): Optional[A, A] =
-    collectOne(pred, _.tryAdvanceRightDepthFirst)
+  def collectFirst[A: Unzip, B](projection: Optional[A, B]): Optional[A, B] =
+    collectOne(projection, _.tryAdvanceRightDepthFirst)
 
   /**
-   * Focuses on the last element of a recursive structure that satisfies a predicate
+   * Focuses on the projection of the first (projectable) element of a recursive structure
    * (traversal order is depth-first, left-to-right).
    */
-  def collectLast[A: Unzip](pred: A ⇒ Boolean): Optional[A, A] =
-    collectOne(pred, _.tryAdvanceLeftDepthFirst)
+  def collectFirst[A: Unzip, B](projection: Prism[A, B]): Optional[A, B] =
+    collectFirst(projection.asOptional)
 
   /**
-   * Focuses on all elements of a recursive structure that satisfy a predicate,
-   * where each element is pointed to by a key obtained via a key function.
+   * Focuses on the projection of the last (projectable) element of a recursive structure
+   * (traversal order is depth-first, left-to-right).
+   */
+  def collectLast[A: Unzip, B](projection: Optional[A, B]): Optional[A, B] =
+    collectOne(projection, _.tryAdvanceLeftDepthFirst)
+
+  /**
+   * Focuses on the projection of the last (projectable) element of a recursive structure
+   * (traversal order is depth-first, left-to-right).
+   */
+  def collectLast[A: Unzip, B](projection: Prism[A, B]): Optional[A, B] =
+    collectLast(projection.asOptional)
+
+  /**
+   * Focuses on projections of all (projectable) elements of a recursive structure,
+   * where each projection is pointed to by a key, obtained from the element via a key function.
    *
-   * The elements are arranged in the resulting map in order of appearance in the structure
+   * The projections are arranged in the resulting map in order of appearance in the structure
    * (traversed depth-first, left-to-right).
    *
-   * On update, elements with missing keys will be deleted, and elements with new keys
+   * On update, elements with missing keys will be deleted, and projections with new keys
    * will be inserted at the root of the structure.
    */
-  def collectLeftByKey[A: Unzip, B](pred: A ⇒ Boolean)(key: A ⇒ B): Lens[A, ListMap[B, A]] = {
-    Lens[A, ListMap[B, A]] {
-      Zipper(_).loopAccum(ListMap.empty[B, A]) { (z, m) ⇒
-        if (pred(z.focus)) (z.tryAdvanceRightDepthFirst, m.updated(key(z.focus), z.focus))
-        else (z.tryAdvanceRightDepthFirst, m)
+  def collectLeftByKey[A: Unzip, K, V](projection: Prism[A, V])(key: A ⇒ K): Lens[A, ListMap[K, V]] = {
+    Lens[A, ListMap[K, V]] {
+      Zipper(_).loopAccum(ListMap.empty[K, V]) { (z, m) ⇒
+        projection.getOption(z.focus) match {
+          case Some(focus) ⇒ (z.tryAdvanceRightDepthFirst, m.updated(key(z.focus), focus))
+          case None ⇒ (z.tryAdvanceRightDepthFirst, m)
+        }
       }._2
     } { children ⇒ node ⇒
       val (zipper, remaining) = Zipper(node).loopAccum(children) { (z, m) ⇒
-        if (!pred(z.focus)) (z.tryAdvanceRightDepthFirst, m) else {
-          val i = key(z.focus)
-          if (m contains i) (z.set(m(i)).tryAdvanceRightDepthFirst, m - i)
-          else (z.tryDeleteAndAdvanceRightDepthFirst, m)
+        projection.getOption(z.focus) match {
+          case Some(focus) ⇒
+            val i = key(z.focus)
+            if (m contains i) (z.set(projection.reverseGet(m(i))).tryAdvanceRightDepthFirst, m - i)
+            else (z.tryDeleteAndAdvanceRightDepthFirst, m)
+          case None ⇒
+            (z.tryAdvanceRightDepthFirst, m)
         }
       }
-      zipper.cycle(_.tryMoveUp).insertDownRight(remaining.values.toList).commit
+      zipper.cycle(_.tryMoveUp).insertDownRight(remaining.values.toList.map(projection.reverseGet)).commit
     }
   }
 
   /**
-   * Focuses on all elements of a recursive structure that satisfy a predicate,
+   * Focuses on projections of all (projectable) elements of a recursive structure,
    * in order of appearance in the structure (traversed depth-first, left-to-right).
    *
    * This lens assumes that the number of elements is preserved on update.
    */
-  def collectLeftByIndex[A: Unzip](pred: A ⇒ Boolean): Lens[A, List[A]] = {
-    Lens[A, List[A]] {
-      Zipper(_).loopAccum(List.empty[A]) { (z, s) ⇒
-        if (pred(z.focus)) (z.tryAdvanceRightDepthFirst, z.focus :: s)
-        else (z.tryAdvanceRightDepthFirst, s)
+  def collectLeftByIndex[A: Unzip, B](projection: Optional[A, B]): Lens[A, List[B]] = {
+    Lens[A, List[B]] {
+      Zipper(_).loopAccum(List.empty[B]) { (z, s) ⇒
+        projection.getOption(z.focus) match {
+          case Some(focus) ⇒ (z.tryAdvanceRightDepthFirst, focus :: s)
+          case None ⇒ (z.tryAdvanceRightDepthFirst, s)
+        }
       }._2.reverse
     } { children ⇒
       Zipper(_).loopAccum(children) { (z, s) ⇒
-        if (pred(z.focus)) (z.set(s.head).tryAdvanceRightDepthFirst, s.tail)
-        else (z.tryAdvanceRightDepthFirst, s)
+        projection.getOption(z.focus) match {
+          case Some(focus) ⇒ (z.update(projection.set(s.head)).tryAdvanceRightDepthFirst, s.tail)
+          case None ⇒ (z.tryAdvanceRightDepthFirst, s)
+        }
       }._1.commit
     }
   }
 
   /**
-   * Focuses on all elements of a recursive structure that satisfy a predicate,
+   * Focuses on projections of all (projectable) elements of a recursive structure,
+   * in order of appearance in the structure (traversed depth-first, left-to-right).
+   *
+   * This lens assumes that the number of elements is preserved on update.
+   */
+  def collectLeftByIndex[A: Unzip, B](projection: Prism[A, B]): Lens[A, List[B]] =
+    collectLeftByIndex(projection.asOptional)
+
+  /**
+   * Focuses on projections of all (projectable) elements of a recursive structure,
    * in order of appearance in the structure (traversed depth-first, left-to-right).
    */
-  def collectAllLeft[A: Unzip](pred: A ⇒ Boolean): Traversal[A, A] =
-    collectLeftByIndex(pred) composeTraversal each
+  def collectAllLeft[A: Unzip, B](projection: Optional[A, B]): Traversal[A, B] =
+    collectLeftByIndex(projection) composeTraversal each
+
+  /**
+   * Focuses on projections of all (projectable) elements of a recursive structure,
+   * in order of appearance in the structure (traversed depth-first, left-to-right).
+   */
+  def collectAllLeft[A: Unzip, B](projection: Prism[A, B]): Traversal[A, B] =
+    collectAllLeft(projection.asOptional)
 
   /** Focuses on a given optional attribute of an XML node */
   def xmlOptAttr(attr: String): Lens[xml.Node, Option[String]] =

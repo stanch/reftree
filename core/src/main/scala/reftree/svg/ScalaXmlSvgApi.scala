@@ -20,7 +20,7 @@ object ScalaXmlSvgApi extends SvgApi[xml.Node] {
   def elementClasses: Getter[xml.Node, Set[String]] =
     xmlOptAttr("class") composeGetter Getter(_.fold(Set.empty[String])(_.split(' ').toSet))
 
-  val translation = Optics.only(select("g, path, polygon, text, a")) composeLens
+  val translation = select("g, path, polygon, text, a") composeLens
     xmlOptAttr("transform") composeIso
     Iso[Option[String], Point] {
       case None ⇒ Point.zero
@@ -70,10 +70,10 @@ object ScalaXmlSvgApi extends SvgApi[xml.Node] {
   val strokeWidth = xmlOptAttr("stroke-width") composeIso
     Iso[Option[String], Double](_.map(_.toDouble).getOrElse(1.0))(t ⇒ Some(t.toString))
 
-  def polygons = Optics.only(select("polygon"))
-  def paths = Optics.only(select("path"))
-  def texts = Optics.only(select("text"))
-  def anchors = Optics.only(select("a"))
+  def polygons = select("polygon")
+  def paths = select("path")
+  def texts = select("text")
+  def anchors = select("a")
 
   val polygonPoints = translated {
     xmlAttr("points") composeIso Polyline.stringIso

@@ -12,13 +12,9 @@ case class SvgGraphAlignment[Svg](api: SvgApi[Svg]) {
     api.elementId.get(_).get
   )
 
-  private val nodeAnchor = Optics.collectFirst(api.select("a")) composePrism
-    api.anchors composeLens
-    api.anchorTitle
+  private val nodeAnchor = Optics.collectFirst(api.anchors) composeLens api.anchorTitle
 
-  private val nodePosition = Optics.collectFirst(api.select("text")) composePrism
-    api.texts composeLens
-    api.textPosition
+  private val nodePosition = Optics.collectFirst(api.texts) composeLens api.textPosition
 
   private def groupByAnchor(nodes: Map[String, Svg]) =
     nodes.values.groupBy(nodeAnchor.getOption(_).flatten) flatMap {
@@ -86,16 +82,16 @@ case class SvgGraphInterpolation[Svg](api: SvgApi[Svg]) {
   // We move the node as a whole, since nothing inside changes position between frames.
   // Movement happens in the second third of the animation time interval.
   private val nodePosition = {
-    Optics.only(api.select("g.node")) composeOptional
+    api.select("g.node") composeOptional
     api.groupPosition(
-      Optics.collectFirst(api.select("text")) composePrism api.texts composeLens api.textPosition
+      Optics.collectFirst(api.texts) composeLens api.textPosition
     )
   }.interpolateWith(Point.interpolation)
     .timespan(1/3.0, 2/3.0)
 
   // To move an edge, we need to move the curve and the arrow separately.
   private val edgePosition = {
-    Optics.only(api.select("g.edge")) composeLens
+    api.select("g.edge") composeLens
     Optics.collectLeftByIndex(api.select("path, polygon"))
   }.interpolateEachWith(
     (api.paths composeLens api.pathPath).interpolateWith(Path.interpolation(100)) +

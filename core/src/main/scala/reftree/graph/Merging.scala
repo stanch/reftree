@@ -26,7 +26,7 @@ object Merging {
       Color.rgbaStringIso
 
     val elementsWithColor: Lens[xml.Node, List[xml.Node]] = Optics.collectLeftByIndex(
-      Optics.xmlOptAttr("bgcolor").exist(_.nonEmpty)
+      Optics.only(Optics.xmlOptAttr("bgcolor").exist(_.nonEmpty))
     )
 
     val colors: Lens[xml.Node, List[Color]] =
