@@ -7,7 +7,7 @@ import shapeless.LabelledTypeClassCompanion
 /**
  * Encoding the DOT HTML AST into its stringified representation
  */
-case class HtmlEncoding[A](encoding: A ⇒ Chunk[Html]) extends Encoding[Html, A]
+case class HtmlEncoding[A](encoding: A ⇒ Chunk) extends Encoding[A]
 
 /**
  * Automatically derives the encoding for case classes with tag attributes (table, cell, ...)
@@ -17,7 +17,7 @@ private[html] sealed trait HtmlAttrEncoding extends LabelledTypeClassCompanion[H
 
   object typeClass extends LabelledTypeClass[HtmlEncoding] {
     def emptyCoproduct: HtmlEncoding[CNil] =
-      new HtmlEncoding(_ ⇒ Chunk.empty[Html])
+      new HtmlEncoding(_ ⇒ Chunk.empty)
 
     def coproduct[L, R <: Coproduct](
       name: String,
@@ -29,7 +29,7 @@ private[html] sealed trait HtmlAttrEncoding extends LabelledTypeClassCompanion[H
     })
 
     def emptyProduct: HtmlEncoding[HNil] =
-      new HtmlEncoding(_ ⇒ Chunk.empty[Html])
+      new HtmlEncoding(_ ⇒ Chunk.empty)
 
     def product[H, T <: HList](
       name: String,
@@ -56,7 +56,7 @@ private[html] sealed trait HtmlAttrEncoding extends LabelledTypeClassCompanion[H
 
 object HtmlEncoding extends EncodingCompanion[Html, HtmlEncoding] with HtmlAttrEncoding {
   implicit val `String Enc` = new HtmlEncoding[String](value ⇒
-    Chunk[Html](value
+    Chunk(value
       .replace("&", "&amp;")
       .replace("<", "&lt;")
       .replace(">", "&gt;")
@@ -65,22 +65,22 @@ object HtmlEncoding extends EncodingCompanion[Html, HtmlEncoding] with HtmlAttrE
     )
   )
 
-  implicit val `Int Enc` = new HtmlEncoding[Int](x ⇒ Chunk[Html](x.toString))
-  implicit val `Color Enc` = new HtmlEncoding[Color](x ⇒ Chunk[Html](x.toRgbaString))
+  implicit val `Int Enc` = new HtmlEncoding[Int](x ⇒ Chunk(x.toString))
+  implicit val `Color Enc` = new HtmlEncoding[Color](x ⇒ Chunk(x.toRgbaString))
 
   implicit def `Option Enc`[A: HtmlEncoding]: HtmlEncoding[Option[A]] = new HtmlEncoding({
     case Some(value) ⇒ value.encoded
-    case None ⇒ Chunk.empty[Html]
+    case None ⇒ Chunk.empty
   })
 
   lazy val root: HtmlEncoding[Html] = new HtmlEncoding({
     case Raw(text) ⇒ Chunk(text)
     case Plain(text) ⇒ text.encoded
-    case RowDivider ⇒ raw(s"<hr/>")
+    case RowDivider ⇒ Chunk(s"<hr/>")
     case tag: Tag ⇒
       val name = tag.tagName
-      val header = Chunk.join(raw(s"<$name"), tag.attrs.encoded.wrap(" ", ""), raw(">"))
-      val footer = raw(s"</$name>")
+      val header = Chunk.join(Chunk(s"<$name"), tag.attrs.encoded.wrap(" ", ""), Chunk(">"))
+      val footer = Chunk(s"</$name>")
       val content = Chunk.join(tag.children.map(root.encoding): _*)
       Chunk.join(header, content, footer)
   })

@@ -7,7 +7,7 @@ import shapeless.LabelledProductTypeClassCompanion
 /**
  * Encoding the DOT AST into its stringified representation
  */
-case class DotEncoding[A](encoding: A ⇒ Chunk[Graph]) extends Encoding[Graph, A]
+case class DotEncoding[A](encoding: A ⇒ Chunk) extends Encoding[A]
 
 /**
  * Automatically derives the encoding for case classes with graph/node/edge attributes
@@ -17,7 +17,7 @@ private[dot] sealed trait DotAttrEncoding extends LabelledProductTypeClassCompan
 
   object typeClass extends LabelledProductTypeClass[DotEncoding] {
     def emptyProduct: DotEncoding[HNil] =
-      new DotEncoding(_ ⇒ Chunk.empty[Graph])
+      new DotEncoding(_ ⇒ Chunk.empty)
 
     def product[H, T <: HList](
       name: String,
@@ -26,15 +26,15 @@ private[dot] sealed trait DotAttrEncoding extends LabelledProductTypeClassCompan
     ): DotEncoding[H :: T] = new DotEncoding({
       case head :: tail ⇒
         val headEnc = ch.encoding(head)
-          // TODO: we are assuming that an empty attribute should be always omitted
-          if (headEnc.encoded.isEmpty) {
+        // TODO: we are assuming that an empty attribute should be always omitted
+        if (headEnc.encoded.isEmpty) {
+          ct.encoding(tail)
+        } else {
+          Chunk.join(" ")(
+            Chunk.join("=")(Chunk(name.toLowerCase), headEnc),
             ct.encoding(tail)
-          } else {
-            Chunk.join(" ")(
-              Chunk.join("=")(Chunk(name.toLowerCase), headEnc),
-              ct.encoding(tail)
-            )
-          }
+          )
+        }
     })
 
     def project[F, G](instance: ⇒ DotEncoding[G], to: F ⇒ G, from: G ⇒ F): DotEncoding[F] =
@@ -51,7 +51,7 @@ object DotEncoding extends EncodingCompanion[Graph, DotEncoding] with DotAttrEnc
 
   implicit def `Option Enc`[A: DotEncoding]: DotEncoding[Option[A]] = new DotEncoding({
     case Some(value) ⇒ value.encoded
-    case None ⇒ Chunk.empty[Graph]
+    case None ⇒ Chunk.empty
   })
 
   case class NodeExtraAttrs(id: String, label: Html)
@@ -78,15 +78,15 @@ object DotEncoding extends EncodingCompanion[Graph, DotEncoding] with DotAttrEnc
           edge.attrs.encoded
         )
       case graphAttrs: Graph.Attrs ⇒
-        Chunk.join(" ")(raw("graph"), graphAttrs.encoded)
+        Chunk.join(" ")(Chunk("graph"), graphAttrs.encoded)
       case nodeAttrs: Node.Attrs ⇒
-        Chunk.join(" ")(raw("node"), nodeAttrs.encoded)
+        Chunk.join(" ")(Chunk("node"), nodeAttrs.encoded)
       case edgeAttrs: Edge.Attrs ⇒
-        Chunk.join(" ")(raw("edge"), edgeAttrs.encoded)
+        Chunk.join(" ")(Chunk("edge"), edgeAttrs.encoded)
     })
 
-    val s = if (graph.strict) raw("strict") else raw("")
-    val d = if (graph.directed) raw("digraph") else raw("graph")
+    val s = if (graph.strict) Chunk("strict") else Chunk("")
+    val d = if (graph.directed) Chunk("digraph") else Chunk("graph")
 
     val content = Chunk.join("\n")(graph.statements.map(statementEnc.encoding).map(_.wrap("  ", "")): _*)
       .wrap("{\n", "\n}")

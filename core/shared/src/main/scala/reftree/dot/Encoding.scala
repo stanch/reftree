@@ -3,49 +3,46 @@ package reftree.dot
 import scala.language.higherKinds
 
 /**
- * A chunk obtained in the process of encoding a value of type [[Type]]
+ * A chunk obtained in the process of encoding
  */
-case class Chunk[Type](encoded: String) {
+case class Chunk(encoded: String) {
   /** If this chunk is non-empty, wrap it with a prefix and a suffix */
   def wrap(prefix: String, suffix: String) =
-    if (encoded.nonEmpty) Chunk[Type](prefix + encoded + suffix) else this
+    if (encoded.nonEmpty) Chunk(prefix + encoded + suffix) else this
 }
 
 object Chunk {
   /** An empty chunk */
-  def empty[Type] = Chunk[Type]("")
+  val empty = Chunk("")
 
   /** Concatenate non-empty chunks */
-  def join[Type](chunks: Chunk[Type]*) =
-    Chunk[Type](chunks.map(_.encoded).filter(_.nonEmpty).mkString)
+  def join(chunks: Chunk*) =
+    Chunk(chunks.map(_.encoded).filter(_.nonEmpty).mkString)
 
   /** Concatenate non-empty chunks with a delimiter */
-  def join[Type](delimiter: String)(chunks: Chunk[Type]*) =
-    Chunk[Type](chunks.map(_.encoded).filter(_.nonEmpty).mkString(delimiter))
+  def join(delimiter: String)(chunks: Chunk*) =
+    Chunk(chunks.map(_.encoded).filter(_.nonEmpty).mkString(delimiter))
 }
 
 /**
- * A typeclass for encoding values of type [[A]] into chunks, for some root type [[Type]]
+ * A typeclass for encoding values of type [[A]] into chunks
  */
-trait Encoding[Type, A] {
-  def encoding: A ⇒ Chunk[Type]
+trait Encoding[A] {
+  def encoding: A ⇒ Chunk
 }
 
 /**
  * Common utilities for implementing encodings
  */
-trait EncodingCompanion[Type, E[X] <: Encoding[Type, X]] {
+trait EncodingCompanion[R, E[X] <: Encoding[X]] {
   /** Convenient syntax */
   implicit class Syntax[A](value: A)(implicit encoding: E[A]) {
-    def encoded: Chunk[Type] = encoding.encoding(value)
+    def encoded: Chunk = encoding.encoding(value)
   }
 
-  /** A chunk with raw, unencoded data */
-  def raw(content: String) = Chunk[Type](content)
-
-  /** A method for encoding the root type [[Type]] */
-  def root: E[Type]
+  /** The root encoding */
+  def root: E[R]
 
   /** The encoding entrypoint */
-  def encode(value: Type) = root.encoding(value).encoded
+  def encode(value: R) = root.encoding(value).encoded
 }
