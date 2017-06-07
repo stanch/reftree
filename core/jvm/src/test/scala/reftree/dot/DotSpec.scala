@@ -1,10 +1,9 @@
 package reftree.dot
 
-import reftree.dot.html._
-
 import java.io.File
 
 import org.scalatest.FlatSpec
+import reftree.dot.html._
 import reftree.render.{DotRenderer, RenderingOptions}
 
 class DotSpec extends FlatSpec {

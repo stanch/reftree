@@ -334,7 +334,7 @@ Next, we need to “descend” to the `d` attribute. Here is where optics really
 we can compose `Optional[A, B]` with `Lens[B, C]` to get an `Optional[A, C]`:
 
 ```tut
-val d = Optics.xmlAttr("d")
+val d = XmlOptics.attr("d")
 val edgePathString = edgePathElement composeLens d
 
 diagram(OpticFocus(edgePathString, Data.edge1)).render("edgePathString")

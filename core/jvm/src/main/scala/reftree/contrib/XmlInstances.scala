@@ -26,4 +26,9 @@ object XmlInstances {
 
   implicit val `XML Elem RefTree`: ToRefTree[xml.Elem] =
     ToRefTree[xml.Elem](`XML Node RefTree`.refTree)
+
+  implicit val `Xml Marker` = new OpticInstances.Marker[xml.Node]({
+    case e: xml.Elem ⇒ e % new xml.UnprefixedAttribute("marked---", "true", xml.Null)
+    case x ⇒ x
+  })
 }

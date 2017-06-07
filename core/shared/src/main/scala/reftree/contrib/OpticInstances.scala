@@ -37,10 +37,6 @@ object OpticInstances {
     implicit val `Double Marker` = new Marker[Double](x ⇒ x + 1.0)
     implicit val `Char Marker` = new Marker[Char]({ case '?' ⇒ '!'; case _ ⇒ '?' })
     implicit val `String Marker` = new Marker[String](x ⇒ x + " ")
-    implicit val `Xml Marker` = new Marker[xml.Node]({
-      case e: xml.Elem ⇒ e % new xml.UnprefixedAttribute("marked---", "true", xml.Null)
-      case x ⇒ x
-    })
 
     import shapeless._
 

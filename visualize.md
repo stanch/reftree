@@ -366,8 +366,8 @@ Next, we need to “descend” to the `d` attribute. Here is where optics really
 we can compose `Optional[A, B]` with `Lens[B, C]` to get an `Optional[A, C]`:
 
 ```scala
-scala> val d = Optics.xmlAttr("d")
-d: monocle.Lens[scala.xml.Node,String] = monocle.PLens$$anon$7@33273b31
+scala> val d = XmlOptics.attr("d")
+d: monocle.Lens[scala.xml.Node,String] = monocle.PLens$$anon$7@1c6bd368
 
 scala> val edgePathString = edgePathElement composeLens d
 edgePathString: monocle.POptional[scala.xml.Node,scala.xml.Node,String,String] = monocle.POptional$$anon$1@69c5297
