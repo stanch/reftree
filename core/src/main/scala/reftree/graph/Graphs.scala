@@ -4,13 +4,22 @@ import reftree.geometry.Color
 import reftree.render.RenderingOptions
 import reftree.diagram.{Animation, Diagram}
 import reftree.core.RefTree
-import reftree.graph.Attr.AttrSyntax
+import reftree.dot._
 
 object Graphs {
   private def graphAttributes(options: RenderingOptions): Seq[GraphStatement] = Seq(
-    Attrs.Graph("ranksep" := options.verticalSpacing),
-    Attrs.Node("shape" := "plaintext", "fontname" := options.font, "fontcolor" := "#000000"),
-    Attrs.Edge("arrowsize" := "0.7", "color" := "#000000")
+    Graph.Attrs(
+      rankSep = Some(options.verticalSpacing)
+    ),
+    Node.Attrs(
+      shape = Some("plaintext"),
+      fontName = Some(options.font),
+      fontColor = Some(Color.fromRgbaString("#000000"))
+    ),
+    Edge.Attrs(
+      arrowSize = Some(0.7),
+      color = Some(Color.fromRgbaString("#000000"))
+    )
   )
 
   private def graphStatements(diagram: Diagram, options: RenderingOptions): Seq[GraphStatement] = {
@@ -44,7 +53,7 @@ object Graphs {
 
   def graph(options: RenderingOptions)(diagram: Diagram): Graph = {
     val statements = graphAttributes(options) ++ Merging.mergeLayer(graphStatements(diagram, options))
-    Graph(strict = false, directed = true, statements: _*)
+    Graph(strict = false, directed = true, statements)
   }
 
   def graphs(options: RenderingOptions, onionSkinLayers: Int)(animation: Animation): Seq[Graph] = {
@@ -58,7 +67,7 @@ object Graphs {
       }
       val statementLayers = onionSkin :+ graphStatements(diagrams.last, options)
       val statements = graphAttributes(options) ++ Merging.mergeLayers(statementLayers)
-      Graph(strict = false, directed = true, statements: _*)
+      Graph(strict = false, directed = true, statements)
     }
   }
 }

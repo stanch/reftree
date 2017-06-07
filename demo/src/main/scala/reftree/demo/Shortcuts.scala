@@ -4,8 +4,9 @@ import java.nio.file.Paths
 
 import reftree.core._
 import reftree.diagram.Diagram
+import reftree.dot.Graph
 import reftree.geometry.{Interpolation, Point}
-import reftree.graph.{Graph, Graphs}
+import reftree.graph.Graphs
 import reftree.render._
 import reftree.svg._
 import reftree.util.Optics
@@ -37,7 +38,7 @@ object Shortcuts {
   )
 
   def clear() = DotRenderer.render(
-    Graph(true, true), Paths.get("diagram.png"), RenderingOptions(), "png"
+    Graph(true, true, Seq.empty), Paths.get("diagram.png"), RenderingOptions(), "png"
   )
 
   def graph[A: ToRefTree](value: A): Graph =

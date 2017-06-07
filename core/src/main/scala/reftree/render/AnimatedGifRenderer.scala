@@ -10,7 +10,7 @@ import com.sksamuel.scrimage.Image
 import com.sksamuel.scrimage.nio.StreamingGifWriter
 import org.apache.batik.transcoder.{TranscoderInput, SVGAbstractTranscoder, TranscoderOutput}
 import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
-import reftree.graph.Graph
+import reftree.dot.Graph
 
 import scala.annotation.tailrec
 import scala.sys.process.{Process, BasicIO}

@@ -160,20 +160,20 @@ From a `RefTree` we can obtain a graph definition that can be rendered by GraphV
 
 ```scala
 scala> Shortcuts.graph(bob)
-res8: reftree.graph.Graph =
+res8: reftree.dot.Graph =
 digraph {
-  graph [ranksep = 0.8];
-  node [shape = "plaintext"; fontname = "Source Code Pro"; fontcolor = "#000000"];
-  edge [arrowsize = "0.7"; color = "#000000"];
-  "-Person396310856" [id = "-Person396310856"; label = <<table cellspacing="0" cellpadding="6" cellborder="0" columns="*" bgcolor="#ffffff00" style="rounded"><tr><td rowspan="2" port="n">Person</td><td rowspan="1" bgcolor="#ffffff00"><i>name</i></td><td rowspan="1" bgcolor="#ffffff00"><i>age</i></td></tr><hr/><tr><td rowspan="1" port="java.lang.String1180229690-0" bgcolor="#ffffff00">&middot;</td><td rowspan="1" bgcolor="#ffffff00">42</td></tr></table>>; color = "#104e8bff"; fontcolor = "#104e8bff"];
-  "-java.lang.String1180229690" [id = "-java.lang.String1180229690"; label = <<table cellspacing="...
+  graph [ ranksep=0.8 ]
+  node [ shape="plaintext" fontname="Source Code Pro" fontcolor="#000000ff" ]
+  edge [ arrowsize=0.7 color="#000000ff" ]
+  "-Person1036998500" [ id="-Person1036998500" label=<<table cellspacing="0" cellpadding="6" cellborder="0" columns="*" bgcolor="#ffffff00" style="rounded"><tr><td port="n" rowspan="2">Person</td><td bgcolor="#ffffff00"><i>name</i></td><td bgcolor="#ffffff00"><i>age</i></td></tr><hr/><tr><td port="java.lang.String97067534-0" bgcolor="#ffffff00">&middot;</td><td bgcolor="#ffffff00">42</td></tr></table>> ] [ color="#104e8bff" fontcolor="#104e8bff" ]
+  "-java.lang.String97067534" [ id="-java.lang.String97067534" label=<<table cellspacing="0" cellpadding="6" cellborder="0" columns="*" bgcolor="#ffffff00" style="r...
 ```
 
 Going even further, we can ask GraphViz for an [SVG](https://en.wikipedia.org/wiki/Scalable_Vector_Graphics) output:
 
 ```scala
 scala> Shortcuts.svg(bob)
-res9: scala.xml.Node = <svg viewBox="0.00 0.00 171.00 168.00" height="168pt" width="171pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g class="graph" id="graph0"><title>%3</title><polygon points="-4,4 -4,-164 167,-164 167,4 -4,4" stroke="none" fill="white"/><g class="node" id="-Person396310856"><title>-Person396310856</title><path d="M20,-100C20,-100 143,-100 143,-100 149,-100 155,-106 155,-112 155,-112 155,-144 155,-144 155,-150 149,-156 143,-156 143,-156 20,-156 20,-156 14,-156 8,-150 8,-144 8,-144 8,-112 8,-112 8,-106 14,-100 20,-100" stroke="none" fill="none"/><text fill="#104e8b" font-size="14.00" font-family="Source Code Pro" y="-124.3" x="15.5" text-anchor="start">Person</text><polygon points="71.5,-128 71.5,-155 117.5,-155 117.5,-128 71.5,-128...
+res9: scala.xml.Node = <svg viewBox="0.00 0.00 171.00 168.00" height="168pt" width="171pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g class="graph" id="graph0"><title>%3</title><polygon points="-4,4 -4,-164 167,-164 167,4 -4,4" stroke="none" fill="white"/><g class="node" id="-Person1036998500"><title>-Person1036998500</title><path d="M20,-100C20,-100 143,-100 143,-100 149,-100 155,-106 155,-112 155,-112 155,-144 155,-144 155,-150 149,-156 143,-156 143,-156 20,-156 20,-156 14,-156 8,-150 8,-144 8,-144 8,-112 8,-112 8,-106 14,-100 20,-100" stroke="none" fill="none"/><text fill="#104e8b" font-size="14.00" font-family="Source Code Pro" y="-124.3" x="15.5" text-anchor="start">Person</text><polygon points="71.5,-128 71.5,-155 117.5,-155 117.5,-128 71.5,-1...
 ```
 
 At this point you might be guessing how we can use this as a basis for our animation approach.

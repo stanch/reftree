@@ -5,7 +5,6 @@ import monocle.function.all.each
 import zipper.{Unzip, Zipper}
 
 import scala.collection.immutable.ListMap
-import scala.reflect.ClassTag
 
 object Optics {
   /** Tuple two lenses with a common source type */
@@ -32,13 +31,6 @@ object Optics {
   def only[A](pred: A ⇒ Boolean): Prism[A, A] =
     Prism[A, A] { value ⇒
       if (pred(value)) Some(value) else None
-    }(identity)
-
-  /** A prism that matches values of a given subtype */
-  def only[A, B <: A: ClassTag]: Prism[A, B] =
-    Prism[A, B] {
-      case value: B ⇒ Some(value)
-      case _ ⇒ None
     }(identity)
 
   /**

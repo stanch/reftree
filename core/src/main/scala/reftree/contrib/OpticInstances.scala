@@ -2,6 +2,7 @@ package reftree.contrib
 
 import monocle.{Prism, Traversal, Lens, Optional}
 import reftree.core._
+import shapeless.ProductTypeClassCompanion
 
 import scala.annotation.implicitNotFound
 
@@ -28,34 +29,30 @@ object OpticInstances {
 
   /** A typeclass for marking values of a certain type */
   @implicitNotFound("Could not find a way to mark a value of type ${A}")
-  trait Marker[A] {
-    def mark(value: A): A
-  }
+  case class Marker[A](mark: A ⇒ A)
 
-  object Marker {
-    def apply[A](f: A ⇒ A): Marker[A] = new Marker[A] {
-      def mark(value: A) = f(value)
-    }
-    implicit val `Int Marker` = Marker[Int](x ⇒ x + 1)
-    implicit val `Long Marker` = Marker[Long](x ⇒ x + 1L)
-    implicit val `Double Marker` = Marker[Double](x ⇒ x + 1.0)
-    implicit val `Char Marker` = Marker[Char] { case '?' ⇒ '!'; case _ ⇒ '?' }
-    implicit val `String Marker` = Marker[String](x ⇒ x + " ")
-    implicit val `Xml Marker` = Marker[xml.Node] {
+  object Marker extends ProductTypeClassCompanion[Marker] {
+    implicit val `Int Marker` = new Marker[Int](x ⇒ x + 1)
+    implicit val `Long Marker` = new Marker[Long](x ⇒ x + 1L)
+    implicit val `Double Marker` = new Marker[Double](x ⇒ x + 1.0)
+    implicit val `Char Marker` = new Marker[Char]({ case '?' ⇒ '!'; case _ ⇒ '?' })
+    implicit val `String Marker` = new Marker[String](x ⇒ x + " ")
+    implicit val `Xml Marker` = new Marker[xml.Node]({
       case e: xml.Elem ⇒ e % new xml.UnprefixedAttribute("marked---", "true", xml.Null)
       case x ⇒ x
-    }
+    })
 
     import shapeless._
 
-    implicit def `HCons Marker`[H: Marker, T <: HList]: Marker[H :: T] = Marker[H :: T] {
-      case h :: t ⇒ implicitly[Marker[H]].mark(h) :: t
-    }
+    object typeClass extends ProductTypeClass[Marker] {
+      def emptyProduct: Marker[HNil] =
+        new Marker(identity)
 
-    implicit def `Generic Marker`[A, L <: HList](
-      implicit generic: Generic.Aux[A, L], hListMarker: Lazy[Marker[L]]
-    ): Marker[A] = Marker[A] { value ⇒
-      generic.from(hListMarker.value.mark(generic.to(value)))
+      def product[H, T <: HList](ch: Marker[H], ct: Marker[T]): Marker[H :: T] =
+        new Marker(value ⇒ ch.mark(value.head) :: ct.mark(value.tail))
+
+      def project[F, G](instance: ⇒ Marker[G], to: F ⇒ G, from: G ⇒ F): Marker[F] =
+        new Marker(value ⇒ from(instance.mark(to(value))))
     }
   }
 

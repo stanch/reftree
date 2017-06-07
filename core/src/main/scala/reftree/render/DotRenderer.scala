@@ -1,6 +1,6 @@
 package reftree.render
 
-import reftree.graph.Graph
+import reftree.dot.Graph
 
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets

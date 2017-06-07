@@ -1,51 +1,63 @@
 package reftree.graph
 
-import com.softwaremill.quicklens._
-import monocle.Lens
+import monocle.Optional
 import reftree.geometry.Color
 import reftree.util.Optics
+import reftree.dot._
+import reftree.dot.html._
 import zipper.Unzip
+import com.softwaremill.quicklens._
 
 object Merging {
   /** Get a unique statement identifier, if any */
   private def statementId(statement: GraphStatement) = statement match {
-    case n: Node ⇒
-      Some(n.id)
-    case e: Edge ⇒
-      Some(e.attrs.find(_.name == "id").get.value)
+    case n: Node ⇒ Some(n.id)
+    case e: Edge ⇒ Some(e.id)
     case _ ⇒ None
   }
 
-  /** Enable navigating through XML with a zipper */
-  implicit val unzipXml: Unzip[xml.Node] =
-    Optics.unzip(Optics.xmlImmediateChildren)
-
-  /** A mapping between the node label and the background colors specified inside it */
-  val nodeColorLens: Lens[Node, List[Color]] = {
-    val color: Lens[xml.Node, Color] = Optics.xmlAttr("bgcolor") composeIso
-      Color.rgbaStringIso
-
-    val elementsWithColor: Lens[xml.Node, List[xml.Node]] = Optics.collectLeftByIndex(
-      Optics.only(Optics.xmlOptAttr("bgcolor").exist(_.nonEmpty))
-    )
-
-    val colors: Lens[xml.Node, List[Color]] =
-      elementsWithColor composeLens Optics.sequenceLens(color)
-
-    val nodeLabel: Lens[Node, xml.Node] =
-      Lens[Node, xml.Node](
-        _.attrs.find(_.name == "label").get.value.asInstanceOf[Identifier.Html].value
-      ) { html ⇒ node ⇒
-        node.modify(_.attrs.eachWhere(_.name == "label").value.when[Identifier.Html].value).setTo(html)
+  implicit val unzipCellular: Unzip[Cellular] =
+    new Unzip[Cellular] {
+      def unzip(node: Cellular): List[Cellular] = node match {
+        case table: Table ⇒ table.rows.toList
+        case row: RowContent ⇒ row.cells.toList
+        case _ ⇒ List.empty
       }
 
-    nodeLabel composeLens colors
+      def zip(node: Cellular, children: List[Cellular]): Cellular = node match {
+        case table: Table ⇒ table.copy(rows = children collect { case r: Row ⇒ r })
+        case row: RowContent ⇒ row.copy(cells = children collect { case c: Cell ⇒ c })
+        case _ ⇒ node
+      }
+    }
+
+  /** A mapping between the node and the background colors specified inside its label */
+  val nodeLabelColors: Optional[Node, List[Color]] = {
+    val nodeLabelCellular = Optional[Node, Cellular] {
+      case Node(_, table: Table, _) ⇒ Some(table)
+      case _ ⇒ None
+    } {
+      case table: Table ⇒ _.copy(label = table)
+      case _ ⇒ identity
+    }
+
+    val cellularColors = Optional[Cellular, Color] {
+      case table: Table ⇒ table.attrs.bgColor
+      case cell: Cell ⇒ cell.attrs.bgColor
+      case _ ⇒ None
+    } { color ⇒ {
+      case table: Table ⇒ table.modify(_.attrs.bgColor).setTo(Some(color))
+      case cell: Cell ⇒ cell.modify(_.attrs.bgColor).setTo(Some(color))
+      case other ⇒ other
+    }}
+
+    nodeLabelCellular composeLens Optics.collectLeftByIndex(cellularColors)
   }
 
   /** Merge node statements by mixing highlight colors inside them */
   private def mergeNodeStatements(statements: Seq[Node], keepLeft: Boolean, mixColor: Boolean) = {
     val keeper = if (keepLeft) statements.head else statements.last
-    val colors = statements.map(nodeColorLens.get)
+    val colors = statements.map(nodeLabelColors.getOption(_).getOrElse(List.empty))
     if (colors.exists(_.isEmpty)) keeper else {
       val mixedColors = colors.transpose.map { cs ⇒
         // we don’t want to mix the default transparent background in...
@@ -59,7 +71,7 @@ object Merging {
         // otherwise pick the winning color
         else if (keepLeft) ignoreDefault.head else ignoreDefault.last
       }
-      nodeColorLens.set(mixedColors.toList)(keeper)
+      nodeLabelColors.set(mixedColors.toList)(keeper)
     }
   }
 
@@ -83,7 +95,7 @@ object Merging {
   private def removeDanglingEdges(statements: Seq[GraphStatement]): Seq[GraphStatement] = {
     val ids = statements.flatMap(statementId).toSet
     statements filter {
-      case Edge(_, NodeId(id, _, _), _*) if !ids(id) ⇒ false
+      case Edge(_, NodeId(id, _, _), _, _) if !ids(id) ⇒ false
       case _ ⇒ true
     }
   }
