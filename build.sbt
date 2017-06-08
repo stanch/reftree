@@ -59,7 +59,7 @@ val demo = crossProject.in(file("demo"))
       "com.lihaoyi" % "ammonite" % "0.8.3" % Test cross CrossVersion.full
     ),
     tutSettings,
-    tutTargetDirectory := baseDirectory.value.getParentFile
+    tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile
   )
   .jsSettings(
     scalaJSUseMainModuleInitializer := true

@@ -1,9 +1,13 @@
 package reftree.svg
 
-import monocle.{Lens, Optional}
+import monocle.{Getter, Lens, Optional}
 
-object XmlOptics {
-  /** Focuses on a given optional attribute of an XML node */
+/**
+ * An implementation of [[BaseSvgApi]] for scala-xml [[xml.Node]]
+ */
+object SvgApi extends SimpleSvgApi[xml.Node] {
+  def elementName = Getter(_.label)
+
   def optAttr(attr: String): Lens[xml.Node, Option[String]] =
     Lens[xml.Node, Option[String]] { node ⇒
       node.attribute(attr).map(_.text)
@@ -15,7 +19,6 @@ object XmlOptics {
       )
     }
 
-  /** Focuses on a given mandatory attribute of an XML node */
   def attr(attr: String): Lens[xml.Node, String] =
     Lens[xml.Node, String] { node ⇒
       node.attribute(attr).map(_.text).get
@@ -25,7 +28,6 @@ object XmlOptics {
       )
     }
 
-  /** Focuses on a given optional attribute of an XML node */
   def prefixedAttr(uri: String, attr: String): Lens[xml.Node, Option[String]] =
     Lens[xml.Node, Option[String]] { node ⇒
       node.attribute(uri, attr).map(_.text)
@@ -38,7 +40,6 @@ object XmlOptics {
       )
     }
 
-  /** Focuses on the immediate children of an XML node, if any */
   def immediateChildren: Optional[xml.Node, List[xml.Node]] =
     Optional[xml.Node, List[xml.Node]] {
       case xml.Elem(_, _, _, _, children @ _*) if children.nonEmpty ⇒ Some(children.toList)

@@ -58,7 +58,7 @@ object Graphs {
 
   def graphs(options: RenderingOptions, onionSkinLayers: Int)(animation: Animation): Seq[Graph] = {
     val prefix = Seq.fill(onionSkinLayers)(animation.diagrams.head)
-    (prefix ++ animation.diagrams).sliding(onionSkinLayers + 1).toSeq map { diagrams ⇒
+    (prefix ++ animation.diagrams).sliding(onionSkinLayers + 1).toVector map { diagrams ⇒
       val onionSkin = diagrams.init.zipWithIndex.map {
         case (diagram, i) ⇒
           val factor = (i + 1.0) / diagrams.length * 0.7

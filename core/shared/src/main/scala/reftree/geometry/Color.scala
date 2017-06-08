@@ -92,16 +92,23 @@ object Color {
 
   /** Parse a color from an RGB(A) string. If the alpha component is missing, `defaultAlpha` is used */
   def fromRgbaString(string: String, defaultAlpha: Double = 1.0) =
-    rgbaParser(defaultAlpha).parse(string).get.value
+    rgbaParser.parse(string).get.value(defaultAlpha)
 
-  private def rgbaParser(defaultAlpha: Double) = {
+  private val rgbaParser = {
     import fastparse.all._
 
     val x = CharIn(('0' to '9') ++ ('a' to 'f'))
     val component = P(x ~ x).!.map(n ⇒ java.lang.Long.parseLong(n, 16) / 255.0)
-    P("#" ~ component ~ component ~ component ~ component.?) map {
-      case (r, g, b, a) ⇒ RGBA(r, g, b, a.getOrElse(defaultAlpha))
+
+    val transparent = P("transparent") map { _ ⇒
+      { _: Double ⇒ RGBA(0, 0, 0, 0) }
     }
+
+    val rgba = P("#" ~ component ~ component ~ component ~ component.?) map {
+      case (r, g, b, a) ⇒ defaultAlpha: Double ⇒ RGBA(r, g, b, a.getOrElse(defaultAlpha))
+    }
+
+    transparent | rgba
   }
 
   /** An isomorphism between RGBA color strings and [[Color]] */

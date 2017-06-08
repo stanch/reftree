@@ -1,23 +1,25 @@
 package reftree.svg
 
-import monocle.{Getter, Iso}
+import monocle.{Getter, Iso, Lens}
 import reftree.geometry._
 import reftree.util.Optics
 
 /**
- * An implementation of [[SvgApi]] for scala-xml [[xml.Node]]
+ * An implementation of [[BaseSvgApi]] that only requires
+ * defining the optics for attributes and navigation
  */
-object ScalaXmlSvgApi extends SvgApi[xml.Node] {
-  import XmlOptics.{attr, optAttr, prefixedAttr}
+trait SimpleSvgApi[Node] extends BaseSvgApi[Node] {
+  type SvgPolygon = Node
+  type SvgPath = Node
+  type SvgText = Node
+  type SvgAnchor = Node
 
-  type SvgPolygon = xml.Node
-  type SvgPath = xml.Node
-  type SvgText = xml.Node
-  type SvgAnchor = xml.Node
+  def optAttr(attr: String): Lens[Node, Option[String]]
+  def attr(attr: String): Lens[Node, String]
+  def prefixedAttr(uri: String, attr: String): Lens[Node, Option[String]]
 
-  def elementName = Getter(_.label)
   def elementId = optAttr("id").asGetter
-  def elementClasses: Getter[xml.Node, Set[String]] =
+  def elementClasses: Getter[Node, Set[String]] =
     optAttr("class") composeGetter Getter(_.fold(Set.empty[String])(_.split(' ').toSet))
 
   val translation = select("g, path, polygon, text, a") composeLens
@@ -30,8 +32,6 @@ object ScalaXmlSvgApi extends SvgApi[xml.Node] {
       case Point.`zero` ⇒ None
       case t ⇒ Some(s"translate($t)")
     }
-
-  def immediateChildren = XmlOptics.immediateChildren
 
   def shapeRendering = optAttr("shape-rendering")
   def textRendering = optAttr("text-rendering")

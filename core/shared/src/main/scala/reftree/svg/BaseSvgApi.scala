@@ -8,7 +8,7 @@ import zipper.Unzip
 /**
  * SVG API sufficient to implement animations, i.e. [[SvgGraphAnimation]]
  */
-abstract class SvgApi[Svg] {
+abstract class BaseSvgApi[Svg] {
   /* SVG types */
 
   type SvgPolygon <: Svg

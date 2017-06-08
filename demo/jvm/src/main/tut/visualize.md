@@ -27,7 +27,7 @@ import reftree.diagram._
 import reftree.render._
 import reftree.geometry._
 import reftree.svg._
-import reftree.svg.ScalaXmlSvgApi.svgUnzip
+import reftree.svg.SvgApi.svgUnzip
 import reftree.contrib.XmlInstances._
 import reftree.contrib.OpticInstances._
 import reftree.contrib.ZipperInstances._
@@ -137,7 +137,7 @@ To visualize a value of some type `A`, `reftree` converts it into a data structu
 called `RefTree` (surprise!), using a typeclass `ToRefTree[A]`.
 For many Scala collections and case classes this is done automagically, using
 [shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes).
-(*If you are curious about the magic, take a look at [this file](core/src/main/scala/reftree/core/GenericInstances.scala).*)
+(*If you are curious about the magic, take a look at [this file](core/shared/src/main/scala/reftree/core/GenericInstances.scala).*)
 
 What does a `RefTree` look like? The best way to find out is to visualize a `RefTree`
 of a `RefTree`!
@@ -200,7 +200,7 @@ trait Interpolation[A] {
 }
 ```
 
-(*If you are curious, [here is the actual implementation](core/src/main/scala/reftree/geometry/Interpolation.scala).*)
+(*If you are curious, [here is the actual implementation](core/shared/src/main/scala/reftree/geometry/Interpolation.scala).*)
 
 Once we have an instance of `Interpolation[xml.Node]`, we can generate
 as many intermediate frames as we want! But how do we construct this instance?
@@ -294,7 +294,7 @@ diagram(polylines).render("polylines")
 We are finally ready to implement our first substantial interpolator: one that morphs graph edges.
 *The following approach is inspired by Mike Bostock’s [path tween](https://bl.ocks.org/mbostock/3916621),
 however `reftree` puts more emphasis on types and even includes its own
-[SVG path parser and simplification algorithm](core/src/main/scala/reftree/geometry/Path.scala).*
+[SVG path parser and simplification algorithm](core/shared/src/main/scala/reftree/geometry/Path.scala).*
 
 The resulting animation should look like this:
 
@@ -317,13 +317,13 @@ in a rather obscure format. Luckily, we have lenses and other optics at our disp
 to plumb through this mess.
 
 First, let’s get to the `path` element. `reftree` implements a few things that will help us:
-* `ScalaXmlSvgApi`, an implementation of several useful SVG operations based on Scala’s `xml.Node`.
+* `SvgApi`, an implementation of several useful SVG operations.
   In particular, if offers a CSS selector-like method for matching elements of certain type and/or class.
 * An optic that focuses on an element deep inside XML or any other recursive data structure: `Optics.collectFirst`.
   It is actually an `Optional`, not a `Lens`, since the element might be missing.
 
 ```tut
-val edgePathElement = Optics.collectFirst(ScalaXmlSvgApi.select("path"))
+val edgePathElement = Optics.collectFirst(SvgApi.select("path"))
 
 diagram(OpticFocus(edgePathElement, Data.edge1)).render("edgePathElement")
 ```
@@ -334,7 +334,7 @@ Next, we need to “descend” to the `d` attribute. Here is where optics really
 we can compose `Optional[A, B]` with `Lens[B, C]` to get an `Optional[A, C]`:
 
 ```tut
-val d = XmlOptics.attr("d")
+val d = SvgApi.attr("d")
 val edgePathString = edgePathElement composeLens d
 
 diagram(OpticFocus(edgePathString, Data.edge1)).render("edgePathString")
@@ -403,7 +403,7 @@ With 100 points and 32 frames:
 
 *Interpolating the entire image is left as an exercise for the reader,
 although the impatient will find the complete implementation
-[here](core/src/main/scala/reftree/svg/SvgGraphAnimation.scala).*
+[here](core/shared/src/main/scala/reftree/svg/SvgGraphAnimation.scala).*
 
 Notice that we never touched XML directly.
 In fact, equipped with the same set of optics for another format or representation
@@ -438,7 +438,7 @@ provides a few useful movements and operations. Just like optics, it’s rather 
 The zipper can operate on any type, as long as an instance of the `Unzip` typeclass is available,
 which can be automatically derived in many cases.
 (*Note that the derivation of `Unzip` for SVG can be found
-[here](core/src/main/scala/reftree/svg/package.scala).*)
+[here](core/shared/src/main/scala/reftree/svg/BaseSvgApi.scala).*)
 
 Consider a simple XML tree:
 
@@ -547,7 +547,7 @@ val notSoSimpleXml = zipper6.commit
 
 *Using an XML zipper, a determined reader can easily implement advanced lenses,
 such as `Optics.collectFirst`, `Optics.collectLeftByKey`, etc, all found
-[here](core/src/main/scala/reftree/util/Optics.scala).*
+[here](core/shared/src/main/scala/reftree/util/Optics.scala).*
 
 To conclude, here is an animation of a zipper and the tree it operates on
 (from my previous talk), produced (as we know now) not without zippers’ help:

@@ -3,7 +3,7 @@ package reftree.svg
 import reftree.geometry._
 import reftree.util.Optics
 
-case class SvgGraphAlignment[Svg](api: SvgApi[Svg]) {
+case class SvgGraphAlignment[Svg](api: BaseSvgApi[Svg]) {
   import api.svgUnzip
 
   private val graph = Optics.collectFirst(api.select("g.graph"))
@@ -57,7 +57,7 @@ case class SvgGraphAlignment[Svg](api: SvgApi[Svg]) {
   }
 }
 
-case class SvgGraphInterpolation[Svg](api: SvgApi[Svg]) {
+case class SvgGraphInterpolation[Svg](api: BaseSvgApi[Svg]) {
   import api.svgUnzip
 
   // In the first third of the animation time interval we fade out disappearing nodes and edges.
@@ -113,7 +113,7 @@ case class SvgGraphInterpolation[Svg](api: SvgApi[Svg]) {
     )
 }
 
-case class SvgGraphAnimation[Svg](api: SvgApi[Svg]) {
+case class SvgGraphAnimation[Svg](api: BaseSvgApi[Svg]) {
   import api.svgUnzip
 
   /** Prevent ugly rendering artifacts */
@@ -136,7 +136,7 @@ case class SvgGraphAnimation[Svg](api: SvgApi[Svg]) {
   }
 
   /** Make the newly appeared nodes and edges thicker */
-  private def accentuatePairwise(svgs: Seq[Svg]) = {
+  private def accentuatePairwise(svgs: Stream[Svg]): Stream[Svg] = {
     val nodesAndEdges = Optics.collectLeftByKey(api.select("g.node, g.edge"))(
       api.elementId.get(_).get
     )
@@ -151,7 +151,7 @@ case class SvgGraphAnimation[Svg](api: SvgApi[Svg]) {
       })(next)
     }
 
-    svgs.head +: svgs.sliding(2).toSeq.map {
+    svgs.head +: svgs.sliding(2).toStream.map {
       case Seq(prev, next) ⇒ accentuate(prev, next)
     } :+ svgs.last // this duplicates the last frame, so that it can lose thickness at the end
   }
@@ -161,21 +161,23 @@ case class SvgGraphAnimation[Svg](api: SvgApi[Svg]) {
       case ((acc :+ prev), next) ⇒ acc :+ prev :+ SvgGraphAlignment(api).align(prev, next)
     }
 
-  private def interpolatePairwise(svgs: Seq[Svg], keyFrames: Int, interpolationFrames: Int) =
-    Seq.fill(keyFrames)(svgs.head) ++ svgs.sliding(2).toSeq.flatMap {
+  private def interpolatePairwise(svgs: Stream[Svg], keyFrames: Int, interpolationFrames: Int): Stream[Svg] =
+    Stream.fill(keyFrames)(svgs.head) ++ svgs.sliding(2).toStream.flatMap {
       case Seq(prev, next) ⇒
         SvgGraphInterpolation(api).interpolation
-          .sample(prev, next, interpolationFrames, inclusive = false) ++ Seq.fill(keyFrames)(next)
+          .sample(prev, next, interpolationFrames, inclusive = false) ++ Stream.fill(keyFrames)(next)
     }
 
   def animate(keyFrames: Int, interpolationFrames: Int)(svgs: Seq[Svg]) = {
-    val preprocessed = svgs.map(improveRendering).map(fixTextColor)
-    if (svgs.length < 2) preprocessed else {
-      val accentuated = accentuatePairwise(preprocessed)
-      val aligned = alignPairwise(accentuated)
+    if (svgs.length < 2) {
+      svgs.map(improveRendering).map(fixTextColor)
+    } else {
+      val aligned = alignPairwise(svgs)
       val maxViewBox = Rectangle.union(aligned.map(api.viewBox.get))
-      val resized = aligned.map(api.viewBox.set(maxViewBox))
-      interpolatePairwise(resized, keyFrames, interpolationFrames)
+      val resized = aligned.map(api.viewBox.set(maxViewBox)).toStream
+      val preprocessed = resized.map(improveRendering).map(fixTextColor)
+      val accentuated = accentuatePairwise(preprocessed)
+      interpolatePairwise(accentuated, keyFrames, interpolationFrames)
     }
   }
 }

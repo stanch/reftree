@@ -1,7 +1,7 @@
 package reftree.core
 
 import scala.annotation.implicitNotFound
-import scala.collection.immutable.CollectionInstances
+import scala.collection.immutable.{CollectionInstances, HackedCollectionInstances}
 
 /**
  * A [[RefTree]] represents the object tree of an immutable data structure.
@@ -129,7 +129,7 @@ trait ToRefTree[A] { self ⇒
   def refTree(value: A): RefTree
 }
 
-object ToRefTree extends CollectionInstances with GenericInstances {
+object ToRefTree extends CollectionInstances with HackedCollectionInstances with GenericInstances {
   /** A shorthand method for creating [[ToRefTree]] instances */
   def apply[A](toRefTree: A ⇒ RefTree): ToRefTree[A] = new ToRefTree[A] {
     def refTree(value: A) = toRefTree(value)

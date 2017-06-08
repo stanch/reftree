@@ -20,7 +20,7 @@ case class RenderingOptions(
     Color.fromRgbaString("#228b22"),
     Color.fromRgbaString("#cd5b45")
   ),
-  font: String = "Source Code Pro",
+  font: String = DefaultRenderingOptions.font,
   density: Int = 100
 ) {
   def withVerticalSpacing(spacing: Double) = copy(verticalSpacing = spacing)
