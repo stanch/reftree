@@ -36,6 +36,9 @@ val core = crossProject.in(file("core"))
     )
   )
   .jsSettings(
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % "0.9.1"
+    ),
     jsDependencies ++= Seq(
       "org.webjars.npm" % "viz.js" % "1.7.0" / "1.7.0/viz.js"
     )
@@ -44,25 +47,33 @@ val core = crossProject.in(file("core"))
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
 
-val demo = project.in(file("demo"))
-  .settings(commonSettings: _*)
-  .dependsOn(coreJVM)
+val demo = crossProject.in(file("demo"))
+  .settings(commonSettings)
+  .dependsOn(core)
   .settings(
     publish := {},
-    publishLocal := {},
+    publishLocal := {}
+  )
+  .jvmSettings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" % "ammonite" % "0.8.3" % Test cross CrossVersion.full
     ),
     tutSettings,
-    tutTargetDirectory := baseDirectory.value / ".."
+    tutTargetDirectory := baseDirectory.value.getParentFile
+  )
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := true
   )
 
+lazy val demoJVM = demo.jvm
+lazy val demoJS = demo.js
+
 lazy val root = project.in(file("."))
-  .aggregate(coreJVM, coreJS, demo)
+  .aggregate(coreJVM, coreJS, demoJVM, demoJS)
+  .settings(commonSettings)
   .settings(
-    commonSettings,
     publish := {},
     publishLocal := {}
   )
 
-addCommandAlias("demo", "demo/test:run")
+addCommandAlias("demo", "demoJVM/test:run")
