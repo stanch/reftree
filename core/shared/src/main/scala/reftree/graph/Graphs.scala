@@ -56,7 +56,7 @@ object Graphs {
     Graph(strict = false, directed = true, statements)
   }
 
-  def graphs(options: RenderingOptions, onionSkinLayers: Int)(animation: Animation): Seq[Graph] = {
+  def graphs(options: RenderingOptions, onionSkinLayers: Int)(animation: Animation): Vector[Graph] = {
     val prefix = Seq.fill(onionSkinLayers)(animation.diagrams.head)
     (prefix ++ animation.diagrams).sliding(onionSkinLayers + 1).toVector map { diagrams ⇒
       val onionSkin = diagrams.init.zipWithIndex.map {

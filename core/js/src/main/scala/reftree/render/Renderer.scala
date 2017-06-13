@@ -61,7 +61,7 @@ case class Renderer(
     copy(animationOptions = tweak(animationOptions))
 
   private def renderSvg(graph: Graph) = (new DOMParser)
-    .parseFromString(VizFacade.Viz(graph.toString), "image/svg+xml")
+    .parseFromString(VizFacade.Viz(graph.encode), "image/svg+xml")
     .documentElement
 
   private def renderTo(target: dom.Node, content: dom.Node) = {

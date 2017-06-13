@@ -74,7 +74,7 @@ object Primitives {
       }
       val port = (firstRow, field.name, field.value) match {
         case (true, Some(_), _) ⇒ None
-        case (_, _, RefTree.Ref(_, id, _, _)) ⇒ Some(s"$id-$i")
+        case (_, _, _: RefTree.Ref) ⇒ Some(i.toString)
         case _ ⇒ None
       }
       val background = (field.value, field.value.highlight) match {
@@ -91,7 +91,7 @@ object Primitives {
         val targetId = namespaced(refId, namespace)
         val edgeId = namespaced(s"$id-$i-$refId", namespace)
         Some(Edge(
-          NodeId(sourceId).withPort(s"$refId-$i").south,
+          NodeId(sourceId).withPort(i.toString).south,
           NodeId(targetId).withPort("n").north,
           edgeId,
           Edge.Attrs(color = Some(color))

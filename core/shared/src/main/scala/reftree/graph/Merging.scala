@@ -32,7 +32,7 @@ object Merging {
     }
 
   /** A mapping between the node and the background colors specified inside its label */
-  val nodeLabelColors: Optional[Node, List[Color]] = {
+  private val nodeLabelColors: Optional[Node, List[Color]] = {
     val nodeLabelCellular = Optional[Node, Cellular] {
       case Node(_, table: Table, _) ⇒ Some(table)
       case _ ⇒ None

@@ -12,7 +12,10 @@ case class Graph(
   directed: Boolean,
   statements: Seq[GraphStatement]
 ) {
-  override def toString = DotEncoding.encode(this)
+  def encode = DotEncoding.encode(this)
+
+  def nodes = statements collect { case n: Node ⇒ n }
+  def edges = statements collect { case e: Edge ⇒ e }
 }
 
 object Graph {
