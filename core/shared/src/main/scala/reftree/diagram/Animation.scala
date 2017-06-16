@@ -2,6 +2,8 @@ package reftree.diagram
 
 import reftree.core._
 
+import scala.collection.immutable.LinearSeq
+
 /**
  * The central type for producing animations — sequences of diagrams
  *
@@ -77,6 +79,14 @@ case class Animation(diagrams: Seq[Diagram]) {
 }
 
 object Animation {
+
+  implicit class TakeWhileInclusive[T](val s: LinearSeq[T]) extends AnyVal {
+    def takeWhileInclusive(p: T => Boolean): LinearSeq[T] = {
+      val (before, after) = s.span(p)
+      before.drop(1) ++ after.headOption
+    }
+  }
+
   /** Create an animation builder from a starting value */
   def startWith[A: ToRefTree](start: A) = Builder(Vector(start))
 
@@ -92,6 +102,31 @@ object Animation {
     /** Add more frames by applying the provided iteration function `n` times */
     def iterate(n: Int)(iteration: A ⇒ A) =
       Builder((1 to n).foldLeft(frames)((current, _) ⇒ current :+ iteration(current.last)))
+
+    /** Add more frames by applying the provided iteration function to a point where `predicate` yields true */
+    def iterateToAtMost(n: Int)(predicate: (A ⇒ Boolean))(iteration: A ⇒ A) =
+        Builder(
+          (frames ++ Stream
+            .iterate(frames.last)(iteration)
+            .takeWhileInclusive(x ⇒ !predicate(x))
+            .toVector).take(n))
+
+    /** Add more frames by applying the provided iteration function to a point where `predicate` yields true */
+    def iterateTo(predicate: (A ⇒ Boolean))(iteration: A ⇒ A) =
+        Builder(
+          frames ++ Stream
+            .iterate(frames.last)(iteration)
+            .takeWhileInclusive(x ⇒ !predicate(x))
+            .toVector)
+
+    /** Add more frames by applying the provided iteration function to a fixpoint (f(x) == x)*/
+    def iterateToFixpoint(iteration: A ⇒ A) =
+      iterateTo(x => x == iteration(x))(iteration)
+
+    /** Add more frames by applying the provided iteration function to a fixpoint (f(x) == x)
+      * or a maximum number of iterations is reached */
+    def iterateUntilFixpointAtMost(n: Int)(iteration: (A ⇒ A)) =
+      iterateToAtMost(n)(x => x == iteration(x))(iteration)
 
     /** Add more frames by applying the provided iteration function `n` times */
     def iterateWithIndex(n: Int)(iteration: (A, Int) ⇒ A) =
