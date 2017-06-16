@@ -83,6 +83,32 @@ object Animation {
   /** Create an animation builder from a sequence of starting values */
   def startWithSequence[A: ToRefTree](start: Seq[A]) = Builder(start.toVector)
 
+  private implicit class TakeUntilStream[T](s: Stream[T]) {
+    def takeWhileInclusive(p: T => Boolean): Stream[T] =
+      if (!s.isEmpty && p(s.head)) Stream.cons(s.head, s.tail takeWhileInclusive p)
+      else Stream.cons(s.tail.head, Stream.empty)
+  }
+
+  /** Create an animation builder from a seed until a fixpoint (f(x) == x) is reached */
+  def iterateUntilFixPoint[A: ToRefTree](seed: A)(iteration: (A => A))(
+    max: Int = 10) =
+    Builder(
+      Stream
+        .iterate(seed)(iteration)
+        .take(max)
+        .takeWhileInclusive(x => x != iteration(x))
+        .toVector)
+
+  /** Create an animation builder from a seed until a a given predicate yields true */
+  def iterateUntil[A: ToRefTree](seed: A)(iteration: (A => A))(
+    predicate: (A => Boolean))(max: Int = 10) =
+    Builder(
+      Stream
+        .iterate(seed)(iteration)
+        .take(max)
+        .takeWhileInclusive(x => !predicate(x))
+        .toVector)
+
   /** A builder for animations */
   case class Builder[A: ToRefTree](frames: Vector[A]) {
     /** Add more frames by applying the provided iteration functions */
