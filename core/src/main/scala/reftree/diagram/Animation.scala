@@ -2,6 +2,8 @@ package reftree.diagram
 
 import reftree.core._
 
+import scala.collection.immutable.LinearSeq
+
 /**
  * The central type for producing animations — sequences of diagrams
  *
@@ -77,37 +79,23 @@ case class Animation(diagrams: Seq[Diagram]) {
 }
 
 object Animation {
+
+  implicit class TakeWhileInclusive[T](val s: LinearSeq[T]) extends AnyVal {
+    def takeWhileInclusive(p: T => Boolean): LinearSeq[T] = {
+      val (before, after) = s.span(p)
+      before.drop(1) ++ after.headOption
+    }
+  }
+
   /** Create an animation builder from a starting value */
   def startWith[A: ToRefTree](start: A) = Builder(Vector(start))
 
   /** Create an animation builder from a sequence of starting values */
   def startWithSequence[A: ToRefTree](start: Seq[A]) = Builder(start.toVector)
 
-  private implicit class TakeUntilStream[T](s: Stream[T]) {
-    def takeWhileInclusive(p: T => Boolean): Stream[T] =
-      if (!s.isEmpty && p(s.head)) Stream.cons(s.head, s.tail takeWhileInclusive p)
-      else Stream.cons(s.tail.head, Stream.empty)
+  object Builder {
+    def apply[T: ToRefTree](frame: T): Builder[T] = Builder(Vector(frame))
   }
-
-  /** Create an animation builder from a seed until a fixpoint (f(x) == x) is reached */
-  def iterateUntilFixPoint[A: ToRefTree](seed: A)(iteration: (A => A))(
-    max: Int = 10) =
-    Builder(
-      Stream
-        .iterate(seed)(iteration)
-        .take(max)
-        .takeWhileInclusive(x => x != iteration(x))
-        .toVector)
-
-  /** Create an animation builder from a seed until a a given predicate yields true */
-  def iterateUntil[A: ToRefTree](seed: A)(iteration: (A => A))(
-    predicate: (A => Boolean))(max: Int = 10) =
-    Builder(
-      Stream
-        .iterate(seed)(iteration)
-        .take(max)
-        .takeWhileInclusive(x => !predicate(x))
-        .toVector)
 
   /** A builder for animations */
   case class Builder[A: ToRefTree](frames: Vector[A]) {
@@ -118,6 +106,35 @@ object Animation {
     /** Add more frames by applying the provided iteration function `n` times */
     def iterate(n: Int)(iteration: A ⇒ A) =
       Builder((1 to n).foldLeft(frames)((current, _) ⇒ current :+ iteration(current.last)))
+
+    /** Add more frames by applying the provided iteration function until `predicate` yields true */
+    def iterateUntilAtMost(n: Int)(iteration: (A => A))(predicate: (A => Boolean)) =
+      if (frames.isEmpty) this
+      else
+        Builder(
+          (frames ++ Stream
+            .iterate(frames.last)(iteration)
+            .takeWhileInclusive(x => !predicate(x))
+            .toVector).take(n))
+
+    /** Add more frames by applying the provided iteration function until `predicate` yields true */
+    def iterateUntil(iteration: (A => A))(predicate: (A => Boolean)) =
+      if (frames.isEmpty) this
+      else
+        Builder(
+          frames ++ Stream
+            .iterate(frames.last)(iteration)
+            .takeWhileInclusive(x => !predicate(x))
+            .toVector)
+
+    /** Add more frames by applying the provided iteration function until a fixpoint (f(x) == x) is reached */
+    def iterateUntilFixPoint(iteration: (A => A)) =
+      iterateUntil(iteration)(x => x == iteration(x))
+
+    /** Add more frames by applying the provided iteration function until a fixpoint (f(x) == x)
+      * or a maximum number of iterations is reached */
+    def iterateUntilFixPointAtMost(n: Int)(iteration: (A => A)) =
+      iterateUntilAtMost(n)(iteration)(x => x == iteration(x))
 
     /** Add more frames by applying the provided iteration function `n` times */
     def iterateWithIndex(n: Int)(iteration: (A, Int) ⇒ A) =
