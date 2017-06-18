@@ -90,7 +90,7 @@ trait GenericInstances {
       case (value, Inr(tail)) ⇒ tailAsTree.refTree(value, tail)
     }
 
-  implicit def `Generic RefTree`[A <: AnyRef, R](
+  implicit def `Generic Product RefTree`[A <: AnyRef, R <: HList](
     implicit generic: LabelledGeneric.Aux[A, R],
     genericAsTree: Lazy[GenericToRefTree[A, R]],
     derivationConfig: DerivationConfig[A] = DerivationConfig[A]()
@@ -101,5 +101,12 @@ trait GenericInstances {
         derivationConfig.name.fold(tree)(f ⇒ tree.rename(f(value)))
       case x ⇒ x
     }
+  }
+
+  implicit def `Generic Coproduct RefTree`[A <: AnyRef, R <: Coproduct](
+    implicit generic: LabelledGeneric.Aux[A, R],
+    genericAsTree: Lazy[GenericToRefTree[A, R]]
+  ): ToRefTree[A] = ToRefTree[A] { value ⇒
+    genericAsTree.value.refTree(value, generic.to(value))
   }
 }
