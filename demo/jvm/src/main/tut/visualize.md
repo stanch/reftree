@@ -407,9 +407,12 @@ although the impatient will find the complete implementation
 [here](core/shared/src/main/scala/reftree/svg/animation/GraphInterpolation.scala).*
 
 Notice that we never touched XML directly.
-In fact, equipped with the same set of optics for another format or representation
-([scala-js?](https://www.scala-js.org/)),
+In fact, equipped with the same set of optics for another format or representation,
 we would be able to operate on it without changing the code too much.
+Case in point: `reftree` supports both
+[*scala-xml*](core/jvm/src/main/scala/reftree/svg/XmlSvgApi.scala) and
+[*scala-js-dom*](core/js/src/main/scala/reftree/svg/DomSvgApi.scala) (for Scala.js),
+with only 50 lines of implementation-specific code for each backend.
 This goes to show the flexibility and usefulness of optics.
 
 ### Zipping it up

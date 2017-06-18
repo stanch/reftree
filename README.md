@@ -43,6 +43,7 @@ For more examples see the [demo page](demo.md).
 
 * Static images as well as animations can be generated.
 * Hassle-free captions (using [sourcecode](https://github.com/lihaoyi/sourcecode)).
+* Scala.js support (*experimental*).
 
 ### Getting Started
 
@@ -92,13 +93,14 @@ implicit def treeInstance: ToRefTree[Tree] = ToRefTree[Tree] { tree =>
 
 #### `Renderer`
 
-To render diagrams and animations, you will need a `Renderer`:
+To render diagrams and animations, you will need a `Renderer`.
+
+**For JVM:**
 
 ```scala
 import reftree.render._
 import reftree.diagram._
 import java.nio.file.Paths
-import scala.collection.immutable.Queue
 
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
@@ -110,18 +112,46 @@ You can also pass a `format` parameter as a String to the `Renderer` constructor
 to specify the format you require. The default is `png`. You can specify any
 file type supported by `dot -T`.
 
-There are two ways to use it:
+**For Scala.js:**
 
 ```scala
-// using the `render` method
+import reftree.render._
+import reftree.diagram._
+
+val renderer = Renderer(
+  renderingOptions = RenderingOptions(density = 75)
+)
+```
+
+There are two ways to use renderers:
+
+**JVM**
+
+```scala
+import scala.collection.immutable.Queue
+
+// Option 1: using the `render` method
 renderer.render("queue", Diagram(Queue(1)))
 
-// using syntactic sugar
+// Option 2: using syntactic sugar
 import renderer._
 Diagram(Queue(1)).render("queue")
 ```
 
-There are various rendering options you can set, for example:
+**Scala.js**
+
+```scala
+import org.scalajs.dom
+
+// Option 1: using the `render` method
+renderer.render(dom.document.getElementById("diagram"), Diagram(List(1)))
+
+// Option 2: using syntactic sugar
+import renderer._
+Diagram(List(1)).render(dom.document.getElementById("diagram"))
+```
+
+You can set various options, for example:
 
 ```scala
 // using the `render` method
@@ -253,7 +283,11 @@ You can depend on the library by adding these lines to your `build.sbt`
 ```scala
 resolvers += Resolver.bintrayRepo("stanch", "maven")
 
+// JVM
 libraryDependencies += "org.stanch" %% "reftree" % "latest-version"
+
+// Scala.js
+libraryDependencies += "org.stanch" %%% "reftree" % "latest-version"
 ```
 
 ### Contributing
