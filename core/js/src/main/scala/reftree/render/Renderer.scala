@@ -6,11 +6,10 @@ import reftree.dot.Graph
 import reftree.graph.Graphs
 
 import org.scalajs.dom
-import reftree.svg.{SvgApi, SvgGraphAnimation}
+import reftree.svg.{OptimizedGraphAnimation, DomSvgApi}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobalScope
-import scala.scalajs.js.timers.SetIntervalHandle
 
 /**
  * An interface to https://github.com/mdaines/viz.js/
@@ -65,39 +64,68 @@ case class Renderer(
     .documentElement
 
   private def renderTo(target: dom.Node, content: dom.Node) = {
+    content.asInstanceOf[dom.Element].setAttribute("width", "100%")
+    content.asInstanceOf[dom.Element].setAttribute("height", "100%")
     val newTarget = target.cloneNode(deep = false)
     newTarget.appendChild(content)
     target.parentNode.replaceChild(newTarget, target)
     newTarget
   }
 
+  private val animation = OptimizedGraphAnimation(DomSvgApi)
+
   /** Render a diagram to a given DOM node */
   def render(target: dom.Node, diagram: Diagram): Unit = {
+    scribe.trace(s"Rendering diagram to $target")
+
     val graph = Graphs.graph(renderingOptions)(diagram)
+
+    scribe.trace("Processing graphs with Viz.js...")
     val svg = renderSvg(graph)
+
+    scribe.trace("Rendering...")
     renderTo(target, svg)
   }
 
   /** Render an animation to a given DOM node */
   def render(target: dom.Node, animation: Animation): Unit = {
+    scribe.trace(s"Rendering animation to $target")
+
     val graphs = Graphs.graphs(renderingOptions, animationOptions.onionSkinLayers)(animation)
+
+    scribe.trace("Processing graphs with Viz.js...")
     val svgs = graphs.map(renderSvg)
-    val frames = SvgGraphAnimation(SvgApi).animate(
+
+    scribe.trace("Preprocessing frames...")
+    val frames = this.animation.animate(
       animationOptions.keyFrames, animationOptions.interpolationFrames
     )(svgs)
+
+    scribe.trace("Starting the animation...")
     var i = 0
     var currentTarget = target
-    lazy val interval: SetIntervalHandle = js.timers.setInterval(animationOptions.delay) {
+    def iteration(): Unit = {
       try {
-        currentTarget = renderTo(currentTarget, frames(i))
+        // we catch the IOOB exception rather than checking the bounds to avoid forcing the stream
+        val currentFrame = frames(i)
         i += 1
+        js.timers.setTimeout(animationOptions.delay * currentFrame.repeat)(iteration())
+        currentTarget = renderTo(currentTarget, currentFrame.frame)
+        if (currentFrame.repeat > 1) {
+          // preprocess a few frames if we are going to be waiting
+          js.timers.setTimeout(animationOptions.delay) {
+            frames.take(i + currentFrame.repeat + 1).force
+          }
+        }
       } catch {
         case _: IndexOutOfBoundsException ⇒
-          if (animationOptions.loop) i = 0
-          else js.timers.clearInterval(interval)
+          if (animationOptions.loop) {
+            i = 0
+            js.timers.setTimeout(animationOptions.delay)(iteration())
+          }
       }
     }
-    interval
+    iteration()
   }
 
   /** Syntactic sugar for diagrams */

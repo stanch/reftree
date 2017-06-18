@@ -104,11 +104,15 @@ object Color {
       { _: Double ⇒ RGBA(0, 0, 0, 0) }
     }
 
+    val white = P("white") map { _ ⇒
+      { a: Double ⇒ RGBA(1.0, 1.0, 1.0, a) }
+    }
+
     val rgba = P("#" ~ component ~ component ~ component ~ component.?) map {
       case (r, g, b, a) ⇒ defaultAlpha: Double ⇒ RGBA(r, g, b, a.getOrElse(defaultAlpha))
     }
 
-    transparent | rgba
+    transparent | white | rgba
   }
 
   /** An isomorphism between RGBA color strings and [[Color]] */

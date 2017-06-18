@@ -9,7 +9,8 @@ import reftree.dot._
 object Graphs {
   private def graphAttributes(options: RenderingOptions): Seq[GraphStatement] = Seq(
     Graph.Attrs(
-      rankSep = Some(options.verticalSpacing)
+      rankSep = Some(options.verticalSpacing),
+      bgColor = Some(Primitives.defaultBackground)
     ),
     Node.Attrs(
       shape = Some("plaintext"),

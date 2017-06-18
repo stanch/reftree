@@ -23,6 +23,7 @@ val core = crossProject.in(file("core"))
       "org.stanch" %%% "zipper" % "0.5.1",
       "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
       "com.github.julien-truffaut" %%% "monocle-macro" % "1.4.0",
+      "com.outr" %%% "scribe" % "1.4.2",
       "org.scalatest" %%% "scalatest" % "3.0.3" % Test,
       "org.scalacheck" %%% "scalacheck" % "1.13.5" % Test
     )

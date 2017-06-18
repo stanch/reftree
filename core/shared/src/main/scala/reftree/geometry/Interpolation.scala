@@ -1,6 +1,6 @@
 package reftree.geometry
 
-import monocle.{Lens, Prism, Optional}
+import monocle.{Lens, Optional}
 import scala.collection.immutable.ListMap
 
 /**
@@ -34,7 +34,15 @@ trait SemiInterpolation[A] { self ⇒
    * “inside” it using the current semi-interpolation
    */
   def lens[B](l: Lens[B, A]) = SemiInterpolation[B] { (value, t) ⇒
-    l.set(self(l.get(value), t))(value)
+    l.modify(self(_, t))(value)
+  }
+
+  /**
+   * Obtain a semi-interpolation of type `B` that varies a value of type `A`
+   * “inside” it using the current semi-interpolation
+   */
+  def optional[B](o: Optional[B, A]) = SemiInterpolation[B] { (value, t) ⇒
+    o.modify(self(_, t))(value)
   }
 }
 
@@ -53,14 +61,13 @@ trait Interpolation[A] { self ⇒
   /**
    * Sample the range between `left` and `right` using `n` values
    */
-  def sample(left: A, right: A, n: Int, inclusive: Boolean = true): Seq[A] = {
-    // TODO: consider overriding downstream for optimizations
+  def sample(left: A, right: A, n: Int, inclusive: Boolean = true): Stream[A] = {
     val range = if (inclusive) {
       Seq.tabulate(n)(i ⇒ (i + 0.0) / (n - 1))
     } else {
       Seq.tabulate(if (inclusive) n - 2 else n)(i ⇒ (i + 1.0) / (n + 1))
     }
-    range.map(self(left, right, _))
+    range.toStream.map(self(left, right, _))
   }
 
   /**
@@ -116,15 +123,6 @@ trait Interpolation[A] { self ⇒
       case _ ⇒ left
     }
   }
-
-  /**
-   * Obtain an interpolation of type `B` that varies a value of type `A`
-   * “inside” it using the current interpolation
-   *
-   * Note that this operation is left-biased,
-   * i.e. it applies the `set` function of the prism to the `left` argument.
-   */
-  def prism[B](p: Prism[B, A]): Interpolation[B] = optional(p.asOptional)
 
   /**
    * Derive a semi-interpolation by providing a function to calculate
@@ -242,6 +240,7 @@ trait InterpolationSyntax {
 
   implicit class OptionalInterpolation[A, B](o: Optional[B, A]) {
     def interpolateWith(interpolation: Interpolation[A]) = interpolation.optional(o)
+    def semiInterpolateWith(semiInterpolation: SemiInterpolation[A]) = semiInterpolation.optional(o)
   }
 
   implicit class OptionalListInterpolation[A, B](o: Optional[B, List[A]]) {
@@ -250,9 +249,5 @@ trait InterpolationSyntax {
 
   implicit class OptionalListMapInterpolation[A, B](o: Optional[B, ListMap[String, A]]) {
     def interpolateEachWith(interpolation: Interpolation[Option[A]]) = interpolation.listMap[A].optional(o)
-  }
-
-  implicit class PrismInterpolation[A, B](p: Prism[B, A]) {
-    def interpolateWith(interpolation: Interpolation[A]) = interpolation.prism(p)
   }
 }

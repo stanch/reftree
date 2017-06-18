@@ -4,11 +4,11 @@ import java.nio.file.Paths
 
 import de.sciss.fingertree.{FingerTree, Measure}
 import com.softwaremill.quicklens._
-import monocle.function.all._
 import monocle.macros.GenLens
 import reftree.core.RefTree
 import reftree.diagram.{Diagram, Animation}
-import reftree.render.{AnimationOptions, RenderingOptions, Renderer}
+import reftree.render.{RenderingOptions, Renderer}
+import scribe.{Level, LogHandler, Logger}
 import zipper.Zipper
 
 import scala.collection.immutable._
@@ -91,31 +91,8 @@ object Zippers extends App {
   (zippers + trees).render("tree+zipper")
 }
 
-object Lenses extends App {
-  import reftree.contrib.SimplifiedInstances.list
-  import reftree.contrib.OpticInstances._
-
-  val renderer = Renderer(
-    animationOptions = AnimationOptions(onionSkinLayers = 2),
-    directory = Paths.get("images", "immutability", "lenses")
-  )
-  import renderer._
-
-  val words = each[List[String], String]
-  val vowels = words composeTraversal Data.vowelTraversal
-  val consonants = words composeTraversal Data.consonantTraversal
-
-  Animation
-    .startWith(List("example"))
-    .iterate("sample" :: _, "specimen" :: _.tail)
-    .build { words ⇒
-      Diagram(OpticFocus(vowels, words)).withCaption("Vowels") +
-      Diagram(OpticFocus(consonants, words)).withCaption("Consonants")
-    }
-    .render("vowels+consonants")
-}
-
 object Teaser extends App {
+  Logger.root.addHandler(LogHandler(level = Level.Trace))
   import reftree.contrib.OpticInstances._
   import reftree.contrib.ZipperInstances._
 
@@ -198,7 +175,6 @@ object All extends App {
   Queues.main(Array.empty)
   FingerTrees.main(Array.empty)
   Zippers.main(Array.empty)
-  Lenses.main(Array.empty)
   Quiz.main(Array.empty)
   Teaser.main(Array.empty)
 }

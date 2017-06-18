@@ -11,8 +11,9 @@ import com.sksamuel.scrimage.nio.StreamingGifWriter
 import org.apache.batik.transcoder.{TranscoderInput, SVGAbstractTranscoder, TranscoderOutput}
 import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
 import reftree.dot.Graph
+import reftree.svg.{OptimizedGraphAnimation, XmlSvgApi}
+import reftree.svg.GraphAnimation.Frame
 
-import scala.annotation.tailrec
 import scala.sys.process.{Process, BasicIO}
 
 object AnimatedGifRenderer {
@@ -60,35 +61,50 @@ object AnimatedGifRenderer {
     Image.fromAwt(image)
   }
 
-  @tailrec def spans[A](xs: List[A], acc: List[(A, Int)] = Nil): List[(A, Int)] =
-    (xs, acc) match {
-      case (Nil, _) ⇒ acc.reverse
-      case (head :: tail, (last, c) :: prev) if head == last ⇒ spans(tail, (last, c + 1) :: prev)
-      case (head :: tail, prev) ⇒ spans(tail, (head, 1) :: prev)
-    }
-
-  def renderAnimatedGif(
-    svgs: Seq[xml.Node],
+  def renderFrames(
+    frames: Seq[Frame[xml.Node]],
     output: Path,
     renderingOptions: RenderingOptions,
     animationOptions: AnimationOptions
   ): Unit = {
     val writer = StreamingGifWriter(animationOptions.delay, animationOptions.loop)
     val stream = writer.prepareStream(output, BufferedImage.TYPE_INT_ARGB)
-    spans(svgs.toList) foreach {
-      case (svg, count) ⇒
+    frames.zipWithIndex foreach {
+      case (Frame(svg, count), i) ⇒
+        if (i % 10 == 0) {
+          scribe.trace(s"Processing frame ${i + 1}...")
+          scribe.trace("Rasterizing...")
+        }
         val image = renderImage(svg, renderingOptions)
+        if (i % 10 == 0) {
+          scribe.trace("Writing to file...")
+        }
         Seq.fill(count)(stream.writeFrame(image))
     }
     stream.finish()
   }
 
-  def renderAnimatedGif(
+  private val animation = OptimizedGraphAnimation(XmlSvgApi)
+
+  def render(
     graphs: Seq[Graph],
-    svgPreprocessing: Seq[xml.Node] ⇒ Seq[xml.Node],
     output: Path,
     renderingOptions: RenderingOptions,
     animationOptions: AnimationOptions
-  ): Unit =
-    renderAnimatedGif(svgPreprocessing(graphs.map(renderSvg)), output, renderingOptions, animationOptions)
+  ): Unit = {
+    scribe.trace(s"Rendering animation to $output")
+
+    scribe.trace("Processing the graphs with Graphviz...")
+    val svgs = graphs.map(renderSvg)
+
+    scribe.trace("Preprocessing frames...")
+    val frames = animation.animate(
+      animationOptions.keyFrames, animationOptions.interpolationFrames
+    )(svgs)
+
+    scribe.trace("Rendering to file...")
+    renderFrames(frames, output, renderingOptions, animationOptions)
+
+    scribe.trace(s"Done rendering animation to $output!")
+  }
 }

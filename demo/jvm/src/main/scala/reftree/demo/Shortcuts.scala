@@ -45,9 +45,9 @@ object Shortcuts {
     Graphs.graph(RenderingOptions())(Diagram(value))
 
   def svg[A: ToRefTree](value: A): xml.Node = {
-    import SvgApi.svgUnzip
-    Optics.collectFirst(SvgApi.select("g.graph"))
-      .composeOptional(SvgApi.translation)
+    import XmlSvgApi.svgUnzip
+    Optics.collectFirst(XmlSvgApi.select("g.graph"))
+      .composeOptional(XmlSvgApi.translation)
       .set(Point.zero)(xml.Utility.trim(AnimatedGifRenderer.renderSvg(graph(value))))
   }
 
@@ -57,8 +57,9 @@ object Shortcuts {
     interpolation: Interpolation[xml.Node],
     frames: Int
   ) = {
-    AnimatedGifRenderer.renderAnimatedGif(
-      start +: interpolation.sample(start, end, frames, inclusive = false) :+ end,
+    AnimatedGifRenderer.renderFrames(
+      (start +: interpolation.sample(start, end, frames, inclusive = false) :+ end)
+        .map(GraphAnimation.Frame(_, 1)),
       Paths.get("diagram.gif"),
       RenderingOptions(density = 200),
       AnimationOptions(framesPerSecond = frames / 4)

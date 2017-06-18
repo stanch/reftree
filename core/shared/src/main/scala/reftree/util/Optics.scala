@@ -7,24 +7,34 @@ import zipper.{Unzip, Zipper}
 import scala.collection.immutable.ListMap
 
 object Optics {
-  /** Tuple two lenses with a common source type */
-  def tupleLensLeft[S, A, B](lensA: Lens[S, A], lensB: Lens[S, B]): Lens[S, (A, B)] =
-    Lens[S, (A, B)](s ⇒ (lensA.get(s), lensB.get(s))) {
-      case (a, b) ⇒ s ⇒ lensB.set(b)(lensA.set(a)(s))
+  /** Tuple two optionals with a common source type */
+  def tupleOptionalLeft[S, A, B](
+    optionalA: Optional[S, A],
+    optionalB: Optional[S, B]
+  ): Optional[S, (A, B)] =
+    Optional[S, (A, B)] { s ⇒
+      for {
+        a ← optionalA.getOption(s)
+        b ← optionalB.getOption(s)
+      } yield (a, b)
+    } {
+      case (a, b) ⇒ s ⇒ optionalB.set(b)(optionalA.set(a)(s))
     }
 
-  /** Tuple three lenses with a common source type */
-  def tupleLensLeft[S, A, B, C](lensA: Lens[S, A], lensB: Lens[S, B], lensC: Lens[S, C]): Lens[S, (A, B, C)] =
-    Lens[S, (A, B, C)](s ⇒ (lensA.get(s), lensB.get(s), lensC.get(s))) {
-      case (a, b, c) ⇒ s ⇒ lensC.set(c)(lensB.set(b)(lensA.set(a)(s)))
-    }
-
-  /** Transforms a lens into a lens of lists */
-  def sequenceLens[A, B](lens: Lens[A, B]): Lens[List[A], List[B]] =
-    Lens[List[A], List[B]] { as ⇒
-      as.map(lens.get)
-    } { bs ⇒ as ⇒
-      (bs zip as).map { case (b, a) ⇒ lens.set(b)(a) }
+  /** Tuple three optionals with a common source type */
+  def tupleOptionalLeft[S, A, B, C](
+    optionalA: Optional[S, A],
+    optionalB: Optional[S, B],
+    optionalC: Optional[S, C]
+  ): Optional[S, (A, B, C)] =
+    Optional[S, (A, B, C)] { s ⇒
+      for {
+        a ← optionalA.getOption(s)
+        b ← optionalB.getOption(s)
+        c ← optionalC.getOption(s)
+      } yield (a, b, c)
+    } {
+      case (a, b, c) ⇒ s ⇒ optionalC.set(c)(optionalB.set(b)(optionalA.set(a)(s)))
     }
 
   /** A prism that matches values satisfying a predicate */
@@ -32,6 +42,20 @@ object Optics {
     Prism[A, A] { value ⇒
       if (pred(value)) Some(value) else None
     }(identity)
+
+  /** Convenience methods for Optionals */
+  implicit class RichOptional[A, B](val optional: Optional[A, B]) extends AnyVal {
+    def setOption(inner: Option[B])(outer: A) =
+      inner.fold(outer)(optional.set(_)(outer))
+
+    def asOptionGetter =
+      Getter[A, Option[B]](optional.getOption)
+  }
+
+  /** Extra flattening for Lenses that point to optional values */
+  implicit class RichLens[A, B](val lens: Lens[A, Option[B]]) extends AnyVal {
+    def asFlatOptional = Optional[A, B](lens.get)(b ⇒ lens.set(Some(b)))
+  }
 
   /**
    * Given a recursive data structure and a move to traverse it with a zipper,

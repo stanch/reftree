@@ -20,7 +20,8 @@ case class Graph(
 
 object Graph {
   case class Attrs(
-    rankSep: Option[Double] = None
+    rankSep: Option[Double] = None,
+    bgColor: Option[Color] = None
   ) extends GraphStatement
 }
 
