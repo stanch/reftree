@@ -93,10 +93,6 @@ object Animation {
   /** Create an animation builder from a sequence of starting values */
   def startWithSequence[A: ToRefTree](start: Seq[A]) = Builder(start.toVector)
 
-  object Builder {
-    def apply[T: ToRefTree](frame: T): Builder[T] = Builder(Vector(frame))
-  }
-
   /** A builder for animations */
   case class Builder[A: ToRefTree](frames: Vector[A]) {
     /** Add more frames by applying the provided iteration functions */
@@ -107,34 +103,34 @@ object Animation {
     def iterate(n: Int)(iteration: A ⇒ A) =
       Builder((1 to n).foldLeft(frames)((current, _) ⇒ current :+ iteration(current.last)))
 
-    /** Add more frames by applying the provided iteration function until `predicate` yields true */
-    def iterateUntilAtMost(n: Int)(iteration: (A => A))(predicate: (A => Boolean)) =
+    /** Add more frames by applying the provided iteration function to a point where `predicate` yields true */
+    def iterateToAtMost(n: Int)(predicate: (A ⇒ Boolean))(iteration: A ⇒ A) =
       if (frames.isEmpty) this
       else
         Builder(
           (frames ++ Stream
             .iterate(frames.last)(iteration)
-            .takeWhileInclusive(x => !predicate(x))
+            .takeWhileInclusive(x ⇒ !predicate(x))
             .toVector).take(n))
 
-    /** Add more frames by applying the provided iteration function until `predicate` yields true */
-    def iterateUntil(iteration: (A => A))(predicate: (A => Boolean)) =
+    /** Add more frames by applying the provided iteration function to a point where `predicate` yields true */
+    def iterateTo(predicate: (A ⇒ Boolean))(iteration: A ⇒ A) =
       if (frames.isEmpty) this
       else
         Builder(
           frames ++ Stream
             .iterate(frames.last)(iteration)
-            .takeWhileInclusive(x => !predicate(x))
+            .takeWhileInclusive(x ⇒ !predicate(x))
             .toVector)
 
-    /** Add more frames by applying the provided iteration function until a fixpoint (f(x) == x) is reached */
-    def iterateUntilFixPoint(iteration: (A => A)) =
-      iterateUntil(iteration)(x => x == iteration(x))
+    /** Add more frames by applying the provided iteration function to a fixpoint (f(x) == x)*/
+    def iterateToFixpoint(iteration: A ⇒ A) =
+      iterateTo(x => x == iteration(x))(iteration)
 
-    /** Add more frames by applying the provided iteration function until a fixpoint (f(x) == x)
+    /** Add more frames by applying the provided iteration function to a fixpoint (f(x) == x)
       * or a maximum number of iterations is reached */
-    def iterateUntilFixPointAtMost(n: Int)(iteration: (A => A)) =
-      iterateUntilAtMost(n)(iteration)(x => x == iteration(x))
+    def iterateUntilFixpointAtMost(n: Int)(iteration: (A ⇒ A)) =
+      iterateToAtMost(n)(x => x == iteration(x))(iteration)
 
     /** Add more frames by applying the provided iteration function `n` times */
     def iterateWithIndex(n: Int)(iteration: (A, Int) ⇒ A) =
