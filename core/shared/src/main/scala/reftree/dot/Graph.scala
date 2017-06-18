@@ -10,6 +10,7 @@ import reftree.dot.html.Html
 case class Graph(
   strict: Boolean,
   directed: Boolean,
+  id: Option[String],
   statements: Seq[GraphStatement]
 ) {
   def encode = DotEncoding.encode(this)

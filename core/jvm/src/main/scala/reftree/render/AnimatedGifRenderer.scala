@@ -12,7 +12,7 @@ import org.apache.batik.transcoder.{TranscoderInput, SVGAbstractTranscoder, Tran
 import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
 import reftree.dot.Graph
 import reftree.svg.{OptimizedGraphAnimation, XmlSvgApi}
-import reftree.svg.GraphAnimation.Frame
+import reftree.svg.animation.Frame
 
 import scala.sys.process.{Process, BasicIO}
 

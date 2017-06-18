@@ -3,8 +3,8 @@
 This page contains the materials for my talk “Visualize your data structures!”.
 Here are some past and future presentations:
 
-* [ScalaDays Chicago, April 2017](http://event.scaladays.org/scaladays-chicago-2017#!#schedulePopupExtras-8067)
-* [Scala Swarm, June 2017](http://scala-swarm.org/)
+* [ScalaDays Chicago, April 2017](http://event.scaladays.org/scaladays-chicago-2017#!#schedulePopupExtras-8067) ([video](https://www.youtube.com/watch?v=6mWaqGHeg3g)).
+* [Scala Swarm, June 2017](http://scala-swarm.org/).
 
 You can use this page in two ways:
 
@@ -26,8 +26,9 @@ import reftree.core._
 import reftree.diagram._
 import reftree.render._
 import reftree.geometry._
-import reftree.svg._
-import reftree.svg.SvgApi.svgUnzip
+import reftree.svg.animation.Frame
+import reftree.svg.XmlSvgApi
+import reftree.svg.XmlSvgApi.svgUnzip
 import reftree.contrib.XmlInstances._
 import reftree.contrib.OpticInstances._
 import reftree.contrib.ZipperInstances._
@@ -155,7 +156,7 @@ This is where [GraphViz](http://www.graphviz.org/) comes in.
 From a `RefTree` we can obtain a graph definition that can be rendered by GraphViz:
 
 ```tut
-Shortcuts.graph(bob)
+Shortcuts.graph(bob).encode
 ```
 
 Going even further, we can ask GraphViz for an [SVG](https://en.wikipedia.org/wiki/Scalable_Vector_Graphics) output:
@@ -209,7 +210,7 @@ Consider a lowly floating point number (it can represent an *x* coordinate of so
 There is an obvious way to implement `Interpolation[Double]`, which `reftree` already defines as `Interpolation.double`:
 
 ```tut
-val numbers = Interpolation.double.sample(0, 10, 5)
+val numbers = Interpolation.double.sample(0, 10, 5).toList
 
 diagram(numbers).render("numbers")
 ```
@@ -265,7 +266,7 @@ val pointInterpolation = (
   x.interpolateWith(Interpolation.double) +
   y.interpolateWith(Interpolation.double))
 
-val points = pointInterpolation.sample(Point(0, 0), Point(10, 20), 5)
+val points = pointInterpolation.sample(Point(0, 0), Point(10, 20), 5).toList
 
 diagram(points).render("points")
 ```
@@ -284,7 +285,7 @@ Data.polyline2
 val polylineInterpolation = (GenLens[Polyline](_.points)
   .interpolateEachWith(Point.interpolation))
 
-val polylines = polylineInterpolation.sample(Data.polyline1, Data.polyline2, 3)
+val polylines = polylineInterpolation.sample(Data.polyline1, Data.polyline2, 3).toList
 
 diagram(polylines).render("polylines")
 ```
@@ -317,13 +318,13 @@ in a rather obscure format. Luckily, we have lenses and other optics at our disp
 to plumb through this mess.
 
 First, let’s get to the `path` element. `reftree` implements a few things that will help us:
-* `SvgApi`, an implementation of several useful SVG operations.
+* `XmlSvgApi`, an implementation of several useful SVG operations for *scala-xml*.
   In particular, if offers a CSS selector-like method for matching elements of certain type and/or class.
 * An optic that focuses on an element deep inside XML or any other recursive data structure: `Optics.collectFirst`.
   It is actually an `Optional`, not a `Lens`, since the element might be missing.
 
 ```tut
-val edgePathElement = Optics.collectFirst(SvgApi.select("path"))
+val edgePathElement = Optics.collectFirst(XmlSvgApi.select("path"))
 
 diagram(OpticFocus(edgePathElement, Data.edge1)).render("edgePathElement")
 ```
@@ -331,11 +332,11 @@ diagram(OpticFocus(edgePathElement, Data.edge1)).render("edgePathElement")
 <p align="center"><img src="images/visualize/animation/edgePathElement.png" width="80%" /></p>
 
 Next, we need to “descend” to the `d` attribute. Here is where optics really shine:
-we can compose `Optional[A, B]` with `Lens[B, C]` to get an `Optional[A, C]`:
+we can compose `Optional[A, B]` with `Optional[B, C]` to get an `Optional[A, C]`:
 
 ```tut
-val d = SvgApi.attr("d")
-val edgePathString = edgePathElement composeLens d
+val d = XmlSvgApi.attr("d")
+val edgePathString = edgePathElement composeOptional d
 
 diagram(OpticFocus(edgePathString, Data.edge1)).render("edgePathString")
 ```
@@ -378,15 +379,15 @@ def edges(points: Int, frames: Int) = (Data.edge1 +:
   edgeInterpolation(points).sample(Data.edge1, Data.edge2, frames, inclusive = false) :+
   Data.edge2)
 
-AnimatedGifRenderer.renderAnimatedGif(
-  edges(4, 4),
+AnimatedGifRenderer.renderFrames(
+  edges(4, 4).map(Frame(_)),
   Paths.get("images", "visualize", "animation", "edges-4.gif"),
   RenderingOptions(density = 200),
   AnimationOptions(framesPerSecond = 1)
 )
 
-AnimatedGifRenderer.renderAnimatedGif(
-  edges(100, 32),
+AnimatedGifRenderer.renderFrames(
+  edges(100, 32).map(Frame(_)),
   Paths.get("images", "visualize", "animation", "edges-100.gif"),
   RenderingOptions(density = 200),
   AnimationOptions(framesPerSecond = 8)
@@ -403,7 +404,7 @@ With 100 points and 32 frames:
 
 *Interpolating the entire image is left as an exercise for the reader,
 although the impatient will find the complete implementation
-[here](core/shared/src/main/scala/reftree/svg/SvgGraphAnimation.scala).*
+[here](core/shared/src/main/scala/reftree/svg/animation/GraphInterpolation.scala).*
 
 Notice that we never touched XML directly.
 In fact, equipped with the same set of optics for another format or representation
@@ -438,7 +439,7 @@ provides a few useful movements and operations. Just like optics, it’s rather 
 The zipper can operate on any type, as long as an instance of the `Unzip` typeclass is available,
 which can be automatically derived in many cases.
 (*Note that the derivation of `Unzip` for SVG can be found
-[here](core/shared/src/main/scala/reftree/svg/BaseSvgApi.scala).*)
+[here](core/shared/src/main/scala/reftree/svg/api/BaseSvgApi.scala).*)
 
 Consider a simple XML tree:
 

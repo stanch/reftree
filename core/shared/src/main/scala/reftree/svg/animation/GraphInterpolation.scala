@@ -1,9 +1,13 @@
 package reftree.svg.animation
 
 import reftree.geometry._
-import reftree.svg.GraphAnimation.Frame
 import reftree.svg.api.BaseSvgApi
 import reftree.util.Optics
+
+/** An animation frame, possibly repeated several times */
+case class Frame[Svg](frame: Svg, repeat: Int = 1) {
+  def map[A](f: Svg ⇒ A) = copy(f(frame))
+}
 
 case class GraphInterpolation[Svg](api: BaseSvgApi[Svg]) {
   import api.svgUnzip
@@ -68,6 +72,6 @@ case class GraphInterpolation[Svg](api: BaseSvgApi[Svg]) {
     Frame(svgs.head, keyFrames) #:: svgs.sliding(2).toStream.flatMap {
       case Seq(prev, next) ⇒
         interpolation.sample(prev, next, interpolationFrames, inclusive = false)
-          .map(Frame(_, 1)) #::: Stream(Frame(next, keyFrames))
+          .map(Frame(_)) #::: Stream(Frame(next, keyFrames))
     }
 }

@@ -4,8 +4,6 @@ import reftree.svg.animation._
 import reftree.svg.api.{SvgWrapper, OptimizedSvgApi, BaseSvgApi}
 
 case class GraphAnimation[Svg](api: BaseSvgApi[Svg]) {
-  import GraphAnimation._
-
   val alignment = GraphAlignment(api)
   val cleanup = GraphCleanup(api)
   val accentuation = GraphAccentuation(api)
@@ -13,7 +11,7 @@ case class GraphAnimation[Svg](api: BaseSvgApi[Svg]) {
 
   def animate(keyFrames: Int, interpolationFrames: Int)(svgs: Seq[Svg]): Stream[Frame[Svg]] = {
     if (svgs.length < 2) {
-      cleanup.cleanup(svgs.toStream).map(Frame(_, 1))
+      cleanup.cleanup(svgs.toStream).map(Frame(_))
     } else {
       scribe.trace("Aligning...")
       val aligned = alignment.alignPairwise(svgs)
@@ -32,8 +30,6 @@ case class GraphAnimation[Svg](api: BaseSvgApi[Svg]) {
 }
 
 case class OptimizedGraphAnimation[Svg](api: BaseSvgApi[Svg]) {
-  import GraphAnimation._
-
   val optimizedApi = OptimizedSvgApi(api)
   val animation = GraphAnimation(optimizedApi)
 
@@ -45,12 +41,5 @@ case class OptimizedGraphAnimation[Svg](api: BaseSvgApi[Svg]) {
 
     scribe.trace("Optimizing...")
     wrappedFrames.map(_.map(_.unwrap))
-  }
-}
-
-object GraphAnimation {
-  /** An animation frame, possibly repeated several times */
-  case class Frame[Svg](frame: Svg, repeat: Int) {
-    def map[A](f: Svg ⇒ A) = copy(f(frame))
   }
 }

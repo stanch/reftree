@@ -1,5 +1,6 @@
 package reftree.demo
 
+import java.io.File
 import java.nio.file.Paths
 
 import reftree.core._
@@ -9,6 +10,7 @@ import reftree.geometry.{Interpolation, Point}
 import reftree.graph.Graphs
 import reftree.render._
 import reftree.svg._
+import reftree.svg.animation.Frame
 import reftree.util.Optics
 import zipper.Zipper
 
@@ -38,7 +40,7 @@ object Shortcuts {
   )
 
   def clear() = DotRenderer.render(
-    Graph(true, true, Seq.empty), Paths.get("diagram.png"), RenderingOptions(), "png"
+    Graph(true, true, None, Seq.empty), Paths.get("diagram.png"), RenderingOptions(), "png"
   )
 
   def graph[A: ToRefTree](value: A): Graph =
@@ -57,14 +59,16 @@ object Shortcuts {
     interpolation: Interpolation[xml.Node],
     frames: Int
   ) = {
+    val output = File.createTempFile("animation", ".gif")
+    output.deleteOnExit()
     AnimatedGifRenderer.renderFrames(
       (start +: interpolation.sample(start, end, frames, inclusive = false) :+ end)
-        .map(GraphAnimation.Frame(_, 1)),
-      Paths.get("diagram.gif"),
+        .map(Frame(_)),
+      output.toPath,
       RenderingOptions(density = 200),
       AnimationOptions(framesPerSecond = frames / 4)
     )
-    Process(Seq("gifview", "diagram.gif")).!
+    Process(Seq("gifview", "--animate", output.getAbsolutePath)).run()
     ()
   }
 

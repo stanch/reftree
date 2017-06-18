@@ -9,8 +9,8 @@ object Ammonite extends App {
     "import zipper._",
     "import reftree.core._",
     "import reftree.diagram._",
-    "import reftree.svg._",
-    "import reftree.svg.SvgApi.svgUnzip",
+    "import reftree.svg.XmlSvgApi",
+    "import reftree.svg.XmlSvgApi.svgUnzip",
     "import reftree.geometry._",
     "import reftree.util.Optics",
     "import reftree.contrib.FingerTreeInstances._",
@@ -18,6 +18,7 @@ object Ammonite extends App {
     "import reftree.contrib.ZipperInstances._",
     "import reftree.contrib.XmlInstances._",
     "import reftree.contrib.SimplifiedInstances",
+    "import reftree.contrib.SimplifiedInstances.seq",
     "import reftree.demo.Data._",
     "import reftree.demo.Shortcuts._"
   ).mkString(";")

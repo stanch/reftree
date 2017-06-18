@@ -91,6 +91,6 @@ object DotEncoding extends EncodingCompanion[Graph, DotEncoding] with DotAttrEnc
     val content = Chunk.join("\n")(graph.statements.map(statementEnc.encoding).map(_.wrap("  ", "")): _*)
       .wrap("{\n", "\n}")
 
-    Chunk.join(" ")(s, d, content)
+    Chunk.join(" ")(s, d, graph.id.encoded, content)
   })
 }

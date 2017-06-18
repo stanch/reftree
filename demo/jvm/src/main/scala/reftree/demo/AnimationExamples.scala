@@ -59,6 +59,7 @@ object FingerTrees extends App {
 }
 
 object Zippers extends App {
+  Logger.root.addHandler(LogHandler(level = Level.Trace))
   import reftree.contrib.SimplifiedInstances.{list, option}
   import reftree.contrib.ZipperInstances._
 

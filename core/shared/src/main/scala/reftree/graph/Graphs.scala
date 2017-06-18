@@ -54,7 +54,7 @@ object Graphs {
 
   def graph(options: RenderingOptions)(diagram: Diagram): Graph = {
     val statements = graphAttributes(options) ++ Merging.mergeLayer(graphStatements(diagram, options))
-    Graph(strict = false, directed = true, statements)
+    Graph(strict = false, directed = true, Some("Diagram"), statements)
   }
 
   def graphs(options: RenderingOptions, onionSkinLayers: Int)(animation: Animation): Vector[Graph] = {
@@ -68,7 +68,7 @@ object Graphs {
       }
       val statementLayers = onionSkin :+ graphStatements(diagrams.last, options)
       val statements = graphAttributes(options) ++ Merging.mergeLayers(statementLayers)
-      Graph(strict = false, directed = true, statements)
+      Graph(strict = false, directed = true, Some("Animation"), statements)
     }
   }
 }

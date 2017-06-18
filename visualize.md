@@ -3,8 +3,8 @@
 This page contains the materials for my talk “Visualize your data structures!”.
 Here are some past and future presentations:
 
-* [ScalaDays Chicago, April 2017](http://event.scaladays.org/scaladays-chicago-2017#!#schedulePopupExtras-8067)
-* [Scala Swarm, June 2017](http://scala-swarm.org/)
+* [ScalaDays Chicago, April 2017](http://event.scaladays.org/scaladays-chicago-2017#!#schedulePopupExtras-8067) ([video](https://www.youtube.com/watch?v=6mWaqGHeg3g)).
+* [Scala Swarm, June 2017](http://scala-swarm.org/).
 
 You can use this page in two ways:
 
@@ -26,8 +26,9 @@ import reftree.core._
 import reftree.diagram._
 import reftree.render._
 import reftree.geometry._
-import reftree.svg._
-import reftree.svg.SvgApi.svgUnzip
+import reftree.svg.animation.Frame
+import reftree.svg.XmlSvgApi
+import reftree.svg.XmlSvgApi.svgUnzip
 import reftree.contrib.XmlInstances._
 import reftree.contrib.OpticInstances._
 import reftree.contrib.ZipperInstances._
@@ -159,21 +160,21 @@ This is where [GraphViz](http://www.graphviz.org/) comes in.
 From a `RefTree` we can obtain a graph definition that can be rendered by GraphViz:
 
 ```scala
-scala> Shortcuts.graph(bob)
-res8: reftree.dot.Graph =
-digraph {
-  graph [ ranksep=0.8 ]
+scala> Shortcuts.graph(bob).encode
+res8: String =
+digraph "Diagram" {
+  graph [ ranksep=0.8 bgcolor="#ffffff00" ]
   node [ shape="plaintext" fontname="Source Code Pro" fontcolor="#000000ff" ]
   edge [ arrowsize=0.7 color="#000000ff" ]
-  "-Person1036998500" [ id="-Person1036998500" label=<<table cellspacing="0" cellpadding="6" cellborder="0" columns="*" bgcolor="#ffffff00" style="rounded"><tr><td port="n" rowspan="2">Person</td><td bgcolor="#ffffff00"><i>name</i></td><td bgcolor="#ffffff00"><i>age</i></td></tr><hr/><tr><td port="java.lang.String97067534-0" bgcolor="#ffffff00">&middot;</td><td bgcolor="#ffffff00">42</td></tr></table>> ] [ color="#104e8bff" fontcolor="#104e8bff" ]
-  "-java.lang.String97067534" [ id="-java.lang.String97067534" label=<<table cellspacing="0" cellpadding="6" cellborder="0" columns="*" bgcolor="#ffffff00" style="r...
+  "-Person946361909" [ id="-Person946361909" label=<<table cellspacing="0" cellpadding="6" cellborder="0" columns="*" bgcolor="#ffffff00" style="rounded"><tr><td port="n" rowspan="2">Person</td><td bgcolor="#ffffff00"><i>name</i></td><td bgcolor="#ffffff00"><i>age</i></td></tr><hr/><tr><td port="0" bgcolor="#ffffff00">&middot;</td><td bgcolor="#ffffff00">42</td></tr></table>> ] [ color="#104e8bff" fontcolor="#104e8bff" ]
+  "-java.lang.String168694385" [ id="-java.lang.String168694385" label=<<table cellspacing="0" cellpadding="6" cellborder="0" columns="*" bgcolor="#ffffff00" style="rounded...
 ```
 
 Going even further, we can ask GraphViz for an [SVG](https://en.wikipedia.org/wiki/Scalable_Vector_Graphics) output:
 
 ```scala
 scala> Shortcuts.svg(bob)
-res9: scala.xml.Node = <svg viewBox="0.00 0.00 171.00 168.00" height="168pt" width="171pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g class="graph" id="graph0"><title>%3</title><polygon points="-4,4 -4,-164 167,-164 167,4 -4,4" stroke="none" fill="white"/><g class="node" id="-Person1036998500"><title>-Person1036998500</title><path d="M20,-100C20,-100 143,-100 143,-100 149,-100 155,-106 155,-112 155,-112 155,-144 155,-144 155,-150 149,-156 143,-156 143,-156 20,-156 20,-156 14,-156 8,-150 8,-144 8,-144 8,-112 8,-112 8,-106 14,-100 20,-100" stroke="none" fill="none"/><text fill="#104e8b" font-size="14.00" font-family="Source Code Pro" y="-124.3" x="15.5" text-anchor="start">Person</text><polygon points="71.5,-128 71.5,-155 117.5,-155 117.5,-128 71.5,-1...
+res9: scala.xml.Node = <svg viewBox="0.00 0.00 171.00 168.00" height="168pt" width="171pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g class="graph" id="graph0"><title>Diagram</title><polygon points="-4,4 -4,-164 167,-164 167,4 -4,4" stroke="none" fill="none"/><g class="node" id="-Person946361909"><title>-Person946361909</title><path d="M20,-100C20,-100 143,-100 143,-100 149,-100 155,-106 155,-112 155,-112 155,-144 155,-144 155,-150 149,-156 143,-156 143,-156 20,-156 20,-156 14,-156 8,-150 8,-144 8,-144 8,-112 8,-112 8,-106 14,-100 20,-100" stroke="none" fill="none"/><text fill="#104e8b" font-size="14.00" font-family="Source Code Pro" y="-124.3" x="15.5" text-anchor="start">Person</text><polygon points="71.5,-128 71.5,-155 117.5,-155 117.5,-128 71.5,...
 ```
 
 At this point you might be guessing how we can use this as a basis for our animation approach.
@@ -221,8 +222,8 @@ Consider a lowly floating point number (it can represent an *x* coordinate of so
 There is an obvious way to implement `Interpolation[Double]`, which `reftree` already defines as `Interpolation.double`:
 
 ```scala
-scala> val numbers = Interpolation.double.sample(0, 10, 5)
-numbers: Seq[Double] = List(0.0, 2.5, 5.0, 7.5, 10.0)
+scala> val numbers = Interpolation.double.sample(0, 10, 5).toList
+numbers: List[Double] = List(0.0, 2.5, 5.0, 7.5, 10.0)
 
 scala> diagram(numbers).render("numbers")
 ```
@@ -254,10 +255,10 @@ scala> import monocle.macros.GenLens
 import monocle.macros.GenLens
 
 scala> val x = GenLens[Point](_.x)
-x: monocle.Lens[reftree.geometry.Point,Double] = $anon$1@34f3cb1e
+x: monocle.Lens[reftree.geometry.Point,Double] = $anon$1@3b38f787
 
 scala> val y = GenLens[Point](_.y)
-y: monocle.Lens[reftree.geometry.Point,Double] = $anon$1@607d521f
+y: monocle.Lens[reftree.geometry.Point,Double] = $anon$1@3dccc488
 
 scala> (diagram(OpticFocus(x, point)).toNamespace("x") +
      |   diagram(OpticFocus(y, point)).toNamespace("y")).render("x+y")
@@ -287,10 +288,10 @@ and combining the resulting interpolations:
 scala> val pointInterpolation = (
      |   x.interpolateWith(Interpolation.double) +
      |   y.interpolateWith(Interpolation.double))
-pointInterpolation: reftree.geometry.Interpolation[reftree.geometry.Point] = reftree.geometry.Interpolation$$anon$2@418f3119
+pointInterpolation: reftree.geometry.Interpolation[reftree.geometry.Point] = reftree.geometry.Interpolation$$anon$2@11bb16a8
 
-scala> val points = pointInterpolation.sample(Point(0, 0), Point(10, 20), 5)
-points: Seq[reftree.geometry.Point] = List(0.0 0.0, 2.5 5.0, 5.0 10.0, 7.5 15.0, 10.0 20.0)
+scala> val points = pointInterpolation.sample(Point(0, 0), Point(10, 20), 5).toList
+points: List[reftree.geometry.Point] = List(0.0 0.0, 2.5 5.0, 5.0 10.0, 7.5 15.0, 10.0 20.0)
 
 scala> diagram(points).render("points")
 ```
@@ -311,10 +312,10 @@ res19: reftree.geometry.Polyline = 20.0 30.0,40.0 50.0
 
 scala> val polylineInterpolation = (GenLens[Polyline](_.points)
      |   .interpolateEachWith(Point.interpolation))
-polylineInterpolation: reftree.geometry.Interpolation[reftree.geometry.Polyline] = reftree.geometry.Interpolation$$anon$2@1313e714
+polylineInterpolation: reftree.geometry.Interpolation[reftree.geometry.Polyline] = reftree.geometry.Interpolation$$anon$2@78171273
 
-scala> val polylines = polylineInterpolation.sample(Data.polyline1, Data.polyline2, 3)
-polylines: Seq[reftree.geometry.Polyline] = List(0.0 10.0,10.0 20.0, 10.0 20.0,25.0 35.0, 20.0 30.0,40.0 50.0)
+scala> val polylines = polylineInterpolation.sample(Data.polyline1, Data.polyline2, 3).toList
+polylines: List[reftree.geometry.Polyline] = List(0.0 10.0,10.0 20.0, 10.0 20.0,25.0 35.0, 20.0 30.0,40.0 50.0)
 
 scala> diagram(polylines).render("polylines")
 ```
@@ -348,14 +349,14 @@ in a rather obscure format. Luckily, we have lenses and other optics at our disp
 to plumb through this mess.
 
 First, let’s get to the `path` element. `reftree` implements a few things that will help us:
-* `SvgApi`, an implementation of several useful SVG operations.
+* `XmlSvgApi`, an implementation of several useful SVG operations for *scala-xml*.
   In particular, if offers a CSS selector-like method for matching elements of certain type and/or class.
 * An optic that focuses on an element deep inside XML or any other recursive data structure: `Optics.collectFirst`.
   It is actually an `Optional`, not a `Lens`, since the element might be missing.
 
 ```scala
-scala> val edgePathElement = Optics.collectFirst(SvgApi.select("path"))
-edgePathElement: monocle.Optional[scala.xml.Node,scala.xml.Node] = monocle.Optional$$anon$6@745b1ca4
+scala> val edgePathElement = Optics.collectFirst(XmlSvgApi.select("path"))
+edgePathElement: monocle.Optional[scala.xml.Node,scala.xml.Node] = monocle.Optional$$anon$6@3920d2e4
 
 scala> diagram(OpticFocus(edgePathElement, Data.edge1)).render("edgePathElement")
 ```
@@ -363,14 +364,14 @@ scala> diagram(OpticFocus(edgePathElement, Data.edge1)).render("edgePathElement"
 <p align="center"><img src="images/visualize/animation/edgePathElement.png" width="80%" /></p>
 
 Next, we need to “descend” to the `d` attribute. Here is where optics really shine:
-we can compose `Optional[A, B]` with `Lens[B, C]` to get an `Optional[A, C]`:
+we can compose `Optional[A, B]` with `Optional[B, C]` to get an `Optional[A, C]`:
 
 ```scala
-scala> val d = SvgApi.attr("d")
-d: monocle.Lens[scala.xml.Node,String] = monocle.PLens$$anon$7@28ddce08
+scala> val d = XmlSvgApi.attr("d")
+d: monocle.Optional[scala.xml.Node,String] = monocle.POptional$$anon$1@18e2deee
 
-scala> val edgePathString = edgePathElement composeLens d
-edgePathString: monocle.POptional[scala.xml.Node,scala.xml.Node,String,String] = monocle.POptional$$anon$1@69c5297
+scala> val edgePathString = edgePathElement composeOptional d
+edgePathString: monocle.POptional[scala.xml.Node,scala.xml.Node,String,String] = monocle.POptional$$anon$1@3b4feb66
 
 scala> diagram(OpticFocus(edgePathString, Data.edge1)).render("edgePathString")
 ```
@@ -382,10 +383,10 @@ the string as a nice case class:
 
 ```scala
 scala> Path.stringIso
-res25: monocle.Iso[String,reftree.geometry.Path] = monocle.PIso$$anon$10@c2df53c
+res25: monocle.Iso[String,reftree.geometry.Path] = monocle.PIso$$anon$10@1f3a0c2d
 
 scala> val edgePath = edgePathString composeIso Path.stringIso
-edgePath: monocle.POptional[scala.xml.Node,scala.xml.Node,reftree.geometry.Path,reftree.geometry.Path] = monocle.POptional$$anon$1@11941988
+edgePath: monocle.POptional[scala.xml.Node,scala.xml.Node,reftree.geometry.Path,reftree.geometry.Path] = monocle.POptional$$anon$1@25c42ab0
 
 scala> diagram(edgePath.getOption(Data.edge1)).render("edgePath")
 ```
@@ -398,7 +399,7 @@ it’s not reversible, but with a lot of points you can get pretty close ;)*)
 
 ```scala
 scala> Path.polylineIso(points = 4)
-res27: monocle.Iso[reftree.geometry.Path,reftree.geometry.Polyline] = monocle.PIso$$anon$10@dd2f255
+res27: monocle.Iso[reftree.geometry.Path,reftree.geometry.Polyline] = monocle.PIso$$anon$10@12250a01
 
 scala> def edgePolyline(points: Int) = edgePath composeIso Path.polylineIso(points)
 edgePolyline: (points: Int)monocle.POptional[scala.xml.Node,scala.xml.Node,reftree.geometry.Polyline,reftree.geometry.Polyline]
@@ -417,17 +418,17 @@ edgeInterpolation: (points: Int)reftree.geometry.Interpolation[scala.xml.Node]
 scala> def edges(points: Int, frames: Int) = (Data.edge1 +:
      |   edgeInterpolation(points).sample(Data.edge1, Data.edge2, frames, inclusive = false) :+
      |   Data.edge2)
-edges: (points: Int, frames: Int)Seq[scala.xml.Node]
+edges: (points: Int, frames: Int)scala.collection.immutable.Stream[scala.xml.Node]
 
-scala> AnimatedGifRenderer.renderAnimatedGif(
-     |   edges(4, 4),
+scala> AnimatedGifRenderer.renderFrames(
+     |   edges(4, 4).map(Frame(_)),
      |   Paths.get("images", "visualize", "animation", "edges-4.gif"),
      |   RenderingOptions(density = 200),
      |   AnimationOptions(framesPerSecond = 1)
      | )
 
-scala> AnimatedGifRenderer.renderAnimatedGif(
-     |   edges(100, 32),
+scala> AnimatedGifRenderer.renderFrames(
+     |   edges(100, 32).map(Frame(_)),
      |   Paths.get("images", "visualize", "animation", "edges-100.gif"),
      |   RenderingOptions(density = 200),
      |   AnimationOptions(framesPerSecond = 8)
@@ -444,7 +445,7 @@ With 100 points and 32 frames:
 
 *Interpolating the entire image is left as an exercise for the reader,
 although the impatient will find the complete implementation
-[here](core/shared/src/main/scala/reftree/svg/SvgGraphAnimation.scala).*
+[here](core/shared/src/main/scala/reftree/svg/animation/GraphInterpolation.scala).*
 
 Notice that we never touched XML directly.
 In fact, equipped with the same set of optics for another format or representation
@@ -479,7 +480,7 @@ provides a few useful movements and operations. Just like optics, it’s rather 
 The zipper can operate on any type, as long as an instance of the `Unzip` typeclass is available,
 which can be automatically derived in many cases.
 (*Note that the derivation of `Unzip` for SVG can be found
-[here](core/shared/src/main/scala/reftree/svg/BaseSvgApi.scala).*)
+[here](core/shared/src/main/scala/reftree/svg/api/BaseSvgApi.scala).*)
 
 Consider a simple XML tree:
 

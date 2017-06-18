@@ -25,6 +25,7 @@ class DotSpec extends FlatSpec {
     val graph = Graph(
       strict = true,
       directed = true,
+      Some("Diagram"),
       Seq(
         node1, node2,
         Edge(NodeId(node1.id).withPort("2").south, NodeId(node2.id), "z"),
