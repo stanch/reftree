@@ -105,8 +105,6 @@ object Animation {
 
     /** Add more frames by applying the provided iteration function to a point where `predicate` yields true */
     def iterateToAtMost(n: Int)(predicate: (A ⇒ Boolean))(iteration: A ⇒ A) =
-      if (frames.isEmpty) this
-      else
         Builder(
           (frames ++ Stream
             .iterate(frames.last)(iteration)
@@ -115,8 +113,6 @@ object Animation {
 
     /** Add more frames by applying the provided iteration function to a point where `predicate` yields true */
     def iterateTo(predicate: (A ⇒ Boolean))(iteration: A ⇒ A) =
-      if (frames.isEmpty) this
-      else
         Builder(
           frames ++ Stream
             .iterate(frames.last)(iteration)
