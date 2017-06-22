@@ -79,7 +79,7 @@ object AnimatedGifRenderer {
         if (i % 10 == 0) {
           scribe.trace("Writing to file...")
         }
-        Seq.fill(count)(stream.writeFrame(image))
+        stream.writeFrame(image, animationOptions.delay * count)
     }
     stream.finish()
   }

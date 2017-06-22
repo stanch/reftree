@@ -3,9 +3,7 @@ package reftree.demo
 import java.nio.file.Paths
 
 import de.sciss.fingertree.{FingerTree, Measure}
-import com.softwaremill.quicklens._
 import monocle.macros.GenLens
-import reftree.core.RefTree
 import reftree.diagram.{Diagram, Animation}
 import reftree.render.{RenderingOptions, Renderer}
 import scribe.{Level, LogHandler, Logger}
@@ -13,25 +11,9 @@ import zipper.Zipper
 
 import scala.collection.immutable._
 
-object Lists extends App {
-  val renderer = Renderer(directory = Paths.get("images", "immutability", "data"))
-  import renderer._
-
-  Animation
-    .startWith(List(1))
-    .iterate(_ :+ 2, _ :+ 3, _ :+ 4)
-    .build()
-    .render("list-append", tweakAnimation = _.withOnionSkinLayers(3))
-
-  Animation
-    .startWith(List(1))
-    .iterate(2 :: _, 3 :: _, 4 :: _)
-    .build()
-    .render("list-prepend")
-}
-
 object Queues extends App {
-  val renderer = Renderer(directory = Paths.get("images", "immutability", "data"))
+  Logger.root.addHandler(LogHandler(level = Level.Trace))
+  val renderer = Renderer(directory = Paths.get("images"))
   import renderer._
 
   Animation
@@ -42,12 +24,13 @@ object Queues extends App {
 }
 
 object FingerTrees extends App {
+  Logger.root.addHandler(LogHandler(level = Level.Trace))
   import reftree.contrib.FingerTreeInstances._
   implicit val measure = Measure.Indexed
 
   val renderer = Renderer(
     renderingOptions = RenderingOptions(verticalSpacing = 2, density = 75),
-    directory = Paths.get("images", "immutability", "data")
+    directory = Paths.get("images")
   )
   import renderer._
 
@@ -65,7 +48,7 @@ object Zippers extends App {
 
   val renderer = Renderer(
     renderingOptions = RenderingOptions(density = 75),
-    directory = Paths.get("images", "immutability", "zippers")
+    directory = Paths.get("images")
   )
   import renderer._
 
@@ -132,50 +115,9 @@ object Teaser extends App {
   (queues + lenses + zippers).mirror.render("teaser")
 }
 
-object Quiz extends App {
-  import reftree.contrib.FingerTreeInstances._
-  implicit val measure = Measure.Indexed
-
-  val renderer = Renderer(
-    renderingOptions = RenderingOptions(verticalSpacing = 2, density = 75),
-    directory = Paths.get("images", "quiz")
-  )
-  import renderer._
-
-  def anonymize(tree: RefTree): RefTree = tree match {
-    case ref: RefTree.Ref ⇒ ref.rename("�").modify(_.children.each.value).using(anonymize)
-    case other ⇒ other
-  }
-
-  def anonymize(diagram: Diagram.Single): Diagram.Single =
-    diagram.modify(_.tree).using(anonymize)
-
-  def number(i: Int) = Math.pow(2, i + 1).toInt
-
-  Animation
-    .startWith(FingerTree(1))
-    .iterateWithIndex(14)((s, i) ⇒ s :+ number(i))
-    .build(t ⇒ anonymize(Diagram(t).withAnchor("tree")))
-    .render("1")
-
-  Animation
-    .startWith(HashSet(1))
-    .iterateWithIndex(10)((s, i) ⇒ s + number(i))
-    .build(s ⇒ anonymize(Diagram(s).withAnchor("set")))
-    .render("2")
-
-  Animation
-    .startWith(TreeSet(1))
-    .iterateWithIndex(14)((s, i) ⇒ s + number(i))
-    .build(s ⇒ anonymize(Diagram(s).withAnchor("set")))
-    .render("3")
-}
-
 object All extends App {
-  Lists.main(Array.empty)
   Queues.main(Array.empty)
   FingerTrees.main(Array.empty)
   Zippers.main(Array.empty)
-  Quiz.main(Array.empty)
   Teaser.main(Array.empty)
 }

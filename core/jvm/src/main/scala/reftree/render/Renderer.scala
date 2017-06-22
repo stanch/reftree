@@ -56,6 +56,7 @@ case class Renderer(
 
   /** Render a diagram to a file with the given name (do not include the extension) */
   def render(name: String, diagram: Diagram): Unit = {
+    directory.toFile.mkdirs()
     val graph = Graphs.graph(renderingOptions)(diagram)
     DotRenderer.render(
       graph,
@@ -67,6 +68,7 @@ case class Renderer(
 
   /** Render an animation to a GIF file with the given name (do not include the extension) */
   def render(name: String, animation: Animation): Unit = {
+    directory.toFile.mkdirs()
     val graphs = Graphs.graphs(renderingOptions, animationOptions.onionSkinLayers)(animation)
     AnimatedGifRenderer.render(
       graphs,

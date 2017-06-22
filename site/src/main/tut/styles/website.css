@@ -1,0 +1,62 @@
+body {
+  font-size: 16px;
+  font-family: "Open Sans";
+}
+
+.book-summary {
+  font-size: 14px;
+  font-family: "Open Sans";
+}
+
+.markdown-section {
+  color: #50595E;
+}
+
+.markdown-section h1,
+.markdown-section h2,
+.markdown-section h3,
+.markdown-section h4,
+.markdown-section h5 {
+  color: #228b22;
+  font-weight: normal;
+}
+
+.markdown-section a {
+  color: #1e6bb8;
+}
+
+.book-summary ul.summary li.active>a {
+  color: #228b22;
+  font-weight: bold;
+}
+
+a.anchorjs-link {
+  color: #E0A800;
+}
+
+div.image-wrapper {
+  text-align: center;
+}
+
+.markdown-section img {
+  max-width: 100%;
+  max-height: 400px;
+}
+
+div#animation svg {
+  max-height: 400px;
+  font-size: 14px;
+}
+
+.markdown-section pre {
+  line-height: 1.1em;
+  border-radius: 7px;
+}
+
+.markdown-section code {
+  border-radius: 7px;
+}
+
+.gitbook-link {
+  display: none !important;
+}
