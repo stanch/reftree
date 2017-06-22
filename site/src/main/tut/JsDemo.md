@@ -13,5 +13,4 @@ Animation.startWith(List(1)).iterate(_ :+ 2, _ :+ 3, _ :+ 4).build()
 
 <div id="animation"></div>
 
-<script type="text/javascript" src="//unpkg.com/viz.js"></script>
 <script type="text/javascript" src="js/demo.js"></script>
