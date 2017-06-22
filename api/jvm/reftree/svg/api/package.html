@@ -1,0 +1,229 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>api - reftree.svg.api</title>
+          <meta name="description" content="api - reftree.svg.api" />
+          <meta name="keywords" content="api reftree.svg.api" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'reftree.svg.api.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../../lib/package_big.png" />
+        <p id="owner"><a href="../../package.html" class="extype" name="reftree">reftree</a>.<a href="../package.html" class="extype" name="reftree.svg">svg</a></p>
+        <h1>api</h1><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.package" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">api</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="reftree.svg.api.BaseSvgApi" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="BaseSvgApi[Svg]extendsAnyRef"></a>
+      <a id="BaseSvgApi[Svg]:BaseSvgApi[Svg]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BaseSvgApi.html"><span class="name">BaseSvgApi</span></a><span class="tparams">[<span name="Svg">Svg</span>]</span><span class="result"> extends <a href="../../../scala/package.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.package@BaseSvgApi[Svg]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">SVG API sufficient to implement animations
+</p>
+    </li><li name="reftree.svg.api.OptimizedSvgApi" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OptimizedSvgApi[Svg]extendsBaseSvgApi[reftree.svg.api.SvgWrapper[Svg]]withProductwithSerializable"></a>
+      <a id="OptimizedSvgApi[Svg]:OptimizedSvgApi[Svg]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="OptimizedSvgApi.html"><span class="name">OptimizedSvgApi</span></a><span class="tparams">[<span name="Svg">Svg</span>]</span><span class="params">(<span name="api">api: <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]</span>)</span><span class="result"> extends <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.package@OptimizedSvgApi[Svg]extendsBaseSvgApi[reftree.svg.api.SvgWrapper[Svg]]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An implementation of <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a> that optimizes another existing implementation
+by caching the node attributes and avoiding excessive parsing/stringifying
+</p>
+    </li><li name="reftree.svg.api.Selector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SelectorextendsProductwithSerializable"></a>
+      <a id="Selector:Selector"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Selector.html"><span class="name">Selector</span></a><span class="params">(<span name="clauses">clauses: <span class="extype" name="scala.Predef.Set">Set</span>[<a href="Selector$$Clause.html" class="extype" name="reftree.svg.api.Selector.Clause">Clause</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.package@SelectorextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A very crude approximation of the CSS selectors, which is enough for our purposes</p><div class="fullcomment"><div class="comment cmt"><p>A very crude approximation of the CSS selectors, which is enough for our purposes</p><p>Use <code>Selector.fromString</code> to construct a selector.
+</p></div></div>
+    </li><li name="reftree.svg.api.SimpleSvgApi" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SimpleSvgApi[Node]extendsBaseSvgApi[Node]"></a>
+      <a id="SimpleSvgApi[Node]:SimpleSvgApi[Node]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="SimpleSvgApi.html"><span class="name">SimpleSvgApi</span></a><span class="tparams">[<span name="Node">Node</span>]</span><span class="result"> extends <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<span class="extype" name="reftree.svg.api.SimpleSvgApi.Node">Node</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.package@SimpleSvgApi[Node]extendsBaseSvgApi[Node]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An implementation of <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a> that only requires
+defining the optics for attributes and navigation
+</p>
+    </li><li name="reftree.svg.api.SvgWrapper" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SvgWrapper[Svg]extendsProductwithSerializable"></a>
+      <a id="SvgWrapper[Svg]:SvgWrapper[Svg]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SvgWrapper.html"><span class="name">SvgWrapper</span></a><span class="tparams">[<span name="Svg">Svg</span>]</span><span class="params">(<span name="api">api: <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<span class="extype" name="reftree.svg.api.SvgWrapper.Svg">Svg</span>]</span>, <span name="svg">svg: <span class="extype" name="reftree.svg.api.SvgWrapper.Svg">Svg</span></span>, <span name="classes">classes: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="children">children: <span class="extype" name="scala.Option">Option</span>[<a href="../../../scala/package.html#List[+A]=List[A]" class="extmbr" name="scala.List">List</a>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.SvgWrapper.Svg">Svg</span>]]]</span>, <span name="translation">translation: <span class="extype" name="scala.Option">Option</span>[<a href="../../geometry/Point.html" class="extype" name="reftree.geometry.Point">Point</a>]</span>, <span name="opacity">opacity: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="fillColor">fillColor: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Option">Option</span>[<a href="../../geometry/Color.html" class="extype" name="reftree.geometry.Color">Color</a>]]</span>, <span name="strokeColor">strokeColor: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Option">Option</span>[<a href="../../geometry/Color.html" class="extype" name="reftree.geometry.Color">Color</a>]]</span>, <span name="strokeWidth">strokeWidth: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="polygonPoints">polygonPoints: <span class="extype" name="scala.Option">Option</span>[<a href="../../geometry/Polyline.html" class="extype" name="reftree.geometry.Polyline">Polyline</a>]</span>, <span name="pathPath">pathPath: <span class="extype" name="scala.Option">Option</span>[<a href="../../geometry/Path.html" class="extype" name="reftree.geometry.Path">Path</a>]</span>, <span name="textPosition">textPosition: <span class="extype" name="scala.Option">Option</span>[<a href="../../geometry/Point.html" class="extype" name="reftree.geometry.Point">Point</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.package@SvgWrapper[Svg]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="reftree.svg.api.Selector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Selector"></a>
+      <a id="Selector:Selector"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Selector$.html"><span class="name">Selector</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.package@Selector" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="reftree.svg.api.SvgWrapper" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SvgWrapper"></a>
+      <a id="SvgWrapper:SvgWrapper"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SvgWrapper$.html"><span class="name">SvgWrapper</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.package@SvgWrapper" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

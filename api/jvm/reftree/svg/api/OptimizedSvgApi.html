@@ -1,0 +1,939 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>OptimizedSvgApi - reftree.svg.api.OptimizedSvgApi</title>
+          <meta name="description" content="OptimizedSvgApi - reftree.svg.api.OptimizedSvgApi" />
+          <meta name="keywords" content="OptimizedSvgApi reftree.svg.api.OptimizedSvgApi" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'reftree.svg.api.OptimizedSvgApi';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img alt="Class" src="../../../lib/class_big.png" />
+        <p id="owner"><a href="../../package.html" class="extype" name="reftree">reftree</a>.<a href="../package.html" class="extype" name="reftree.svg">svg</a>.<a href="package.html" class="extype" name="reftree.svg.api">api</a></p>
+        <h1>OptimizedSvgApi</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="reftree.svg.api">package api</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">OptimizedSvgApi</span><span class="tparams">[<span name="Svg">Svg</span>]</span><span class="params">(<span name="api">api: <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]</span>)</span><span class="result"> extends <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An implementation of <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a> that optimizes another existing implementation
+by caching the node attributes and avoiding excessive parsing/stringifying
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]], <a href="../../../scala/package.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="reftree.svg.api.OptimizedSvgApi"><span>OptimizedSvgApi</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="reftree.svg.api.BaseSvgApi"><span>BaseSvgApi</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="reftree.svg.api.OptimizedSvgApi#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(api:reftree.svg.api.BaseSvgApi[Svg]):reftree.svg.api.OptimizedSvgApi[Svg]"></a>
+      <a id="&lt;init&gt;:OptimizedSvgApi[Svg]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">OptimizedSvgApi</span><span class="params">(<span name="api">api: <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@&lt;init&gt;(api:reftree.svg.api.BaseSvgApi[Svg]):reftree.svg.api.OptimizedSvgApi[Svg]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@##():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#anchorTitle" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="anchorTitle:monocle.POptional[reftree.svg.api.SvgWrapper[Svg],reftree.svg.api.SvgWrapper[Svg],Option[String],Option[String]]"></a>
+      <a id="anchorTitle:POptional[SvgWrapper[Svg],SvgWrapper[Svg],Option[String],Option[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">anchorTitle</span><span class="result">: <span class="extype" name="monocle.POptional">POptional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@anchorTitle:monocle.POptional[reftree.svg.api.SvgWrapper[Svg],reftree.svg.api.SvgWrapper[Svg],Option[String],Option[String]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#anchors" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="anchors:monocle.Prism[Svg,Svg]"></a>
+      <a id="anchors:Prism[SvgWrapper[Svg],SvgWrapper[Svg]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">anchors</span><span class="result">: <span class="extype" name="monocle.Prism">Prism</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@anchors:monocle.Prism[Svg,Svg]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#api" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="api:reftree.svg.api.BaseSvgApi[Svg]"></a>
+      <a id="api:BaseSvgApi[Svg]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">api</span><span class="result">: <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@api:reftree.svg.api.BaseSvgApi[Svg]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="../../../scala/package.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@clone():Object" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#elementClasses" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="elementClasses:monocle.Getter[reftree.svg.api.SvgWrapper[Svg],Set[String]]"></a>
+      <a id="elementClasses:Getter[SvgWrapper[Svg],Set[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">elementClasses</span><span class="result">: <span class="extype" name="monocle.Getter">Getter</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@elementClasses:monocle.Getter[reftree.svg.api.SvgWrapper[Svg],Set[String]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#elementId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="elementId:monocle.Getter[reftree.svg.api.SvgWrapper[Svg],Option[String]]"></a>
+      <a id="elementId:Getter[SvgWrapper[Svg],Option[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">elementId</span><span class="result">: <span class="extype" name="monocle.Getter">Getter</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@elementId:monocle.Getter[reftree.svg.api.SvgWrapper[Svg],Option[String]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#elementName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="elementName:monocle.Getter[reftree.svg.api.SvgWrapper[Svg],String]"></a>
+      <a id="elementName:Getter[SvgWrapper[Svg],String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">elementName</span><span class="result">: <span class="extype" name="monocle.Getter">Getter</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@elementName:monocle.Getter[reftree.svg.api.SvgWrapper[Svg],String]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="../../../scala/package.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#fillColor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fillColor:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],Option[reftree.geometry.Color]]"></a>
+      <a id="fillColor:Optional[SvgWrapper[Svg],Option[Color]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fillColor</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Option">Option</span>[<a href="../../geometry/Color.html" class="extype" name="reftree.geometry.Color">Color</a>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@fillColor:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],Option[reftree.geometry.Color]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#groupPosition" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="groupPosition(anchor:monocle.Optional[Svg,reftree.geometry.Point]):monocle.Optional[Svg,reftree.geometry.Point]"></a>
+      <a id="groupPosition(Optional[SvgWrapper[Svg],Point]):Optional[SvgWrapper[Svg],Point]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">groupPosition</span><span class="params">(<span name="anchor">anchor: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Point.html" class="extype" name="reftree.geometry.Point">Point</a>]</span>)</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Point.html" class="extype" name="reftree.geometry.Point">Point</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@groupPosition(anchor:monocle.Optional[Svg,reftree.geometry.Point]):monocle.Optional[Svg,reftree.geometry.Point]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#immediateChildren" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="immediateChildren:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],List[reftree.svg.api.SvgWrapper[Svg]]]"></a>
+      <a id="immediateChildren:Optional[SvgWrapper[Svg],List[SvgWrapper[Svg]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">immediateChildren</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../../scala/package.html#List[+A]=List[A]" class="extmbr" name="scala.List">List</a>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@immediateChildren:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],List[reftree.svg.api.SvgWrapper[Svg]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="../../../scala/package.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#opacity" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="opacity:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],Double]"></a>
+      <a id="opacity:Optional[SvgWrapper[Svg],Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">opacity</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@opacity:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],Double]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#pathPath" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pathPath:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Path]"></a>
+      <a id="pathPath:Optional[SvgWrapper[Svg],Path]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pathPath</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Path.html" class="extype" name="reftree.geometry.Path">Path</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@pathPath:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Path]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#paths" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="paths:monocle.Prism[Svg,Svg]"></a>
+      <a id="paths:Prism[SvgWrapper[Svg],SvgWrapper[Svg]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">paths</span><span class="result">: <span class="extype" name="monocle.Prism">Prism</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@paths:monocle.Prism[Svg,Svg]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#polygonPoints" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="polygonPoints:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Polyline]"></a>
+      <a id="polygonPoints:Optional[SvgWrapper[Svg],Polyline]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">polygonPoints</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Polyline.html" class="extype" name="reftree.geometry.Polyline">Polyline</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@polygonPoints:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Polyline]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#polygons" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="polygons:monocle.Prism[Svg,Svg]"></a>
+      <a id="polygons:Prism[SvgWrapper[Svg],SvgWrapper[Svg]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">polygons</span><span class="result">: <span class="extype" name="monocle.Prism">Prism</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@polygons:monocle.Prism[Svg,Svg]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#realImmediateChildren" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="realImmediateChildren:monocle.Optional[Svg,List[Svg]]"></a>
+      <a id="realImmediateChildren:Optional[SvgWrapper[Svg],List[SvgWrapper[Svg]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">realImmediateChildren</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../../scala/package.html#List[+A]=List[A]" class="extmbr" name="scala.List">List</a>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@realImmediateChildren:monocle.Optional[Svg,List[Svg]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#realPathPath" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="realPathPath:monocle.Optional[Svg,reftree.geometry.Path]"></a>
+      <a id="realPathPath:Optional[SvgWrapper[Svg],Path]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">realPathPath</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Path.html" class="extype" name="reftree.geometry.Path">Path</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@realPathPath:monocle.Optional[Svg,reftree.geometry.Path]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#realPolygonPoints" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="realPolygonPoints:monocle.Optional[Svg,reftree.geometry.Polyline]"></a>
+      <a id="realPolygonPoints:Optional[SvgWrapper[Svg],Polyline]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">realPolygonPoints</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Polyline.html" class="extype" name="reftree.geometry.Polyline">Polyline</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@realPolygonPoints:monocle.Optional[Svg,reftree.geometry.Polyline]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#realTextPosition" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="realTextPosition:monocle.Optional[Svg,reftree.geometry.Point]"></a>
+      <a id="realTextPosition:Optional[SvgWrapper[Svg],Point]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">realTextPosition</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Point.html" class="extype" name="reftree.geometry.Point">Point</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@realTextPosition:monocle.Optional[Svg,reftree.geometry.Point]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#select" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="select(selector:String):monocle.Prism[Svg,Svg]"></a>
+      <a id="select(String):Prism[SvgWrapper[Svg],SvgWrapper[Svg]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">select</span><span class="params">(<span name="selector">selector: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="monocle.Prism">Prism</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@select(selector:String):monocle.Prism[Svg,Svg]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#shapeRendering" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shapeRendering:monocle.POptional[reftree.svg.api.SvgWrapper[Svg],reftree.svg.api.SvgWrapper[Svg],Option[String],Option[String]]"></a>
+      <a id="shapeRendering:POptional[SvgWrapper[Svg],SvgWrapper[Svg],Option[String],Option[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shapeRendering</span><span class="result">: <span class="extype" name="monocle.POptional">POptional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@shapeRendering:monocle.POptional[reftree.svg.api.SvgWrapper[Svg],reftree.svg.api.SvgWrapper[Svg],Option[String],Option[String]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#strokeColor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="strokeColor:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],Option[reftree.geometry.Color]]"></a>
+      <a id="strokeColor:Optional[SvgWrapper[Svg],Option[Color]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">strokeColor</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Option">Option</span>[<a href="../../geometry/Color.html" class="extype" name="reftree.geometry.Color">Color</a>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@strokeColor:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],Option[reftree.geometry.Color]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#strokeWidth" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="strokeWidth:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],Double]"></a>
+      <a id="strokeWidth:Optional[SvgWrapper[Svg],Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">strokeWidth</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@strokeWidth:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],Double]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#svgUnzip" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="svgUnzip:zipper.Unzip[Svg]"></a>
+      <a id="svgUnzip:Unzip[SvgWrapper[Svg]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">svgUnzip</span><span class="result">: <span class="extype" name="zipper.Unzip">Unzip</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@svgUnzip:zipper.Unzip[Svg]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#textPosition" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="textPosition:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Point]"></a>
+      <a id="textPosition:Optional[SvgWrapper[Svg],Point]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">textPosition</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Point.html" class="extype" name="reftree.geometry.Point">Point</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@textPosition:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Point]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#textRendering" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="textRendering:monocle.POptional[reftree.svg.api.SvgWrapper[Svg],reftree.svg.api.SvgWrapper[Svg],Option[String],Option[String]]"></a>
+      <a id="textRendering:POptional[SvgWrapper[Svg],SvgWrapper[Svg],Option[String],Option[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">textRendering</span><span class="result">: <span class="extype" name="monocle.POptional">POptional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@textRendering:monocle.POptional[reftree.svg.api.SvgWrapper[Svg],reftree.svg.api.SvgWrapper[Svg],Option[String],Option[String]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.BaseSvgApi#texts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="texts:monocle.Prism[Svg,Svg]"></a>
+      <a id="texts:Prism[SvgWrapper[Svg],SvgWrapper[Svg]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">texts</span><span class="result">: <span class="extype" name="monocle.Prism">Prism</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@texts:monocle.Prism[Svg,Svg]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#translation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="translation:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Point]"></a>
+      <a id="translation:Optional[SvgWrapper[Svg],Point]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">translation</span><span class="result">: <span class="extype" name="monocle.Optional">Optional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Point.html" class="extype" name="reftree.geometry.Point">Point</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@translation:monocle.Optional[reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Point]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="reftree.svg.api.OptimizedSvgApi#viewBox" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="viewBox:monocle.POptional[reftree.svg.api.SvgWrapper[Svg],reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Rectangle,reftree.geometry.Rectangle]"></a>
+      <a id="viewBox:POptional[SvgWrapper[Svg],SvgWrapper[Svg],Rectangle,Rectangle]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">viewBox</span><span class="result">: <span class="extype" name="monocle.POptional">POptional</span>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>], <a href="../../geometry/Rectangle.html" class="extype" name="reftree.geometry.Rectangle">Rectangle</a>, <a href="../../geometry/Rectangle.html" class="extype" name="reftree.geometry.Rectangle">Rectangle</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@viewBox:monocle.POptional[reftree.svg.api.SvgWrapper[Svg],reftree.svg.api.SvgWrapper[Svg],reftree.geometry.Rectangle,reftree.geometry.Rectangle]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="reftree.svg.api.OptimizedSvgApi">OptimizedSvgApi</a> → <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a></dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#reftree.svg.api.OptimizedSvgApi@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="reftree.svg.api.BaseSvgApi">
+              <h3>Inherited from <a href="BaseSvgApi.html" class="extype" name="reftree.svg.api.BaseSvgApi">BaseSvgApi</a>[<a href="SvgWrapper.html" class="extype" name="reftree.svg.api.SvgWrapper">SvgWrapper</a>[<span class="extype" name="reftree.svg.api.OptimizedSvgApi.Svg">Svg</span>]]</h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <a href="../../../scala/package.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>diagram - reftree.diagram</title>
+          <meta name="description" content="diagram - reftree.diagram" />
+          <meta name="keywords" content="diagram reftree.diagram" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'reftree.diagram.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../lib/package_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="reftree">reftree</a></p>
+        <h1>diagram</h1><span class="permalink">
+      <a href="../../index.html#reftree.diagram.package" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">diagram</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="reftree.diagram.Animation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AnimationextendsProductwithSerializable"></a>
+      <a id="Animation:Animation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Animation.html"><span class="name">Animation</span></a><span class="params">(<span name="diagrams">diagrams: <a href="../../scala/package.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="Diagram.html" class="extype" name="reftree.diagram.Diagram">Diagram</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.diagram.package@AnimationextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The central type for producing animations — sequences of diagrams</p><div class="fullcomment"><div class="comment cmt"><p>The central type for producing animations — sequences of diagrams</p><p>Animations can be combined in parallel (using <code>+</code>) or in sequence (using <code>chain</code>).</p><p>While in most cases this library provides sane defaults,
+various techniques can be applied to ensure continuity between the frames:</p><ul><li>By default, the adjacent frames are aligned to reduce the overall movement
+    of the tree nodes inside them. You can “anchor” the roots of one or more diagrams
+    to minimize their movement instead, while allowing everything else to move (in case
+    of several anchors in one frame, completely pinning all of them might not be possible).
+    To do that, use the <code>withAnchor</code> method for each diagram in question, and provide
+    the same anchor id for the same diagram across different frames.</li><li>By default, colors are auto-assigned within each frame. However if you have
+    several diagrams in each frame and their number or order changes, you will want
+    to assign colors manually. You can do that by using the <code>withColor</code> diagram method
+    and providing the same color palette index for the same diagram across different frames.</li><li>When combining several animations in parallel, you might want to prevent the trees
+    inside them from sharing nodes with the same ids. This can be achieved with the
+    namespacing functionality (see <a href="Diagram.html" class="extype" name="reftree.diagram.Diagram">Diagram</a> for more details). Just like with diagrams,
+    you can use the <code>toNamespace</code> method to adjust that for the entire animation.</li></ul><p>Usage examples:</p><pre><span class="cmt">// Basic animation</span>
+Animation
+  .startWith(Queue(<span class="num">1</span>))
+  .iterateWithIndex(<span class="num">2</span>)((queue, i) ⇒ queue :+ (i + <span class="num">1</span>))
+  .build()
+
+<span class="cmt">// Configure how the diagram for each frame is produced</span>
+Animation
+  .startWith(Queue(<span class="num">1</span>))
+  .iterateWithIndex(<span class="num">2</span>)((queue, i) ⇒ queue :+ (i + <span class="num">1</span>))
+  .build(Diagram(_).withCaption(<span class="lit">"My Queue"</span>).withColor(<span class="num">2</span>))
+
+<span class="cmt">// Adding anchors</span>
+Animation
+  .startWith(Queue(<span class="num">1</span>))
+  .iterateWithIndex(<span class="num">2</span>)((queue, i) ⇒ queue :+ (i + <span class="num">1</span>))
+  .build(Diagram(_).withAnchor(<span class="lit">"queue"</span>).withCaption(<span class="lit">"This node is anchored!"</span>))
+
+<span class="cmt">// Combining in parallel</span>
+Animation
+  .startWith(Queue(<span class="num">1</span>))
+  .iterateWithIndex(<span class="num">2</span>)((queue, i) ⇒ queue :+ (i + <span class="num">1</span>))
+  .build()
+  .toNamespace(<span class="lit">"one"</span>) +
+Animation
+  .startWith(Queue(<span class="num">10</span>))
+  .iterateWithIndex(<span class="num">2</span>)((queue, i) ⇒ queue :+ (<span class="num">10</span> * (i + <span class="num">1</span>)))
+  .build()
+  .toNamespace(<span class="lit">"two"</span>)</pre></div></div>
+    </li><li name="reftree.diagram.Diagram" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="DiagramextendsAnyRef"></a>
+      <a id="Diagram:Diagram"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Diagram.html"><span class="name">Diagram</span></a><span class="result"> extends <a href="../../scala/package.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.diagram.package@DiagramextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The central type for producing diagrams</p><div class="fullcomment"><div class="comment cmt"><p>The central type for producing diagrams</p><p>A Diagram can be either a <a href="Diagram$$Single.html" class="extype" name="reftree.diagram.Diagram.Single">Diagram.Single</a> (a diagram of a single <span class="extype" name="RefTree">RefTree</span>),
+or <a href="Diagram$$Multiple.html" class="extype" name="reftree.diagram.Diagram.Multiple">Diagram.Multiple</a> — a diagram containing several trees.</p><p>Diagrams can be combined using the <code>+</code> operator.</p><p>Each diagram is associated with a hierarchical namespace.
+This namespace scopes the ids of the trees in the diagram.
+Put simply, two <span class="extype" name="List">List</span> diagrams will share the same <span class="extype" name="Nil">Nil</span> tree node
+if they are in the same namespace, and will each have its own <span class="extype" name="Nil">Nil</span> node otherwise.</p><p>Diagrams can have “anchors” which prevent their root nodes from moving
+between adjacent animation frames. For more details see <a href="Animation.html" class="extype" name="reftree.diagram.Animation">Animation</a>.</p><p>Usage examples:</p><pre><span class="cmt">// no caption</span>
+Diagram(Queue(<span class="num">1</span>))
+
+<span class="cmt">// automatically set caption to "Queue(1) :+ 2"</span>
+Diagram.sourceCodeCaption(Queue(<span class="num">1</span>) :+ <span class="num">2</span>)
+
+<span class="cmt">// use toString to get the caption, i.e. "Queue(1, 2)"</span>
+Diagram.toStringCaption(Queue(<span class="num">1</span>) :+ <span class="num">2</span>)
+
+<span class="cmt">// merge two diagrams, set captions manually</span>
+Diagram(Queue(<span class="num">1</span>)).withCaption(<span class="lit">"one"</span>) + Diagram(Queue(<span class="num">2</span>)).withCaption(<span class="lit">"two"</span>)
+
+<span class="cmt">// isolate each diagram in its own namespace</span>
+Diagram(Queue(<span class="num">1</span>)).toNamespace(<span class="lit">"one"</span>) + Diagram(Queue(<span class="num">2</span>)).toNamespace(<span class="lit">"two"</span>)</pre></div></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="reftree.diagram.Animation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Animation"></a>
+      <a id="Animation:Animation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Animation$.html"><span class="name">Animation</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.diagram.package@Animation" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="reftree.diagram.Diagram" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Diagram"></a>
+      <a id="Diagram:Diagram"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Diagram$.html"><span class="name">Diagram</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.diagram.package@Diagram" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

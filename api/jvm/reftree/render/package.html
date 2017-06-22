@@ -1,0 +1,239 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>render - reftree.render</title>
+          <meta name="description" content="render - reftree.render" />
+          <meta name="keywords" content="render reftree.render" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'reftree.render.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../lib/package_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="reftree">reftree</a></p>
+        <h1>render</h1><span class="permalink">
+      <a href="../../index.html#reftree.render.package" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">render</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="reftree.render.AnimationOptions" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AnimationOptionsextendsProductwithSerializable"></a>
+      <a id="AnimationOptions:AnimationOptions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AnimationOptions.html"><span class="name">AnimationOptions</span></a><span class="params">(<span name="keyFrameDuration">keyFrameDuration: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span> = <span class="symbol"><span class="name"><a href="../../scala/package.html">2.seconds</a></span></span></span>, <span name="interpolationDuration">interpolationDuration: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span> = <span class="symbol"><span class="name"><a href="../../scala/package.html">1.seconds</a></span></span></span>, <span name="framesPerSecond">framesPerSecond: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">9</span></span>, <span name="loop">loop: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="onionSkinLayers">onionSkinLayers: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.render.package@AnimationOptionsextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Options for rendering animations
+</p><div class="fullcomment"><div class="comment cmt"><p>Options for rendering animations
+</p></div><dl class="paramcmts block"><dt class="param">keyFrameDuration</dt><dd class="cmt"><p>the duration for key frames</p></dd><dt class="param">interpolationDuration</dt><dd class="cmt"><p>the duration for interpolation segments between the key frames
+                             set to <code>Duration.Zero</code> to disable interpolation</p></dd><dt class="param">framesPerSecond</dt><dd class="cmt"><p>the rate to use for interpolation (ignored when interpolation is off)</p></dd><dt class="param">loop</dt><dd class="cmt"><p>whether the animation should be looped infinitely</p></dd><dt class="param">onionSkinLayers</dt><dd class="cmt"><p>set to a positive number <code>n</code> to add <code>n</code> previous frames to each frame,
+                       with reduced opacity</p></dd></dl></div>
+    </li><li name="reftree.render.Renderer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RendererextendsProductwithSerializable"></a>
+      <a id="Renderer:Renderer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Renderer.html"><span class="name">Renderer</span></a><span class="params">(<span name="renderingOptions">renderingOptions: <a href="RenderingOptions.html" class="extype" name="reftree.render.RenderingOptions">RenderingOptions</a> = <span class="symbol">RenderingOptions()</span></span>, <span name="animationOptions">animationOptions: <a href="AnimationOptions.html" class="extype" name="reftree.render.AnimationOptions">AnimationOptions</a> = <span class="symbol">AnimationOptions()</span></span>, <span name="directory">directory: <span class="extype" name="java.nio.file.Path">Path</span> = <span class="symbol">Paths.get(&quot;.&quot;)</span></span>, <span name="format">format: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;png&quot;</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.render.package@RendererextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This class provides functionality for rendering diagrams and animations</p><div class="fullcomment"><div class="comment cmt"><p>This class provides functionality for rendering diagrams and animations</p><p>It can be used in two ways:</p><ul><li>conventionally, via the <code>render</code> methods;</li><li>with special syntax sugar, allowing <code>render</code> calls on the diagrams/animations themselves.</li></ul><p>Usage examples:</p><pre><span class="kw">import</span> reftree.diagram.Diagram
+<span class="kw">import</span> java.nio.file.Paths
+
+<span class="kw">val</span> renderer = Renderer(
+  renderingOptions = RenderingOptions(density = <span class="num">75</span>),
+  directory = Paths.get(<span class="lit">"images"</span>, <span class="lit">"usage"</span>)
+)
+
+<span class="cmt">// With custom output format</span>
+<span class="kw">val</span> renderer = Renderer(
+  renderingOptions = RenderingOptions(density = <span class="num">75</span>),
+  directory = Paths.get(<span class="lit">"images"</span>, <span class="lit">"usage"</span>),
+  format = <span class="lit">"ps"</span> <span class="cmt">// Or any other format that compatible with dot -T</span>
+)
+
+<span class="cmt">// Conventional usage</span>
+renderer
+  .tweakRendering(_.withVerticalSpacing(<span class="num">2</span>))
+  .render(<span class="lit">"list"</span>, Diagram(<span class="std">List</span>(<span class="num">1</span>)))
+
+<span class="cmt">// Sweet sugar, recommended</span>
+<span class="kw">import</span> renderer._
+Diagram(<span class="std">List</span>(<span class="num">1</span>))
+  .render(<span class="lit">"list"</span>, _.withVerticalSpacing(<span class="num">2</span>))</pre></div></div>
+    </li><li name="reftree.render.RenderingOptions" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RenderingOptionsextendsProductwithSerializable"></a>
+      <a id="RenderingOptions:RenderingOptions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RenderingOptions.html"><span class="name">RenderingOptions</span></a><span class="params">(<span name="verticalSpacing">verticalSpacing: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.8</span></span>, <span name="palette">palette: <a href="../../scala/package.html#IndexedSeq[+A]=IndexedSeq[A]" class="extmbr" name="scala.IndexedSeq">IndexedSeq</a>[<a href="../geometry/Color.html" class="extype" name="reftree.geometry.Color">Color</a>] = <span class="defval" name='<span class="name"><a href="../package.html">Array(
+    Color.fromRgbaString(&quot;#104e8b&quot;),
+    Color.fromRgbaString(&quot;#228b22&quot;),
+    Color.fromRgbaString(&quot;#cd5b45&quot;)
+  )</a></span>'>...</span></span>, <span name="font">font: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol"><span class="name"><a href="DefaultRenderingOptions$.html">DefaultRenderingOptions.font</a></span></span></span>, <span name="density">density: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">100</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.render.package@RenderingOptionsextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Options for rendering static diagrams
+</p><div class="fullcomment"><div class="comment cmt"><p>Options for rendering static diagrams
+</p></div><dl class="paramcmts block"><dt class="param">verticalSpacing</dt><dd class="cmt"><p>vertical spacing to set for Graphviz</p></dd><dt class="param">palette</dt><dd class="cmt"><p>a sequence of colors to be used</p></dd><dt class="param">font</dt><dd class="cmt"><p>the font for text rendering</p></dd><dt class="param">density</dt><dd class="cmt"><p>the desired image density, in pixels per inch</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="reftree.render.AnimatedGifRenderer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AnimatedGifRenderer"></a>
+      <a id="AnimatedGifRenderer:AnimatedGifRenderer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="AnimatedGifRenderer$.html"><span class="name">AnimatedGifRenderer</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.render.package@AnimatedGifRenderer" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="reftree.render.DefaultRenderingOptions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultRenderingOptions"></a>
+      <a id="DefaultRenderingOptions:DefaultRenderingOptions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultRenderingOptions$.html"><span class="name">DefaultRenderingOptions</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.render.package@DefaultRenderingOptions" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="reftree.render.DotRenderer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DotRenderer"></a>
+      <a id="DotRenderer:DotRenderer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DotRenderer$.html"><span class="name">DotRenderer</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.render.package@DotRenderer" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
