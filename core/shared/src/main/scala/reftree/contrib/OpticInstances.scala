@@ -70,7 +70,7 @@ object OpticInstances {
         x.name == y.name &&
           x.children.map(_.name) == y.children.map(_.name) &&
           (x.children.map(_.value) zip y.children.map(_.value))
-            .forall { case(a, b) ⇒ matching(a, b) }
+            .forall { case (a, b) ⇒ matching(a, b) }
       case _ ⇒ false
     }
 

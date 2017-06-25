@@ -32,6 +32,7 @@ import reftree.svg.XmlSvgApi.svgUnzip
 import reftree.contrib.XmlInstances._
 import reftree.contrib.OpticInstances._
 import reftree.contrib.ZipperInstances._
+import reftree.contrib.ShapelessInstances._
 import reftree.util.Optics
 import reftree.demo.Data
 import reftree.demo.Shortcuts
@@ -140,15 +141,27 @@ First, we need to grasp the basics of `reftree`.
 
 To visualize a value of some type `A`, `reftree` converts it into a data structure
 called `RefTree` (surprise!), using a typeclass `ToRefTree[A]`.
-For many Scala collections and case classes this is done automagically, using
-[shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes).
-(*If you are curious about the magic, take a look at [this file](https://github.com/stanch/reftree/blob/master/core/shared/src/main/scala/reftree/core/GenericInstances.scala).*)
 
-What does a `RefTree` look like? The best way to find out is to visualize a `RefTree`
+For case classes this is done automagically, using
+[*shapeless*](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes).
+(*If you are curious about the magic, take a look at [this file](https://github.com/stanch/reftree/blob/master/core/shared/src/main/scala/reftree/core/GenericInstances.scala).*)
+Given our friend `bob`, *shapeless* would provide a generic representation,
+which includes the field names (at the type level!) and the values (as a heterogeneous list):
+
+```tut
+Shortcuts.generic(bob)
+
+diagram(Shortcuts.generic(bob)).render("generic")
+```
+
+![generic](../images/visualize/inside/generic.png)
+
+This information is enough to auto-generate a `RefTree`.
+Now, what does it look like? The best way to find out is to visualize a `RefTree`
 of a `RefTree`!
 
 ```tut
-diagram(bob.refTree).render("reftree")
+diagram(Shortcuts.refTree(bob)).render("reftree")
 ```
 
 ![reftree](../images/visualize/inside/reftree.png)
@@ -237,7 +250,7 @@ To answer this question, let’s introduce more abstraction
 
 A lens `Lens[A, B]` is something that can “focus” on a piece of data of type `B`
 inside a data structure of type `A` and provide read-write access to it.
-We will use the excellent [Monocle library](https://github.com/julien-truffaut/Monocle)
+We will use the excellent [*Monocle* library](https://github.com/julien-truffaut/Monocle)
 to create lenses and other optics along the way:
 
 ```tut
@@ -386,14 +399,14 @@ def edges(points: Int, frames: Int) = (Data.edge1 +:
 AnimatedGifRenderer.renderFrames(
   edges(4, 4).map(Frame(_)),
   Paths.get(ImagePath, "visualize", "animation", "edges-4.gif"),
-  RenderingOptions(density = 75),
+  RenderingOptions(density = 200),
   AnimationOptions(framesPerSecond = 1)
 )
 
 AnimatedGifRenderer.renderFrames(
   edges(100, 32).map(Frame(_)),
   Paths.get(ImagePath, "visualize", "animation", "edges-100.gif"),
-  RenderingOptions(density = 75),
+  RenderingOptions(density = 200),
   AnimationOptions(framesPerSecond = 8)
 )
 ```

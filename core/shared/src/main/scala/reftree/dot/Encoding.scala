@@ -9,6 +9,10 @@ case class Chunk(encoded: String) {
   /** If this chunk is non-empty, wrap it with a prefix and a suffix */
   def wrap(prefix: String, suffix: String) =
     if (encoded.nonEmpty) Chunk(prefix + encoded + suffix) else this
+
+  /** Wrap it with a prefix and a suffix */
+  def wrapAlways(prefix: String, suffix: String) =
+    Chunk(prefix + encoded + suffix)
 }
 
 object Chunk {

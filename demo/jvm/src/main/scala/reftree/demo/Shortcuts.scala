@@ -1,7 +1,7 @@
 package reftree.demo
 
-import java.io.File
-import java.nio.file.Paths
+import java.io.{FileOutputStream, File}
+import java.nio.file.{Files, Paths}
 
 import reftree.core._
 import reftree.diagram.Diagram
@@ -19,8 +19,19 @@ import scala.sys.process.Process
 object Shortcuts {
   val renderer = Renderer()
 
-  def render[A: ToRefTree](value: sourcecode.Text[A]) =
-    renderer.render("diagram", Diagram.sourceCodeCaption(value))
+  private var shownSlides = Set.empty[String]
+
+  def render[A: ToRefTree](value: sourcecode.Text[A]) = {
+    val id = value.source.filter(_.isLetter)
+    val slide = Paths.get("slides", s"$id.png")
+    if (!shownSlides(id) &&
+      slide.toFile.exists()) {
+      val stream = new FileOutputStream("diagram.png")
+      Files.copy(slide, stream)
+      stream.close()
+      shownSlides += id
+    } else renderer.render("diagram", Diagram.sourceCodeCaption(value))
+  }
 
   def render[A: ToRefTree, B: ToRefTree](
     value1: sourcecode.Text[A],
@@ -42,6 +53,12 @@ object Shortcuts {
   def clear() = DotRenderer.render(
     Graph(true, true, None, Seq.empty), Paths.get("diagram.png"), RenderingOptions(), "png"
   )
+
+  def generic[A](value: A)(implicit generic: shapeless.LabelledGeneric[A]) =
+    generic.to(value)
+
+  def refTree[A: ToRefTree](value: A): RefTree =
+    value.refTree
 
   def graph[A: ToRefTree](value: A): Graph =
     Graphs.graph(RenderingOptions())(Diagram(value))

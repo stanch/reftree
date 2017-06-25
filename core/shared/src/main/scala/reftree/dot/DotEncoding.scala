@@ -89,7 +89,7 @@ object DotEncoding extends EncodingCompanion[Graph, DotEncoding] with DotAttrEnc
     val d = if (graph.directed) Chunk("digraph") else Chunk("graph")
 
     val content = Chunk.join("\n")(graph.statements.map(statementEnc.encoding).map(_.wrap("  ", "")): _*)
-      .wrap("{\n", "\n}")
+      .wrapAlways("{\n", "\n}")
 
     Chunk.join(" ")(s, d, graph.id.encoded, content)
   })

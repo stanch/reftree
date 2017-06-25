@@ -17,6 +17,7 @@ object Ammonite extends App {
     "import reftree.contrib.OpticInstances._",
     "import reftree.contrib.ZipperInstances._",
     "import reftree.contrib.XmlInstances._",
+    "import reftree.contrib.ShapelessInstances._",
     "import reftree.contrib.SimplifiedInstances",
     "import reftree.contrib.SimplifiedInstances.seq",
     "import reftree.demo.Data._",
