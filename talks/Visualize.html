@@ -409,6 +409,7 @@ declarations (each section might add its own):</p>
 <span class="hljs-keyword">import</span> reftree.contrib.<span class="hljs-type">XmlInstances</span>._
 <span class="hljs-keyword">import</span> reftree.contrib.<span class="hljs-type">OpticInstances</span>._
 <span class="hljs-keyword">import</span> reftree.contrib.<span class="hljs-type">ZipperInstances</span>._
+<span class="hljs-keyword">import</span> reftree.contrib.<span class="hljs-type">ShapelessInstances</span>._
 <span class="hljs-keyword">import</span> reftree.util.<span class="hljs-type">Optics</span>
 <span class="hljs-keyword">import</span> reftree.demo.<span class="hljs-type">Data</span>
 <span class="hljs-keyword">import</span> reftree.demo.<span class="hljs-type">Shortcuts</span>
@@ -488,13 +489,22 @@ features: animations.</p>
 </code></pre>
 <p>First, we need to grasp the basics of <code>reftree</code>.</p>
 <p>To visualize a value of some type <code>A</code>, <code>reftree</code> converts it into a data structure
-called <code>RefTree</code> (surprise!), using a typeclass <code>ToRefTree[A]</code>.
-For many Scala collections and case classes this is done automagically, using
-<a href="https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes" target="_blank">shapeless</a>.
-(<em>If you are curious about the magic, take a look at <a href="https://github.com/stanch/reftree/blob/master/core/shared/src/main/scala/reftree/core/GenericInstances.scala" target="_blank">this file</a>.</em>)</p>
-<p>What does a <code>RefTree</code> look like? The best way to find out is to visualize a <code>RefTree</code>
+called <code>RefTree</code> (surprise!), using a typeclass <code>ToRefTree[A]</code>.</p>
+<p>For case classes this is done automagically, using
+<a href="https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#generic-representation-of-sealed-families-of-case-classes" target="_blank"><em>shapeless</em></a>.
+(<em>If you are curious about the magic, take a look at <a href="https://github.com/stanch/reftree/blob/master/core/shared/src/main/scala/reftree/core/GenericInstances.scala" target="_blank">this file</a>.</em>)
+Given our friend <code>bob</code>, <em>shapeless</em> would provide a generic representation,
+which includes the field names (at the type level!) and the values (as a heterogeneous list):</p>
+<pre><code class="lang-scala">scala&gt; <span class="hljs-type">Shortcuts</span>.generic(bob)
+res7: shapeless.::[<span class="hljs-type">String</span> <span class="hljs-keyword">with</span> shapeless.labelled.<span class="hljs-type">KeyTag</span>[<span class="hljs-type">Symbol</span> <span class="hljs-keyword">with</span> shapeless.tag.<span class="hljs-type">Tagged</span>[<span class="hljs-type">String</span>(<span class="hljs-string">&quot;firstName&quot;</span>)],<span class="hljs-type">String</span>],shapeless.::[<span class="hljs-type">Int</span> <span class="hljs-keyword">with</span> shapeless.labelled.<span class="hljs-type">KeyTag</span>[<span class="hljs-type">Symbol</span> <span class="hljs-keyword">with</span> shapeless.tag.<span class="hljs-type">Tagged</span>[<span class="hljs-type">String</span>(<span class="hljs-string">&quot;age&quot;</span>)],<span class="hljs-type">Int</span>],shapeless.<span class="hljs-type">HNil</span>]] = <span class="hljs-type">Bob</span> :: <span class="hljs-number">42</span> :: <span class="hljs-type">HNil</span>
+
+scala&gt; diagram(<span class="hljs-type">Shortcuts</span>.generic(bob)).render(<span class="hljs-string">&quot;generic&quot;</span>)
+</code></pre>
+<p><div class="image-wrapper"><img src="../images/visualize/inside/generic.png" alt="generic"></div></p>
+<p>This information is enough to auto-generate a <code>RefTree</code>.
+Now, what does it look like? The best way to find out is to visualize a <code>RefTree</code>
 of a <code>RefTree</code>!</p>
-<pre><code class="lang-scala">scala&gt; diagram(bob.refTree).render(<span class="hljs-string">&quot;reftree&quot;</span>)
+<pre><code class="lang-scala">scala&gt; diagram(<span class="hljs-type">Shortcuts</span>.refTree(bob)).render(<span class="hljs-string">&quot;reftree&quot;</span>)
 </code></pre>
 <p><div class="image-wrapper"><img src="../images/visualize/inside/reftree.png" alt="reftree"></div></p>
 <p>As you can see, it contains values (<code>Val</code>) and references (<code>Ref</code>).</p>
@@ -502,17 +512,17 @@ of a <code>RefTree</code>!</p>
 This is where <a href="http://www.graphviz.org/" target="_blank">GraphViz</a> comes in.
 From a <code>RefTree</code> we can obtain a graph definition that can be rendered by GraphViz:</p>
 <pre><code class="lang-scala">scala&gt; Shortcuts.graph(bob).encode
-res8: String =
+res10: String =
 digraph &quot;Diagram&quot; {
   graph [ ranksep=0.8 bgcolor=&quot;#ffffff00&quot; ]
   node [ shape=&quot;plaintext&quot; fontname=&quot;Source Code Pro&quot; fontcolor=&quot;#000000ff&quot; ]
   edge [ arrowsize=0.7 color=&quot;#000000ff&quot; ]
-  &quot;-Person1056215861&quot; [ id=&quot;-Person1056215861&quot; label=&lt;&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;6&quot; cellborder=&quot;0&quot; columns=&quot;*&quot; bgcolor=&quot;#ffffff00&quot; style=&quot;rounded&quot;&gt;&lt;tr&gt;&lt;td port=&quot;n&quot; rowspan=&quot;2&quot;&gt;Person&lt;/td&gt;&lt;td bgcolor=&quot;#ffffff00&quot;&gt;&lt;i&gt;name&lt;/i&gt;&lt;/td&gt;&lt;td bgcolor=&quot;#ffffff00&quot;&gt;&lt;i&gt;age&lt;/i&gt;&lt;/td&gt;&lt;/tr&gt;&lt;hr/&gt;&lt;tr&gt;&lt;td port=&quot;0&quot; bgcolor=&quot;#ffffff00&quot;&gt;&amp;middot;&lt;/td&gt;&lt;td bgcolor=&quot;#ffffff00&quot;&gt;42&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&gt; ] [ color=&quot;#104e8bff&quot; fontcolor=&quot;#104e8bff&quot; ]
-  &quot;-java.lang.String1884258714&quot; [ id=&quot;-java.lang.String1884258714&quot; label=&lt;&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;6&quot; cellborder=&quot;0&quot; columns=&quot;*&quot; bgcolor=&quot;#ffffff00&quot; style=&quot;rou...
+  &quot;-Person599628537&quot; [ id=&quot;-Person599628537&quot; label=&lt;&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;6&quot; cellborder=&quot;0&quot; columns=&quot;*&quot; bgcolor=&quot;#ffffff00&quot; style=&quot;rounded&quot;&gt;&lt;tr&gt;&lt;td port=&quot;n&quot; rowspan=&quot;2&quot;&gt;Person&lt;/td&gt;&lt;td bgcolor=&quot;#ffffff00&quot;&gt;&lt;i&gt;name&lt;/i&gt;&lt;/td&gt;&lt;td bgcolor=&quot;#ffffff00&quot;&gt;&lt;i&gt;age&lt;/i&gt;&lt;/td&gt;&lt;/tr&gt;&lt;hr/&gt;&lt;tr&gt;&lt;td port=&quot;0&quot; bgcolor=&quot;#ffffff00&quot;&gt;&amp;middot;&lt;/td&gt;&lt;td bgcolor=&quot;#ffffff00&quot;&gt;42&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&gt; ] [ color=&quot;#104e8bff&quot; fontcolor=&quot;#104e8bff&quot; ]
+  &quot;-java.lang.String1108513508&quot; [ id=&quot;-java.lang.String1108513508&quot; label=&lt;&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;6&quot; cellborder=&quot;0&quot; columns=&quot;*&quot; bgcolor=&quot;#ffffff00&quot; style=&quot;roun...
 </code></pre>
 <p>Going even further, we can ask GraphViz for an <a href="https://en.wikipedia.org/wiki/Scalable_Vector_Graphics" target="_blank">SVG</a> output:</p>
 <pre><code class="lang-scala">scala&gt; Shortcuts.svg(bob)
-res9: scala.xml.Node = &lt;svg viewBox=&quot;0.00 0.00 171.00 168.00&quot; height=&quot;168pt&quot; width=&quot;171pt&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;&lt;g class=&quot;graph&quot; id=&quot;graph0&quot;&gt;&lt;title&gt;Diagram&lt;/title&gt;&lt;polygon points=&quot;-4,4 -4,-164 167,-164 167,4 -4,4&quot; stroke=&quot;none&quot; fill=&quot;none&quot;/&gt;&lt;g class=&quot;node&quot; id=&quot;-Person1056215861&quot;&gt;&lt;title&gt;-Person1056215861&lt;/title&gt;&lt;path d=&quot;M20,-100C20,-100 143,-100 143,-100 149,-100 155,-106 155,-112 155,-112 155,-144 155,-144 155,-150 149,-156 143,-156 143,-156 20,-156 20,-156 14,-156 8,-150 8,-144 8,-144 8,-112 8,-112 8,-106 14,-100 20,-100&quot; stroke=&quot;none&quot; fill=&quot;none&quot;/&gt;&lt;text fill=&quot;#104e8b&quot; font-size=&quot;14.00&quot; font-family=&quot;Source Code Pro&quot; y=&quot;-124.3&quot; x=&quot;15.5&quot; text-anchor=&quot;start&quot;&gt;Person&lt;/text&gt;&lt;polygon points=&quot;71.5,-128 71.5,-155 117.5,-155 117.5,-128 71....
+res11: scala.xml.Node = &lt;svg viewBox=&quot;0.00 0.00 171.00 168.00&quot; height=&quot;168pt&quot; width=&quot;171pt&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;&lt;g class=&quot;graph&quot; id=&quot;graph0&quot;&gt;&lt;title&gt;Diagram&lt;/title&gt;&lt;polygon points=&quot;-4,4 -4,-164 167,-164 167,4 -4,4&quot; stroke=&quot;none&quot; fill=&quot;none&quot;/&gt;&lt;g class=&quot;node&quot; id=&quot;-Person599628537&quot;&gt;&lt;title&gt;-Person599628537&lt;/title&gt;&lt;path d=&quot;M20,-100C20,-100 143,-100 143,-100 149,-100 155,-106 155,-112 155,-112 155,-144 155,-144 155,-150 149,-156 143,-156 143,-156 20,-156 20,-156 14,-156 8,-150 8,-144 8,-144 8,-112 8,-112 8,-106 14,-100 20,-100&quot; stroke=&quot;none&quot; fill=&quot;none&quot;/&gt;&lt;text fill=&quot;#104e8b&quot; font-size=&quot;14.00&quot; font-family=&quot;Source Code Pro&quot; y=&quot;-124.3&quot; x=&quot;15.5&quot; text-anchor=&quot;start&quot;&gt;Person&lt;/text&gt;&lt;polygon points=&quot;71.5,-128 71.5,-155 117.5,-155 117.5,-128 71.5...
 </code></pre>
 <p>At this point you might be guessing how we can use this as a basis for our animation approach.
 Every state of a data structure will be a separate frame in the SVG format.
@@ -566,16 +576,16 @@ To answer this question, let&#x2019;s introduce more abstraction
 (in a great tradition of functional programming).</p>
 <p>A lens <code>Lens[A, B]</code> is something that can &#x201C;focus&#x201D; on a piece of data of type <code>B</code>
 inside a data structure of type <code>A</code> and provide read-write access to it.
-We will use the excellent <a href="https://github.com/julien-truffaut/Monocle" target="_blank">Monocle library</a>
+We will use the excellent <a href="https://github.com/julien-truffaut/Monocle" target="_blank"><em>Monocle</em> library</a>
 to create lenses and other optics along the way:</p>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-keyword">import</span> monocle.macros.<span class="hljs-type">GenLens</span>
 <span class="hljs-keyword">import</span> monocle.macros.<span class="hljs-type">GenLens</span>
 
 scala&gt; <span class="hljs-keyword">val</span> x = <span class="hljs-type">GenLens</span>[<span class="hljs-type">Point</span>](_.x)
-x: monocle.<span class="hljs-type">Lens</span>[reftree.geometry.<span class="hljs-type">Point</span>,<span class="hljs-type">Double</span>] = $anon$<span class="hljs-number">1</span>@<span class="hljs-number">6</span>a8a96dd
+x: monocle.<span class="hljs-type">Lens</span>[reftree.geometry.<span class="hljs-type">Point</span>,<span class="hljs-type">Double</span>] = $anon$<span class="hljs-number">1</span>@<span class="hljs-number">3</span>cadee74
 
 scala&gt; <span class="hljs-keyword">val</span> y = <span class="hljs-type">GenLens</span>[<span class="hljs-type">Point</span>](_.y)
-y: monocle.<span class="hljs-type">Lens</span>[reftree.geometry.<span class="hljs-type">Point</span>,<span class="hljs-type">Double</span>] = $anon$<span class="hljs-number">1</span>@<span class="hljs-number">12941656</span>
+y: monocle.<span class="hljs-type">Lens</span>[reftree.geometry.<span class="hljs-type">Point</span>,<span class="hljs-type">Double</span>] = $anon$<span class="hljs-number">1</span>@<span class="hljs-number">5633</span>c31c
 
 scala&gt; (diagram(<span class="hljs-type">OpticFocus</span>(x, point)).toNamespace(<span class="hljs-string">&quot;x&quot;</span>) +
      |   diagram(<span class="hljs-type">OpticFocus</span>(y, point)).toNamespace(<span class="hljs-string">&quot;y&quot;</span>)).render(<span class="hljs-string">&quot;x+y&quot;</span>)
@@ -583,13 +593,13 @@ scala&gt; (diagram(<span class="hljs-type">OpticFocus</span>(x, point)).toNamesp
 <p><div class="image-wrapper"><img src="../images/visualize/animation/x+y.png" alt="x+y"></div></p>
 <p>Lenses provide several methods to manipulate data:</p>
 <pre><code class="lang-scala">scala&gt; x.get(point)
-res14: <span class="hljs-type">Double</span> = <span class="hljs-number">0.0</span>
+res16: <span class="hljs-type">Double</span> = <span class="hljs-number">0.0</span>
 
 scala&gt; y.set(<span class="hljs-number">20</span>)(point)
-res15: reftree.geometry.<span class="hljs-type">Point</span> = <span class="hljs-number">0.0</span> <span class="hljs-number">20.0</span>
+res17: reftree.geometry.<span class="hljs-type">Point</span> = <span class="hljs-number">0.0</span> <span class="hljs-number">20.0</span>
 
 scala&gt; y.modify(_ + <span class="hljs-number">20</span>)(point)
-res16: reftree.geometry.<span class="hljs-type">Point</span> = <span class="hljs-number">0.0</span> <span class="hljs-number">30.0</span>
+res18: reftree.geometry.<span class="hljs-type">Point</span> = <span class="hljs-number">0.0</span> <span class="hljs-number">30.0</span>
 </code></pre>
 <p>If we can read and write each coordinate field, we can interpolate them separately
 and update the point field by field.
@@ -598,7 +608,7 @@ and combining the resulting interpolations:</p>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-keyword">val</span> pointInterpolation = (
      |   x.interpolateWith(<span class="hljs-type">Interpolation</span>.double) +
      |   y.interpolateWith(<span class="hljs-type">Interpolation</span>.double))
-pointInterpolation: reftree.geometry.<span class="hljs-type">Interpolation</span>[reftree.geometry.<span class="hljs-type">Point</span>] = reftree.geometry.<span class="hljs-type">Interpolation</span>$$anon$<span class="hljs-number">2</span>@<span class="hljs-number">8</span>c7a479
+pointInterpolation: reftree.geometry.<span class="hljs-type">Interpolation</span>[reftree.geometry.<span class="hljs-type">Point</span>] = reftree.geometry.<span class="hljs-type">Interpolation</span>$$anon$<span class="hljs-number">2</span>@<span class="hljs-number">6e540</span>a37
 
 scala&gt; <span class="hljs-keyword">val</span> points = pointInterpolation.sample(<span class="hljs-type">Point</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-type">Point</span>(<span class="hljs-number">10</span>, <span class="hljs-number">20</span>), <span class="hljs-number">5</span>).toList
 points: <span class="hljs-type">List</span>[reftree.geometry.<span class="hljs-type">Point</span>] = <span class="hljs-type">List</span>(<span class="hljs-number">0.0</span> <span class="hljs-number">0.0</span>, <span class="hljs-number">2.5</span> <span class="hljs-number">5.0</span>, <span class="hljs-number">5.0</span> <span class="hljs-number">10.0</span>, <span class="hljs-number">7.5</span> <span class="hljs-number">15.0</span>, <span class="hljs-number">10.0</span> <span class="hljs-number">20.0</span>)
@@ -610,14 +620,14 @@ scala&gt; diagram(points).render(<span class="hljs-string">&quot;points&quot;</s
 <p>Using the same approach, we can build a polyline interpolator
 (assuming the polylines being interpolated consist of equal number of points):</p>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-type">Data</span>.polyline1
-res18: reftree.geometry.<span class="hljs-type">Polyline</span> = <span class="hljs-number">0.0</span> <span class="hljs-number">10.0</span>,<span class="hljs-number">10.0</span> <span class="hljs-number">20.0</span>
+res20: reftree.geometry.<span class="hljs-type">Polyline</span> = <span class="hljs-number">0.0</span> <span class="hljs-number">10.0</span>,<span class="hljs-number">10.0</span> <span class="hljs-number">20.0</span>
 
 scala&gt; <span class="hljs-type">Data</span>.polyline2
-res19: reftree.geometry.<span class="hljs-type">Polyline</span> = <span class="hljs-number">20.0</span> <span class="hljs-number">30.0</span>,<span class="hljs-number">40.0</span> <span class="hljs-number">50.0</span>
+res21: reftree.geometry.<span class="hljs-type">Polyline</span> = <span class="hljs-number">20.0</span> <span class="hljs-number">30.0</span>,<span class="hljs-number">40.0</span> <span class="hljs-number">50.0</span>
 
 scala&gt; <span class="hljs-keyword">val</span> polylineInterpolation = (<span class="hljs-type">GenLens</span>[<span class="hljs-type">Polyline</span>](_.points)
      |   .interpolateEachWith(<span class="hljs-type">Point</span>.interpolation))
-polylineInterpolation: reftree.geometry.<span class="hljs-type">Interpolation</span>[reftree.geometry.<span class="hljs-type">Polyline</span>] = reftree.geometry.<span class="hljs-type">Interpolation</span>$$anon$<span class="hljs-number">2</span>@<span class="hljs-number">26</span>ddaa5b
+polylineInterpolation: reftree.geometry.<span class="hljs-type">Interpolation</span>[reftree.geometry.<span class="hljs-type">Polyline</span>] = reftree.geometry.<span class="hljs-type">Interpolation</span>$$anon$<span class="hljs-number">2</span><span class="hljs-meta">@b</span>392277
 
 scala&gt; <span class="hljs-keyword">val</span> polylines = polylineInterpolation.sample(<span class="hljs-type">Data</span>.polyline1, <span class="hljs-type">Data</span>.polyline2, <span class="hljs-number">3</span>).toList
 polylines: <span class="hljs-type">List</span>[reftree.geometry.<span class="hljs-type">Polyline</span>] = <span class="hljs-type">List</span>(<span class="hljs-number">0.0</span> <span class="hljs-number">10.0</span>,<span class="hljs-number">10.0</span> <span class="hljs-number">20.0</span>, <span class="hljs-number">10.0</span> <span class="hljs-number">20.0</span>,<span class="hljs-number">25.0</span> <span class="hljs-number">35.0</span>, <span class="hljs-number">20.0</span> <span class="hljs-number">30.0</span>,<span class="hljs-number">40.0</span> <span class="hljs-number">50.0</span>)
@@ -635,7 +645,7 @@ however <code>reftree</code> puts more emphasis on types and even includes its o
 which consists of several commands, e.g. &#x201C;move to&#x201D;, &#x201C;line to&#x201D;, &#x201C;bezier curve to&#x201D;.
 Here is a minimized SVG snippet for an actual edge:</p>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-type">Data</span>.edge1
-res21: scala.xml.<span class="hljs-type">Node</span> = &lt;svg viewBox=<span class="hljs-string">&quot;50 -200 130 70&quot;</span> height=<span class="hljs-string">&quot;70pt&quot;</span> width=<span class="hljs-string">&quot;130pt&quot;</span> shape-rendering=<span class="hljs-string">&quot;geometricPrecision&quot;</span> xmlns=<span class="hljs-string">&quot;http://www.w3.org/2000/svg&quot;</span> xmlns:xlink=<span class="hljs-string">&quot;http://www.w3.org/1999/xlink&quot;</span>&gt;&lt;g <span class="hljs-class"><span class="hljs-keyword">class</span></span>=<span class="hljs-string">&quot;edge&quot;</span>&gt;&lt;path d=<span class="hljs-string">&quot;M84.5,-195C84.5,-165.869 62.5907,-160.925 58.9962,-135.762&quot;</span> stroke=<span class="hljs-string">&quot;#104e8b&quot;</span> fill=<span class="hljs-string">&quot;none&quot;</span>/&gt;&lt;/g&gt;&lt;/svg&gt;
+res23: scala.xml.<span class="hljs-type">Node</span> = &lt;svg viewBox=<span class="hljs-string">&quot;50 -200 130 70&quot;</span> height=<span class="hljs-string">&quot;70pt&quot;</span> width=<span class="hljs-string">&quot;130pt&quot;</span> shape-rendering=<span class="hljs-string">&quot;geometricPrecision&quot;</span> xmlns=<span class="hljs-string">&quot;http://www.w3.org/2000/svg&quot;</span> xmlns:xlink=<span class="hljs-string">&quot;http://www.w3.org/1999/xlink&quot;</span>&gt;&lt;g <span class="hljs-class"><span class="hljs-keyword">class</span></span>=<span class="hljs-string">&quot;edge&quot;</span>&gt;&lt;path d=<span class="hljs-string">&quot;M84.5,-195C84.5,-165.869 62.5907,-160.925 58.9962,-135.762&quot;</span> stroke=<span class="hljs-string">&quot;#104e8b&quot;</span> fill=<span class="hljs-string">&quot;none&quot;</span>/&gt;&lt;/g&gt;&lt;/svg&gt;
 
 scala&gt; diagram(<span class="hljs-type">Data</span>.edge1).render(<span class="hljs-string">&quot;edge&quot;</span>)
 </code></pre>
@@ -651,7 +661,7 @@ In particular, if offers a CSS selector-like method for matching elements of cer
 It is actually an <code>Optional</code>, not a <code>Lens</code>, since the element might be missing.</li>
 </ul>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-keyword">val</span> edgePathElement = <span class="hljs-type">Optics</span>.collectFirst(<span class="hljs-type">XmlSvgApi</span>.select(<span class="hljs-string">&quot;path&quot;</span>))
-edgePathElement: monocle.<span class="hljs-type">Optional</span>[scala.xml.<span class="hljs-type">Node</span>,scala.xml.<span class="hljs-type">Node</span>] = monocle.<span class="hljs-type">Optional</span>$$anon$<span class="hljs-number">6</span>@<span class="hljs-number">4</span>a130fe2
+edgePathElement: monocle.<span class="hljs-type">Optional</span>[scala.xml.<span class="hljs-type">Node</span>,scala.xml.<span class="hljs-type">Node</span>] = monocle.<span class="hljs-type">Optional</span>$$anon$<span class="hljs-number">6</span><span class="hljs-meta">@ed</span>4aed8
 
 scala&gt; diagram(<span class="hljs-type">OpticFocus</span>(edgePathElement, <span class="hljs-type">Data</span>.edge1)).render(<span class="hljs-string">&quot;edgePathElement&quot;</span>)
 </code></pre>
@@ -659,10 +669,10 @@ scala&gt; diagram(<span class="hljs-type">OpticFocus</span>(edgePathElement, <sp
 <p>Next, we need to &#x201C;descend&#x201D; to the <code>d</code> attribute. Here is where optics really shine:
 we can compose <code>Optional[A, B]</code> with <code>Optional[B, C]</code> to get an <code>Optional[A, C]</code>:</p>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-keyword">val</span> d = <span class="hljs-type">XmlSvgApi</span>.attr(<span class="hljs-string">&quot;d&quot;</span>)
-d: monocle.<span class="hljs-type">Optional</span>[scala.xml.<span class="hljs-type">Node</span>,<span class="hljs-type">String</span>] = monocle.<span class="hljs-type">POptional</span>$$anon$<span class="hljs-number">1</span>@<span class="hljs-number">25</span>f432ab
+d: monocle.<span class="hljs-type">Optional</span>[scala.xml.<span class="hljs-type">Node</span>,<span class="hljs-type">String</span>] = monocle.<span class="hljs-type">POptional</span>$$anon$<span class="hljs-number">1</span>@<span class="hljs-number">5</span>c973321
 
 scala&gt; <span class="hljs-keyword">val</span> edgePathString = edgePathElement composeOptional d
-edgePathString: monocle.<span class="hljs-type">POptional</span>[scala.xml.<span class="hljs-type">Node</span>,scala.xml.<span class="hljs-type">Node</span>,<span class="hljs-type">String</span>,<span class="hljs-type">String</span>] = monocle.<span class="hljs-type">POptional</span>$$anon$<span class="hljs-number">1</span>@<span class="hljs-number">235</span>fba4
+edgePathString: monocle.<span class="hljs-type">POptional</span>[scala.xml.<span class="hljs-type">Node</span>,scala.xml.<span class="hljs-type">Node</span>,<span class="hljs-type">String</span>,<span class="hljs-type">String</span>] = monocle.<span class="hljs-type">POptional</span>$$anon$<span class="hljs-number">1</span>@<span class="hljs-number">2</span>d637ef1
 
 scala&gt; diagram(<span class="hljs-type">OpticFocus</span>(edgePathString, <span class="hljs-type">Data</span>.edge1)).render(<span class="hljs-string">&quot;edgePathString&quot;</span>)
 </code></pre>
@@ -670,10 +680,10 @@ scala&gt; diagram(<span class="hljs-type">OpticFocus</span>(edgePathString, <spa
 <p>Next, we will use an isomorphism, another kind of optic, to view
 the string as a nice case class:</p>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-type">Path</span>.stringIso
-res25: monocle.<span class="hljs-type">Iso</span>[<span class="hljs-type">String</span>,reftree.geometry.<span class="hljs-type">Path</span>] = monocle.<span class="hljs-type">PIso</span>$$anon$<span class="hljs-number">10</span>@<span class="hljs-number">7</span>f723783
+res27: monocle.<span class="hljs-type">Iso</span>[<span class="hljs-type">String</span>,reftree.geometry.<span class="hljs-type">Path</span>] = monocle.<span class="hljs-type">PIso</span>$$anon$<span class="hljs-number">10</span>@<span class="hljs-number">123706</span>aa
 
 scala&gt; <span class="hljs-keyword">val</span> edgePath = edgePathString composeIso <span class="hljs-type">Path</span>.stringIso
-edgePath: monocle.<span class="hljs-type">POptional</span>[scala.xml.<span class="hljs-type">Node</span>,scala.xml.<span class="hljs-type">Node</span>,reftree.geometry.<span class="hljs-type">Path</span>,reftree.geometry.<span class="hljs-type">Path</span>] = monocle.<span class="hljs-type">POptional</span>$$anon$<span class="hljs-number">1</span>@<span class="hljs-number">5</span>f002e04
+edgePath: monocle.<span class="hljs-type">POptional</span>[scala.xml.<span class="hljs-type">Node</span>,scala.xml.<span class="hljs-type">Node</span>,reftree.geometry.<span class="hljs-type">Path</span>,reftree.geometry.<span class="hljs-type">Path</span>] = monocle.<span class="hljs-type">POptional</span>$$anon$<span class="hljs-number">1</span>@<span class="hljs-number">606</span>f998f
 
 scala&gt; diagram(edgePath.getOption(<span class="hljs-type">Data</span>.edge1)).render(<span class="hljs-string">&quot;edgePath&quot;</span>)
 </code></pre>
@@ -682,7 +692,7 @@ scala&gt; diagram(edgePath.getOption(<span class="hljs-type">Data</span>.edge1))
 as a <code>Polyline</code>. (<em>Purists will say that this is not really an isomorphism because
 it&#x2019;s not reversible, but with a lot of points you can get pretty close ;)</em>)</p>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-type">Path</span>.polylineIso(points = <span class="hljs-number">4</span>)
-res27: monocle.<span class="hljs-type">Iso</span>[reftree.geometry.<span class="hljs-type">Path</span>,reftree.geometry.<span class="hljs-type">Polyline</span>] = monocle.<span class="hljs-type">PIso</span>$$anon$<span class="hljs-number">10</span>@<span class="hljs-number">2</span>ddce15b
+res29: monocle.<span class="hljs-type">Iso</span>[reftree.geometry.<span class="hljs-type">Path</span>,reftree.geometry.<span class="hljs-type">Polyline</span>] = monocle.<span class="hljs-type">PIso</span>$$anon$<span class="hljs-number">10</span>@<span class="hljs-number">6</span>c863ee1
 
 scala&gt; <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">edgePolyline</span></span>(points: <span class="hljs-type">Int</span>) = edgePath composeIso <span class="hljs-type">Path</span>.polylineIso(points)
 edgePolyline: (points: <span class="hljs-type">Int</span>)monocle.<span class="hljs-type">POptional</span>[scala.xml.<span class="hljs-type">Node</span>,scala.xml.<span class="hljs-type">Node</span>,reftree.geometry.<span class="hljs-type">Polyline</span>,reftree.geometry.<span class="hljs-type">Polyline</span>]
@@ -702,14 +712,14 @@ edges: (points: <span class="hljs-type">Int</span>, frames: <span class="hljs-ty
 scala&gt; <span class="hljs-type">AnimatedGifRenderer</span>.renderFrames(
      |   edges(<span class="hljs-number">4</span>, <span class="hljs-number">4</span>).map(<span class="hljs-type">Frame</span>(_)),
      |   <span class="hljs-type">Paths</span>.get(<span class="hljs-type">ImagePath</span>, <span class="hljs-string">&quot;visualize&quot;</span>, <span class="hljs-string">&quot;animation&quot;</span>, <span class="hljs-string">&quot;edges-4.gif&quot;</span>),
-     |   <span class="hljs-type">RenderingOptions</span>(density = <span class="hljs-number">75</span>),
+     |   <span class="hljs-type">RenderingOptions</span>(density = <span class="hljs-number">200</span>),
      |   <span class="hljs-type">AnimationOptions</span>(framesPerSecond = <span class="hljs-number">1</span>)
      | )
 
 scala&gt; <span class="hljs-type">AnimatedGifRenderer</span>.renderFrames(
      |   edges(<span class="hljs-number">100</span>, <span class="hljs-number">32</span>).map(<span class="hljs-type">Frame</span>(_)),
      |   <span class="hljs-type">Paths</span>.get(<span class="hljs-type">ImagePath</span>, <span class="hljs-string">&quot;visualize&quot;</span>, <span class="hljs-string">&quot;animation&quot;</span>, <span class="hljs-string">&quot;edges-100.gif&quot;</span>),
-     |   <span class="hljs-type">RenderingOptions</span>(density = <span class="hljs-number">75</span>),
+     |   <span class="hljs-type">RenderingOptions</span>(density = <span class="hljs-number">200</span>),
      |   <span class="hljs-type">AnimationOptions</span>(framesPerSecond = <span class="hljs-number">8</span>)
      | )
 </code></pre>
@@ -753,7 +763,7 @@ which can be automatically derived in many cases.
 <a href="https://github.com/stanch/reftree/blob/master/core/shared/src/main/scala/reftree/svg/api/BaseSvgApi.scala" target="_blank">here</a>.</em>)</p>
 <p>Consider a simple XML tree:</p>
 <pre><code class="lang-scala">scala&gt; <span class="hljs-type">Data</span>.simpleXml
-res32: scala.xml.<span class="hljs-type">Node</span> = &lt;tree value=<span class="hljs-string">&quot;1&quot;</span>&gt;&lt;leaf value=<span class="hljs-string">&quot;2&quot;</span>/&gt;&lt;leaf value=<span class="hljs-string">&quot;3&quot;</span>/&gt;&lt;leaf value=<span class="hljs-string">&quot;4&quot;</span>/&gt;&lt;tree value=<span class="hljs-string">&quot;5&quot;</span>&gt;&lt;leaf value=<span class="hljs-string">&quot;6&quot;</span>/&gt;&lt;leaf value=<span class="hljs-string">&quot;7&quot;</span>/&gt;&lt;/tree&gt;&lt;/tree&gt;
+res34: scala.xml.<span class="hljs-type">Node</span> = &lt;tree value=<span class="hljs-string">&quot;1&quot;</span>&gt;&lt;leaf value=<span class="hljs-string">&quot;2&quot;</span>/&gt;&lt;leaf value=<span class="hljs-string">&quot;3&quot;</span>/&gt;&lt;leaf value=<span class="hljs-string">&quot;4&quot;</span>/&gt;&lt;tree value=<span class="hljs-string">&quot;5&quot;</span>&gt;&lt;leaf value=<span class="hljs-string">&quot;6&quot;</span>/&gt;&lt;leaf value=<span class="hljs-string">&quot;7&quot;</span>/&gt;&lt;/tree&gt;&lt;/tree&gt;
 
 scala&gt; diagram(<span class="hljs-type">Data</span>.simpleXml).render(<span class="hljs-string">&quot;simpleXml&quot;</span>)
 </code></pre>
@@ -878,7 +888,7 @@ I hope you are leaving this page with some great <code>reftree</code> use-cases 
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Visualize your data structures!","level":"3.1.2","depth":2,"next":{"title":"Scala.js demo","level":"3.2","depth":1,"path":"JsDemo.md","ref":"JsDemo.md","articles":[]},"previous":{"title":"Unzipping immutability","level":"3.1.1","depth":2,"path":"talks/Immutability.md","ref":"talks/Immutability.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["-fontsettings","github","youtube","image-wrapper","anchorjs"],"pluginsConfig":{"image-wrapper":{},"youtube":{},"github":{"url":"https://github.com/stanch/reftree"},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{"placement":"right","visible":"touch"}},"structure":{"langs":"LANGS.md","readme":"Overview.md","glossary":"GLOSSARY.md","summary":"Navigation.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"talks/Visualize.md","mtime":"2017-06-22T01:32:03.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-06-22T06:51:21.618Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Visualize your data structures!","level":"3.1.2","depth":2,"next":{"title":"Scala.js demo","level":"3.2","depth":1,"path":"JsDemo.md","ref":"JsDemo.md","articles":[]},"previous":{"title":"Unzipping immutability","level":"3.1.1","depth":2,"path":"talks/Immutability.md","ref":"talks/Immutability.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["-fontsettings","github","youtube","image-wrapper","anchorjs"],"pluginsConfig":{"image-wrapper":{},"youtube":{},"github":{"url":"https://github.com/stanch/reftree"},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{"placement":"right","visible":"touch"}},"structure":{"langs":"LANGS.md","readme":"Overview.md","glossary":"GLOSSARY.md","summary":"Navigation.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"talks/Visualize.md","mtime":"2017-06-25T13:35:22.000Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-06-25T17:05:39.325Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
