@@ -364,6 +364,77 @@
       </a>
     </span>
       <p class="shortcomment cmt">Add more frames by applying the provided iteration functions</p>
+    </li><li name="reftree.diagram.Animation.Builder#iterateToFixpoint" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="iterateToFixpoint(iteration:A=&gt;A):reftree.diagram.Animation.Builder[A]"></a>
+      <a id="iterateToFixpoint((A)⇒A):Builder[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">iterateToFixpoint</span><span class="params">(<span name="iteration">iteration: (<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>) ⇒ <span class="extype" name="reftree.diagram.Animation.Builder.A">A</span></span>)</span><span class="result">: <a href="" class="extype" name="reftree.diagram.Animation.Builder">Builder</a>[<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.diagram.Animation$$Builder@iterateToFixpoint(iteration:A=&gt;A):reftree.diagram.Animation.Builder[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add more frames by applying the provided iteration function to a fixpoint (f(x) == x)</p>
+    </li><li name="reftree.diagram.Animation.Builder#iterateToFixpointAtMost" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="iterateToFixpointAtMost(n:Int)(iteration:A=&gt;A):reftree.diagram.Animation.Builder[A]"></a>
+      <a id="iterateToFixpointAtMost(Int)((A)⇒A):Builder[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">iterateToFixpointAtMost</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span name="iteration">iteration: (<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>) ⇒ <span class="extype" name="reftree.diagram.Animation.Builder.A">A</span></span>)</span><span class="result">: <a href="" class="extype" name="reftree.diagram.Animation.Builder">Builder</a>[<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.diagram.Animation$$Builder@iterateToFixpointAtMost(n:Int)(iteration:A=&gt;A):reftree.diagram.Animation.Builder[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add more frames by applying the provided iteration function to a fixpoint (f(x) == x)
+or a maximum number of iterations is reached
+</p>
+    </li><li name="reftree.diagram.Animation.Builder#iterateWhile" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="iterateWhile(predicate:A=&gt;Boolean)(iteration:A=&gt;A):reftree.diagram.Animation.Builder[A]"></a>
+      <a id="iterateWhile((A)⇒Boolean)((A)⇒A):Builder[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">iterateWhile</span><span class="params">(<span name="predicate">predicate: (<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="params">(<span name="iteration">iteration: (<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>) ⇒ <span class="extype" name="reftree.diagram.Animation.Builder.A">A</span></span>)</span><span class="result">: <a href="" class="extype" name="reftree.diagram.Animation.Builder">Builder</a>[<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.diagram.Animation$$Builder@iterateWhile(predicate:A=&gt;Boolean)(iteration:A=&gt;A):reftree.diagram.Animation.Builder[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add more frames by applying the provided iteration function while <code>predicate</code> yields true</p>
+    </li><li name="reftree.diagram.Animation.Builder#iterateWhileAtMost" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="iterateWhileAtMost(n:Int)(predicate:A=&gt;Boolean)(iteration:A=&gt;A):reftree.diagram.Animation.Builder[A]"></a>
+      <a id="iterateWhileAtMost(Int)((A)⇒Boolean)((A)⇒A):Builder[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">iterateWhileAtMost</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span name="predicate">predicate: (<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="params">(<span name="iteration">iteration: (<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>) ⇒ <span class="extype" name="reftree.diagram.Animation.Builder.A">A</span></span>)</span><span class="result">: <a href="" class="extype" name="reftree.diagram.Animation.Builder">Builder</a>[<span class="extype" name="reftree.diagram.Animation.Builder.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#reftree.diagram.Animation$$Builder@iterateWhileAtMost(n:Int)(predicate:A=&gt;Boolean)(iteration:A=&gt;A):reftree.diagram.Animation.Builder[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add more frames by applying the provided iteration function while <code>predicate</code> yields true,
+or the maximum number of iterations is reached.</p>
     </li><li name="reftree.diagram.Animation.Builder#iterateWithIndex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="iterateWithIndex(n:Int)(iteration:(A,Int)=&gt;A):reftree.diagram.Animation.Builder[A]"></a>
       <a id="iterateWithIndex(Int)((A,Int)⇒A):Builder[A]"></a>
