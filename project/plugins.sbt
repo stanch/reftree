@@ -11,3 +11,5 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.17")
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.2.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.0")
+
+addSbtPlugin("com.dwijnand" % "sbt-dynver" % "1.3.0")

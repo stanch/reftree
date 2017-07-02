@@ -16,7 +16,6 @@ val core = crossProject.in(file("core"))
   .settings(commonSettings)
   .settings(
     name := "reftree",
-    version := "1.1.1",
     libraryDependencies ++= Seq(
       "com.chuusai" %%% "shapeless" % "2.3.2",
       "com.lihaoyi" %%% "sourcecode" % "0.1.3",
