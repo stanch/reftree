@@ -97,7 +97,7 @@ object Color {
   private val rgbaParser = {
     import fastparse.all._
 
-    val x = CharIn(('0' to '9') ++ ('a' to 'f'))
+    val x = CharIn(('0' to '9') ++ ('a' to 'f') ++ ('A' to 'F'))
     val component = P(x ~ x).!.map(n ⇒ java.lang.Long.parseLong(n, 16) / 255.0)
 
     val transparent = P("transparent") map { _ ⇒
