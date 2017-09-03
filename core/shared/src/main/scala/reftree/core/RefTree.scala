@@ -48,25 +48,24 @@ object RefTree {
   }
 
   /** A [[RefTree]] for a value */
-  case class Val(
+  case class Val private (
     value: AnyVal,
-    hint: Option[Val.Hint],
+    formattedValue: String,
     highlight: Boolean
   ) extends RefTree {
     def id = value.toString
 
-    /* Add a visualization hint */
-    def withHint(hint: Val.Hint) = copy(hint = Some(hint))
+    /* Customize the formatted value */
+    def withFormattedValue(formattedValue: String) = copy(formattedValue = formattedValue)
   }
 
   object Val {
-    /** Special visualization hints */
-    sealed trait Hint
-    case object Bin extends Hint
-    case object Hex extends Hint
-
     /** Construct a [[RefTree]] for a value */
-    def apply(value: AnyVal): Val = Val(value, None, highlight = false)
+    def apply(value: AnyVal): Val = Val(value, value.toString.replace(' ', '_'), highlight = false)
+
+    /** Construct a [[RefTree]] for a value with a custom formatter */
+    def formatted[A <: AnyVal](value: A)(formatter: A ⇒ String): Val =
+      Val(value, formatter(value), highlight = false)
   }
 
   /**
