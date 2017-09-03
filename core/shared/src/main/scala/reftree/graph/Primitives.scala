@@ -58,7 +58,9 @@ object Primitives {
 
   private def cellLabel(tree: RefTree, elideRefs: Boolean = false): Html = tree match {
     case RefTree.Val(value: Int, Some(RefTree.Val.Bin), _) ⇒ Plain(value.toBinaryString)
+    case RefTree.Val(value: Long, Some(RefTree.Val.Bin), _) ⇒ Plain(value.toBinaryString)
     case RefTree.Val(value: Int, Some(RefTree.Val.Hex), _) ⇒ Plain(value.toHexString)
+    case RefTree.Val(value: Long, Some(RefTree.Val.Hex), _) ⇒ Plain(value.toHexString)
     case RefTree.Val(value, _, _) ⇒ Plain(value.toString.replace(" ", "_"))
     case _: RefTree.Null ⇒ Raw("&empty;")
     case RefTree.Ref(_, id, _, _) ⇒
