@@ -27,7 +27,7 @@ trait HackedCollectionInstances extends CollectionInstances {
   implicit def `Vector RefTree`[A: ToRefTree]: ToRefTree[Vector[A]] = ToRefTree[Vector[A]] { value ⇒
     val start = value.startIndex.refTree.toField.withName("start")
     val end = value.endIndex.refTree.toField.withName("end")
-    val focus = RefTree.Val(value.privateField[Int]("focus")).withHint(RefTree.Val.Bin)
+    val focus = RefTree.Val.formatted(value.privateField[Int]("focus"))(_.toBinaryString)
       .toField.withName("focus")
     val depth = value.depth.refTree.toField.withName("depth")
     val layers = Seq(
@@ -47,19 +47,19 @@ trait HackedCollectionInstances extends CollectionInstances {
   implicit def `HashSet RefTree`[A: ToRefTree]: ToRefTree[HashSet[A]] =
     ToRefTree[HashSet[A]] {
       case leaf: HashSet.HashSet1[A] ⇒
-        val hash = RefTree.Val(leaf.privateField[Int]("hash")).withHint(RefTree.Val.Hex)
+        val hash = RefTree.Val.formatted(leaf.privateField[Int]("hash"))(_.toHexString)
           .toField.withName("hash")
         val key = leaf.privateField[A]("key").refTree.toField
         RefTree.Ref(leaf, Seq(hash, key)).rename("HashSet.HashSet1")
       case collision: HashSet.HashSetCollision1[A] ⇒
-        val hash = RefTree.Val(collision.privateField[Int]("hash")).withHint(RefTree.Val.Hex)
+        val hash = RefTree.Val.formatted(collision.privateField[Int]("hash"))(_.toHexString)
           .toField.withName("hash")
         val ks = collision.privateField[ListSet[A]]("ks").refTree.toField
         RefTree.Ref(collision, Seq(hash, ks)).rename("HashSet.HashSetCollision1")
       case trie: HashSet.HashTrieSet[A] ⇒
         val size = trie.privateField[Int]("size0").refTree.toField.withName("size")
         val elems = trie.privateField[Array[HashSet[A]]]("elems").refTree.toField
-        val bitmap = RefTree.Val(trie.privateField[Int]("bitmap")).withHint(RefTree.Val.Bin)
+        val bitmap = RefTree.Val.formatted(trie.privateField[Int]("bitmap"))(_.toBinaryString)
           .toField.withName("bitmap")
         RefTree.Ref(trie, Seq(size, bitmap, elems)).rename("HashSet.HashTrieSet")
       case empty ⇒
@@ -69,20 +69,20 @@ trait HackedCollectionInstances extends CollectionInstances {
   implicit def `HashMap RefTree`[A: ToRefTree, B: ToRefTree]: ToRefTree[HashMap[A, B]] =
     ToRefTree[HashMap[A, B]] {
       case leaf: HashMap.HashMap1[A, B] ⇒
-        val hash = RefTree.Val(leaf.privateField[Int]("hash")).withHint(RefTree.Val.Hex)
+        val hash = RefTree.Val.formatted(leaf.privateField[Int]("hash"))(_.toHexString)
           .toField.withName("hash")
         val key = leaf.privateField[A]("key").refTree.toField
         val value = leaf.privateField[A]("value").refTree.toField
         RefTree.Ref(leaf, Seq(hash, key, value)).rename("HashMap.HashMap1")
       case collision: HashMap.HashMapCollision1[A, B] ⇒
-        val hash = RefTree.Val(collision.privateField[Int]("hash")).withHint(RefTree.Val.Hex)
+        val hash = RefTree.Val.formatted(collision.privateField[Int]("hash"))(_.toHexString)
           .toField.withName("hash")
         val kvs = collision.privateField[ListMap[A, B]]("kvs").refTree.toField
         RefTree.Ref(collision, Seq(hash, kvs)).rename("HashMap.HashMapCollision1")
       case trie: HashMap.HashTrieMap[A, B] ⇒
         val size = trie.privateField[Int]("size0").refTree.toField.withName("size")
         val elems = trie.privateField[Array[HashMap[A, B]]]("elems").refTree.toField
-        val bitmap = RefTree.Val(trie.privateField[Int]("bitmap")).withHint(RefTree.Val.Bin)
+        val bitmap = RefTree.Val.formatted(trie.privateField[Int]("bitmap"))(_.toBinaryString)
           .toField.withName("bitmap")
         RefTree.Ref(trie, Seq(size, bitmap, elems)).rename("HashMap.HashTrieMap")
       case empty ⇒

@@ -10,14 +10,14 @@ class ToRefTreeSpec extends FlatSpec with Matchers {
       case RefTree.Ref(
         "Person", _,
         Seq(
-          RefTree.Ref.Field(RefTree.Val(3, None, false), Some("age"), false),
+          RefTree.Ref.Field(RefTree.Val(3, "3", false), Some("age"), false),
           RefTree.Ref.Field(RefTree.Ref(
             "String", _,
             Seq(
-              RefTree.Ref.Field(RefTree.Val('N', None, false), None, false),
-              RefTree.Ref.Field(RefTree.Val('i', None, false), None, false),
-              RefTree.Ref.Field(RefTree.Val('c', None, false), None, false),
-              RefTree.Ref.Field(RefTree.Val('k', None, false), None, false)
+              RefTree.Ref.Field(RefTree.Val('N', "N", false), None, false),
+              RefTree.Ref.Field(RefTree.Val('i', "i", false), None, false),
+              RefTree.Ref.Field(RefTree.Val('c', "c", false), None, false),
+              RefTree.Ref.Field(RefTree.Val('k', "k", false), None, false)
             ),
             false
           ), Some("name"), false)
@@ -37,7 +37,7 @@ class ToRefTreeSpec extends FlatSpec with Matchers {
       case RefTree.Ref(
         "Nick", _,
         Seq(
-          RefTree.Ref.Field(RefTree.Val(3, None, true), Some("years"), false)
+          RefTree.Ref.Field(RefTree.Val(3, "3", true), Some("years"), false)
         ),
         false
       ) ⇒

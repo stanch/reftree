@@ -35,7 +35,7 @@ import reftree.core._
 implicit def treeInstance: ToRefTree[Tree] = ToRefTree[Tree] { tree =>
   RefTree.Ref(tree, Seq(
     // display the size as a hexadecimal number (why not?)
-    RefTree.Val(tree.size).withHint(RefTree.Val.Hex).toField.withName("s"),
+    RefTree.Val.formatted(tree.size)(_.toHexString).toField.withName("s"),
     // highlight the value
     tree.value.refTree.withHighlight(true).toField.withName("value"),
     // do not label the children
