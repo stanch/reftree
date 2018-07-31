@@ -1,5 +1,4 @@
 val commonSettings = Seq(
-  organization := "org.stanch",
   scalaVersion := "2.11.11",
   crossScalaVersions := Seq("2.11.11", "2.12.2"),
   scalacOptions ++= Seq(
@@ -7,9 +6,38 @@ val commonSettings = Seq(
     "-Xlint", "-Xfatal-warnings"
   ),
   scalacOptions in (Compile, compile) += "-Ywarn-unused-import",
-  scalacOptions in (Compile, doc) += "-no-link-warnings",
-  resolvers += Resolver.bintrayRepo("stanch", "maven"),
+  scalacOptions in (Compile, doc) += "-no-link-warnings"
+) ++ metadata ++ publishing
+
+lazy val metadata = Seq(
+  organization := "io.github.stanch",
+  homepage := Some(url("https://stanch.github.io/reftree/")),
+  scmInfo := Some(ScmInfo(
+    url("https://github.com/stanch/reftree"),
+    "scm:git@github.com:stanch/reftree.git"
+  )),
+  developers := List(Developer(
+    id="stanch",
+    name="Nick Stanchenko",
+    email="nick.stanch@gmail.com",
+    url=url("https://github.com/stanch")
+  )),
   licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
+)
+
+lazy val publishing = Seq(
+  useGpg := false,
+  usePgpKeyHex("8ED74E385203BEB1"),
+  pgpPublicRing := baseDirectory.value.getParentFile.getParentFile / ".gnupg" / "pubring.gpg",
+  pgpSecretRing := baseDirectory.value.getParentFile.getParentFile / ".gnupg" / "secring.gpg",
+  pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray),
+  credentials += Credentials(
+    "Sonatype Nexus Repository Manager",
+    "oss.sonatype.org",
+    sys.env.getOrElse("SONATYPE_USER", ""),
+    sys.env.getOrElse("SONATYPE_PASS", "")
+  ),
+  publishTo := Some(Opts.resolver.sonatypeStaging)
 )
 
 val core = crossProject.in(file("core"))
@@ -20,7 +48,7 @@ val core = crossProject.in(file("core"))
       "com.chuusai" %%% "shapeless" % "2.3.2",
       "com.lihaoyi" %%% "sourcecode" % "0.1.3",
       "com.lihaoyi" %%% "fastparse" % "0.4.3",
-      "org.stanch" %%% "zipper" % "0.5.1",
+      "io.github.stanch" %%% "zipper" % "0.5.2",
       "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
       "com.github.julien-truffaut" %%% "monocle-macro" % "1.4.0",
       "com.outr" %%% "scribe" % "1.4.2",
@@ -53,7 +81,8 @@ val demo = crossProject.in(file("demo"))
   .dependsOn(core)
   .settings(
     publish := {},
-    publishLocal := {}
+    publishLocal := {},
+    publishArtifact := false
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -95,7 +124,8 @@ lazy val root = project.in(file("."))
   .settings(commonSettings)
   .settings(
     publish := {},
-    publishLocal := {}
+    publishLocal := {},
+    publishArtifact := false
   )
 
 addCommandAlias("demo", "demoJVM/test:run")

@@ -66,14 +66,14 @@ $ sbt demo
 
 You can depend on the library by adding these lines to your `build.sbt`:
 
-[ ![Download](https://api.bintray.com/packages/stanch/maven/reftree/images/download.svg) ](https://bintray.com/stanch/maven/reftree/_latestVersion)
+[![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/io/github/stanch/reftree_2.12/maven-metadata.xml.svg)](https://mvnrepository.com/artifact/io.github.stanch/reftree)
 
 ```scala
 // JVM
-libraryDependencies += "org.stanch" %% "reftree" % "latest-version"
+libraryDependencies += "io.github.stanch" %% "reftree" % "latest-version"
 
 // Scala.js
-libraryDependencies += "org.stanch" %%% "reftree" % "latest-version"
+libraryDependencies += "io.github.stanch" %%% "reftree" % "latest-version"
 ```
 
 ### Minimal example
