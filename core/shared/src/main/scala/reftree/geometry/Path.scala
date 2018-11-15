@@ -1,5 +1,6 @@
 package reftree.geometry
 
+import fastparse._, NoWhitespace._
 import monocle.Iso
 
 /** A segment of an SVG-like path */
@@ -88,7 +89,7 @@ object Path {
   def empty = Path(Seq.empty)
 
   /** Parse an SVG path */
-  def fromString(string: String) = parser.parse(string).get.value
+  def fromString(string: String) = parse(string, parser(_)).get.value
 
   /** An isomorphism between SVG paths and [[Path]] */
   val stringIso: Iso[String, Path] =
@@ -107,12 +108,11 @@ object Path {
   def polylineIso(points: Int): Iso[Path, Polyline] =
     Iso[Path, Polyline](_.simplify(points))(fromPolyline)
 
-  private val parser = {
-    import fastparse.all._
+  private def parser[_: P] = {
 
-    val sep = P(" " | ",").rep(min = 1)
-    val double = P(CharIn(('0' to '9') ++ Seq('-', '.')).rep(min = 1).!).map(_.toDouble)
-    val point = P(double ~ sep ~ double).map { case (x, y) ⇒ Point(x, y) }
+    def sep = P(" " | ",").rep(1)
+    def double = P(CharIn("0-9\\-\\.").rep(1).!).map(_.toDouble)
+    def point = P(double ~ sep ~ double).map { case (x, y) ⇒ Point(x, y) }
 
     def moveSegment(acc: Path): P[Path] = point
       .map(PathSegment.Move.apply)

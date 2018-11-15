@@ -2,6 +2,7 @@ package reftree.geometry
 
 import monocle.Iso
 import com.softwaremill.quicklens._
+import fastparse._, NoWhitespace._
 
 /**
  * A simple, portable color implementation that supports RGBA and HSLA
@@ -92,23 +93,22 @@ object Color {
 
   /** Parse a color from an RGB(A) string. If the alpha component is missing, `defaultAlpha` is used */
   def fromRgbaString(string: String, defaultAlpha: Double = 1.0) =
-    rgbaParser.parse(string).get.value(defaultAlpha)
+    parse(string, rgbaParser(_)).get.value(defaultAlpha)
 
-  private val rgbaParser = {
-    import fastparse.all._
+  private def rgbaParser[_: P] = {
 
-    val x = CharIn(('0' to '9') ++ ('a' to 'f') ++ ('A' to 'F'))
-    val component = P(x ~ x).!.map(n ⇒ java.lang.Long.parseLong(n, 16) / 255.0)
+    def x = CharIn("0-9a-fA-F")
+    def component = P(x ~ x).!.map(n ⇒ java.lang.Long.parseLong(n, 16) / 255.0)
 
-    val transparent = P("transparent") map { _ ⇒
+    def transparent = P("transparent") map { _ ⇒
       { _: Double ⇒ RGBA(0, 0, 0, 0) }
     }
 
-    val white = P("white") map { _ ⇒
+    def white = P( "white" ) map { _ ⇒
       { a: Double ⇒ RGBA(1.0, 1.0, 1.0, a) }
     }
 
-    val rgba = P("#" ~ component ~ component ~ component ~ component.?) map {
+    def rgba = P("#" ~ component ~ component ~ component ~ component.?) map {
       case (r, g, b, a) ⇒ defaultAlpha: Double ⇒ RGBA(r, g, b, a.getOrElse(defaultAlpha))
     }
 

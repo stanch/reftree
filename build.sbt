@@ -47,7 +47,7 @@ val core = crossProject.in(file("core"))
     libraryDependencies ++= Seq(
       "com.chuusai" %%% "shapeless" % "2.3.2",
       "com.lihaoyi" %%% "sourcecode" % "0.1.3",
-      "com.lihaoyi" %%% "fastparse" % "0.4.3",
+      "com.lihaoyi" %%% "fastparse" % "2.0.5",
       "io.github.stanch" %%% "zipper" % "0.5.2",
       "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
       "com.github.julien-truffaut" %%% "monocle-macro" % "1.4.0",
@@ -86,7 +86,7 @@ val demo = crossProject.in(file("demo"))
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" % "ammonite" % "0.9.9" % Test cross CrossVersion.full
+      "com.lihaoyi" % "ammonite" % "1.4.2" % Test cross CrossVersion.full
     )
   )
   .jsSettings(
