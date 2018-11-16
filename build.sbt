@@ -1,6 +1,9 @@
+// shadow sbt-scalajs' crossProject and CrossType from Scala.js 0.6.x
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+
 val commonSettings = Seq(
-  scalaVersion := "2.11.11",
-  crossScalaVersions := Seq("2.11.11", "2.12.2"),
+  scalaVersion := "2.11.12",
+  crossScalaVersions := Seq("2.11.12", "2.12.7"),
   scalacOptions ++= Seq(
     "-feature", "-deprecation",
     "-Xlint", "-Xfatal-warnings"
@@ -40,7 +43,8 @@ lazy val publishing = Seq(
   publishTo := Some(Opts.resolver.sonatypeStaging)
 )
 
-val core = crossProject.in(file("core"))
+val core = crossProject(JSPlatform, JVMPlatform)
+  .in(file("core"))
   .settings(commonSettings)
   .settings(
     name := "reftree",
@@ -76,7 +80,8 @@ val core = crossProject.in(file("core"))
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
 
-val demo = crossProject.in(file("demo"))
+val demo = crossProject(JSPlatform, JVMPlatform)
+  .in(file("demo"))
   .settings(commonSettings)
   .dependsOn(core)
   .settings(

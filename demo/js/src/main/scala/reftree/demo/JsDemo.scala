@@ -3,11 +3,10 @@ package reftree.demo
 import reftree.diagram.Animation
 import reftree.render.Renderer
 
-import scala.scalajs.js
 import org.scalajs.dom
 
-object JsDemo extends js.JSApp {
-  def main(): Unit = {
+object JsDemo {
+  def main(args: Array[String]): Unit = {
     val renderer = Renderer()
     import renderer._
 
