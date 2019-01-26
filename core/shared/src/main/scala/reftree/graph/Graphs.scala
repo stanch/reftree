@@ -32,11 +32,11 @@ object Graphs {
       depth: Int
     ): Seq[GraphStatement] = tree match {
       case r @ RefTree.Ref(_, id, children, _) ⇒
-        Seq(Primitives.node(r, color, anchorId, namespace)) ++
+        Seq(Primitives.node(r, color, anchorId, namespace, options.nodeURLs.get(id), options.nodeTips.get(id))) ++
           children.filterNot(_.elideRefs).flatMap(c ⇒ inner(c.value, color, None, namespace, depth + 1)) ++
           children.zipWithIndex.flatMap { case (c, i) ⇒ Primitives.edge(id, c.value, i, color, namespace) }
       case _ if depth == 0 ⇒
-        Seq(Primitives.node(tree, color, anchorId, namespace))
+        Seq(Primitives.node(tree, color, anchorId, namespace, None, None))
       case _ ⇒
         Seq.empty
     }

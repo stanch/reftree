@@ -9,12 +9,16 @@ import scala.concurrent.duration._
  * Options for rendering static diagrams
  *
  * @param verticalSpacing vertical spacing to set for Graphviz
+ * @param nodeURLs map of node ID to a URL
+ * @param nodeTips map of node ID to a node tooltip overriding the anchor tooltip, if defined
  * @param palette a sequence of colors to be used
  * @param font the font for text rendering
  * @param density the desired image density, in pixels per inch
  */
 case class RenderingOptions(
   verticalSpacing: Double = 0.8,
+  nodeURLs: Map[String, String] = Map.empty,
+  nodeTips: Map[String, String] = Map.empty,
   palette: IndexedSeq[Color] = Array(
     Color.fromRgbaString("#104e8b"),
     Color.fromRgbaString("#228b22"),

@@ -80,6 +80,26 @@ val renderer = Renderer(
 )
 ```
 
+**For SVG rendering (JVM, Scala.js):**
+
+It is possible to specify for each `RefTree.Ref`
+a hyperlink URL and a tooltip text
+by providing associating to the `RefTree.Ref.id` a URL string
+or a tooltip string respectively.
+
+```scala
+import reftree.render._
+import reftree.diagram._
+
+val renderer = Renderer(
+  renderingOptions = RenderingOptions(
+    density = 75,
+    nodeURLs = Map("1" -> "http://www.example.org", "2" -> "http://www.foobar.org"),
+    nodeTips = Map("1" -> "example", "2" -> "foobar")),
+  format = "svg"
+)
+```
+
 There are two ways to use renderers:
 
 **JVM**

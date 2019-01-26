@@ -30,8 +30,10 @@ private[dot] sealed trait DotAttrEncoding extends LabelledProductTypeClassCompan
         if (headEnc.encoded.isEmpty) {
           ct.encoding(tail)
         } else {
+          // The 'URL' attribute must remain in uppercase otherwise it will be ignored.
+          val encodedName = if (name == "URL") name else name.toLowerCase
           Chunk.join(" ")(
-            Chunk.join("=")(Chunk(name.toLowerCase), headEnc),
+            Chunk.join("=")(Chunk(encodedName), headEnc),
             ct.encoding(tail)
           )
         }
