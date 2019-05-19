@@ -51,7 +51,7 @@ val core = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "com.chuusai" %%% "shapeless" % "2.3.2",
       "com.lihaoyi" %%% "sourcecode" % "0.1.3",
-      "com.lihaoyi" %%% "fastparse" % "2.0.5",
+      "com.lihaoyi" %%% "fastparse" % "2.1.2",
       "io.github.stanch" %%% "zipper" % "0.5.2",
       "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
       "com.github.julien-truffaut" %%% "monocle-macro" % "1.4.0",
