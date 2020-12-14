@@ -113,8 +113,8 @@ val site = project.in(file("site"))
       file("images/tree+zipper.gif") → "images/tree+zipper.gif",
       ((crossTarget in demoJS).value / "demo-opt.js") → "js/demo.js"
     ),
-    SiteScaladocPlugin.scaladocSettings(config("jvm"), mappings in (Compile, packageDoc) in coreJVM, "api/jvm"),
-    SiteScaladocPlugin.scaladocSettings(config("js"), mappings in (Compile, packageDoc) in coreJS, "api/js"),
+    SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, mappings in (Compile, packageDoc) in coreJVM, "api/jvm"),
+    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js }, mappings in (Compile, packageDoc) in coreJS, "api/js"),
     tutNameFilter := """.*\.(md|json|css|html)""".r,
     tutTargetDirectory := target.value / "tut",
     gitbookInstallDir in GitBook := Some(baseDirectory.value / "node_modules" / "gitbook"),
