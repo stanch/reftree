@@ -51,7 +51,7 @@ object AnimatedGifRenderer {
       )
       addTranscodingHint(
         SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER,
-        new java.lang.Float(25.4 / options.density)
+        java.lang.Float.valueOf(25.4f / options.density)
       )
     }
     val inputStream = new ByteArrayInputStream(svg.toString().getBytes("UTF-8"))
