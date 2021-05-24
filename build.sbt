@@ -8,9 +8,8 @@ val commonSettings = Seq(
     "-feature", "-deprecation",
     "-Xlint", "-Xfatal-warnings"
   ),
-  scalacOptions in (Compile, compile) += "-Ywarn-unused-import",
-  scalacOptions in (Compile, compile) += "-Ywarn-unused-import",
-  scalacOptions in (Compile, doc) += "-no-link-warnings"
+  Compile / compile / scalacOptions  += "-Ywarn-unused-import",
+  Compile / doc / scalacOptions += "-no-link-warnings"
 ) ++ metadata ++ publishing
 
 lazy val metadata = Seq(
@@ -56,7 +55,7 @@ val core = crossProject(JSPlatform, JVMPlatform)
       "io.github.stanch" %%% "zipper" % "0.5.2",
       "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
       "com.github.julien-truffaut" %%% "monocle-macro" % "1.4.0",
-      "com.outr" %%% "scribe" % "1.4.2",
+      "com.outr" %%% "scribe" % "2.7.9",
       "org.scalatest" %%% "scalatest" % "3.0.3" % Test,
       "org.scalacheck" %%% "scalacheck" % "1.13.5" % Test
     )
@@ -107,15 +106,15 @@ val site = project.in(file("site"))
   .dependsOn(demoJVM)
   .settings(commonSettings)
   .settings(
-    mappings in makeSite ++= Seq(
+    makeSite / mappings ++= Seq(
       file("images/teaser.gif") → "images/teaser.gif",
       file("images/queue.gif") → "images/queue.gif",
       file("images/finger.gif") → "images/finger.gif",
       file("images/tree+zipper.gif") → "images/tree+zipper.gif",
-      ((crossTarget in demoJS).value / "demo-opt.js") → "js/demo.js"
+      (( demoJS / crossTarget).value / "demo-opt.js") → "js/demo.js"
     ),
-    SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, mappings in (Compile, packageDoc) in coreJVM, "api/jvm"),
-    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js }, mappings in (Compile, packageDoc) in coreJS, "api/js"),
+    SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, (Compile / packageDoc / mappings) in coreJVM, "api/jvm"),
+    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js }, (Compile/  packageDoc / mappings) in coreJS, "api/js"),
     tutNameFilter := """.*\.(md|json|css|html)""".r,
     tutTargetDirectory := target.value / "tut",
     gitbookInstallDir in GitBook := Some(baseDirectory.value / "node_modules" / "gitbook"),
