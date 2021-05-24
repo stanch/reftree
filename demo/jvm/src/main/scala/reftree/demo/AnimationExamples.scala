@@ -6,13 +6,13 @@ import de.sciss.fingertree.{FingerTree, Measure}
 import monocle.macros.GenLens
 import reftree.diagram.{Diagram, Animation}
 import reftree.render.{RenderingOptions, Renderer}
-import scribe.{Level, LogHandler, Logger}
+import scribe._
+import scribe.handler._
 import zipper.Zipper
-
 import scala.collection.immutable._
 
 object Queues extends App {
-  Logger.root.addHandler(LogHandler(level = Level.Trace))
+  Logger.root.withHandler(LogHandler(minimumLevel = Some(Level.Trace)))
   val renderer = Renderer(directory = Paths.get("images"))
   import renderer._
 
@@ -24,7 +24,7 @@ object Queues extends App {
 }
 
 object FingerTrees extends App {
-  Logger.root.addHandler(LogHandler(level = Level.Trace))
+  Logger.root.withHandler(LogHandler(minimumLevel = Some(Level.Trace)))
   import reftree.contrib.FingerTreeInstances._
   implicit val measure = Measure.Indexed
 
@@ -42,7 +42,7 @@ object FingerTrees extends App {
 }
 
 object Zippers extends App {
-  Logger.root.addHandler(LogHandler(level = Level.Trace))
+  Logger.root.withHandler(LogHandler(minimumLevel = Some(Level.Trace)))
   import reftree.contrib.SimplifiedInstances.{list, option}
   import reftree.contrib.ZipperInstances._
 
@@ -76,7 +76,7 @@ object Zippers extends App {
 }
 
 object Teaser extends App {
-  Logger.root.addHandler(LogHandler(level = Level.Trace))
+  Logger.root.withHandler(LogHandler(minimumLevel = Some(Level.Trace)))
   import reftree.contrib.OpticInstances._
   import reftree.contrib.ZipperInstances._
 
