@@ -2,7 +2,7 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val commonSettings = Seq(
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.12.10",
   crossScalaVersions := Seq("2.11.12", "2.12.10"),
   scalacOptions ++= Seq(
     "-feature", "-deprecation",
@@ -91,7 +91,7 @@ val demo = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" % "ammonite" % "1.5.0" % Test cross CrossVersion.full
+      "com.lihaoyi" % "ammonite" % "1.8.0" % Test cross CrossVersion.full
     )
   )
   .jsSettings(

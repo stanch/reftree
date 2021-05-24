@@ -4,7 +4,7 @@ addSbtPlugin("org.tpolecat" % "tut-plugin" % "0.6.13")
 
 addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.3")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.25")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.33")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.4.1")
 
