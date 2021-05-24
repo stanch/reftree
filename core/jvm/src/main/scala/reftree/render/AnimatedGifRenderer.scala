@@ -6,17 +6,54 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import javax.xml.parsers.SAXParserFactory
 
-import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.nio.StreamingGifWriter
 import org.apache.batik.transcoder.{TranscoderInput, SVGAbstractTranscoder, TranscoderOutput}
 import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
 import reftree.dot.Graph
 import reftree.svg.{OptimizedGraphAnimation, XmlSvgApi}
 import reftree.svg.animation.Frame
-
+import java.time.{Duration => JavaDuration}
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 import scala.sys.process.{Process, BasicIO}
+import scala.concurrent.duration.{FiniteDuration, Duration => ScalaDuration}
 
 object AnimatedGifRenderer {
+
+  def toScala(duration: java.time.Duration): scala.concurrent.duration.FiniteDuration = {
+    val originalSeconds = duration.getSeconds
+    val originalNanos = duration.getNano
+    if (originalNanos == 0) {
+      if (originalSeconds == 0) ScalaDuration.Zero
+      else FiniteDuration(originalSeconds, TimeUnit.SECONDS)
+    } else if (originalSeconds == 0) {
+      FiniteDuration(originalNanos, TimeUnit.NANOSECONDS)
+    } else {
+      try {
+        val secondsAsNanos = Math.multiplyExact(originalSeconds, 1000000000)
+        val totalNanos = secondsAsNanos + originalNanos
+        if ((totalNanos < 0 && secondsAsNanos < 0) || (totalNanos > 0 && secondsAsNanos > 0)) FiniteDuration(totalNanos, TimeUnit.NANOSECONDS)
+        else throw new ArithmeticException()
+      } catch {
+        case _: ArithmeticException => throw new IllegalArgumentException(s"Java duration $duration cannot be expressed as a Scala duration")
+      }
+    }
+  }
+
+  def toJava(duration: scala.concurrent.duration.FiniteDuration): java.time.Duration = {
+    if (duration.length == 0) JavaDuration.ZERO
+    else duration.unit match {
+      case TimeUnit.NANOSECONDS => JavaDuration.ofNanos(duration.length)
+      case TimeUnit.MICROSECONDS => JavaDuration.of(duration.length, ChronoUnit.MICROS)
+      case TimeUnit.MILLISECONDS => JavaDuration.ofMillis(duration.length)
+      case TimeUnit.SECONDS => JavaDuration.ofSeconds(duration.length)
+      case TimeUnit.MINUTES => JavaDuration.ofMinutes(duration.length)
+      case TimeUnit.HOURS => JavaDuration.ofHours(duration.length)
+      case TimeUnit.DAYS => JavaDuration.ofDays(duration.length)
+    }
+  }
+
   case class RenderingException(message: String) extends Exception(message)
 
   private lazy val saxParserFactory = {
@@ -41,7 +78,7 @@ object AnimatedGifRenderer {
     XML.loadString(output.toString)
   }
 
-  private def renderImage(svg: xml.Node, options: RenderingOptions): Image = {
+  private def renderImage(svg: xml.Node, options: RenderingOptions): ImmutableImage = {
     var image: BufferedImage = null
     val transcoder = new PNGTranscoder {
       override def writeImage(img: BufferedImage, output: TranscoderOutput): Unit = image = img
@@ -58,7 +95,7 @@ object AnimatedGifRenderer {
     val transcoderInput = new TranscoderInput(inputStream)
     transcoder.transcode(transcoderInput, null)
     inputStream.close()
-    Image.fromAwt(image)
+    ImmutableImage.fromAwt(image)
   }
 
   def renderFrames(
@@ -67,7 +104,7 @@ object AnimatedGifRenderer {
     renderingOptions: RenderingOptions,
     animationOptions: AnimationOptions
   ): Unit = {
-    val writer = StreamingGifWriter(animationOptions.delay, animationOptions.loop)
+    val writer = new StreamingGifWriter(toJava(animationOptions.delay), animationOptions.loop)
     val stream = writer.prepareStream(output, BufferedImage.TYPE_INT_ARGB)
     frames.zipWithIndex foreach {
       case (Frame(svg, count), i) ⇒
@@ -79,9 +116,10 @@ object AnimatedGifRenderer {
         if (i % 10 == 0) {
           scribe.trace("Writing to file...")
         }
-        stream.writeFrame(image, animationOptions.delay * count)
+        stream.writeFrame(image, toJava(animationOptions.delay * count))
     }
-    stream.finish()
+   // stream.finish()
+    stream.close()
   }
 
   private val animation = OptimizedGraphAnimation(XmlSvgApi)

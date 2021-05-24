@@ -9,6 +9,7 @@ val commonSettings = Seq(
     "-Xlint", "-Xfatal-warnings"
   ),
   scalacOptions in (Compile, compile) += "-Ywarn-unused-import",
+  scalacOptions in (Compile, compile) += "-Ywarn-unused-import",
   scalacOptions in (Compile, doc) += "-no-link-warnings"
 ) ++ metadata ++ publishing
 
@@ -62,10 +63,10 @@ val core = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "org.apache.xmlgraphics" % "batik-transcoder" % "1.9",
-      "com.sksamuel.scrimage" %% "scrimage-core" % "3.0.0-alpha3",
-      "de.sciss" %% "fingertree" % "1.5.2"
+      "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+      "org.apache.xmlgraphics" % "batik-transcoder" % "1.14",
+      "com.sksamuel.scrimage" % "scrimage-core" % "4.0.18",
+      "de.sciss" %% "fingertree" % "1.5.3"
     )
   )
   .jsSettings(
