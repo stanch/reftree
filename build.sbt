@@ -49,9 +49,9 @@ val core = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "reftree",
     libraryDependencies ++= Seq(
-      "com.chuusai" %%% "shapeless" % "2.3.2",
-      "com.lihaoyi" %%% "sourcecode" % "0.1.3",
-      "com.lihaoyi" %%% "fastparse" % "2.0.2",
+      "com.chuusai" %%% "shapeless" % "2.3.3",
+      "com.lihaoyi" %%% "sourcecode" % "0.2.7",
+      "com.lihaoyi" %%% "fastparse" % "2.3.0",
       "io.github.stanch" %%% "zipper" % "0.5.2",
       "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
       "com.github.julien-truffaut" %%% "monocle-macro" % "1.4.0",
@@ -65,7 +65,7 @@ val core = crossProject(JSPlatform, JVMPlatform)
       "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
       "org.apache.xmlgraphics" % "batik-transcoder" % "1.14",
       "com.sksamuel.scrimage" % "scrimage-core" % "4.0.18",
-      "de.sciss" %% "fingertree" % "1.5.3"
+      "de.sciss" %% "fingertree" % "1.5.5"
     )
   )
   .jsSettings(
