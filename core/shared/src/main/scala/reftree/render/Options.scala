@@ -2,9 +2,7 @@ package reftree.render
 
 import reftree.geometry.Color
 import com.softwaremill.quicklens._
-
-import scala.concurrent.duration._
-
+import java.time.Duration
 /**
  * Options for rendering static diagrams
  *
@@ -41,19 +39,19 @@ case class RenderingOptions(
  *                        with reduced opacity
  */
 case class AnimationOptions(
-  keyFrameDuration: FiniteDuration = 2.seconds,
-  interpolationDuration: FiniteDuration = 1.seconds,
+  keyFrameDuration: Duration = Duration.ofSeconds(2),
+  interpolationDuration: Duration = Duration.ofSeconds(1),
   framesPerSecond: Int = 9,
   loop: Boolean = true,
   onionSkinLayers: Int = 0
 ) {
-  def withOnionSkinLayers(layers: Int) = copy(onionSkinLayers = layers)
+  def withOnionSkinLayers(layers: Int):AnimationOptions  = copy(onionSkinLayers = layers)
 
-  def interpolationFrames = Math.round(interpolationDuration.toMillis * framesPerSecond / 1000.0f)
+  def interpolationFrames: Int = Math.round(interpolationDuration.toMillis * framesPerSecond / 1000.0f)
 
-  def keyFrames = if (interpolationFrames == 0) 1 else {
+  def keyFrames: Int = if (interpolationFrames == 0) 1 else {
     Math.round(keyFrameDuration.toMillis * framesPerSecond / 1000.0f)
   }
 
-  def delay = if (interpolationFrames == 0) keyFrameDuration else 1.second / framesPerSecond
+  def delay: Duration = if (interpolationFrames == 0) keyFrameDuration else Duration.ofSeconds(1).dividedBy(framesPerSecond.toLong)
 }
