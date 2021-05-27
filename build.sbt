@@ -113,13 +113,13 @@ val site = project.in(file("site"))
       file("images/tree+zipper.gif") → "images/tree+zipper.gif",
       (( demoJS / crossTarget).value / "demo-opt.js") → "js/demo.js"
     ),
-    SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, (Compile / packageDoc / mappings) in coreJVM, "api/jvm"),
-    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js }, (Compile/  packageDoc / mappings) in coreJS, "api/js"),
+    SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, coreJVM / (Compile / packageDoc / mappings), "api/jvm"),
+    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js },  coreJS / (Compile/  packageDoc / mappings), "api/js"),
     tutNameFilter := """.*\.(md|json|css|html)""".r,
     tutTargetDirectory := target.value / "tut",
-    gitbookInstallDir in GitBook := Some(baseDirectory.value / "node_modules" / "gitbook"),
-    sourceDirectory in GitBook := tutTargetDirectory.value,
-    makeSite := makeSite.dependsOn(tutQuick).dependsOn(fullOptJS in Compile in demoJS).value,
+    GitBook / gitbookInstallDir := Some(baseDirectory.value / "node_modules" / "gitbook"),
+    GitBook / sourceDirectory := tutTargetDirectory.value,
+    makeSite := makeSite.dependsOn(tutQuick).dependsOn( demoJS/ ( Compile/ fullOptJS)).value,
     ghpagesNoJekyll := true,
     git.remoteRepo := "git@github.com:stanch/reftree.git"
   )
