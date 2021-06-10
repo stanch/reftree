@@ -1,10 +1,11 @@
 package reftree.core
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 case class Person(age: Int, name: String)
 
-class ToRefTreeSpec extends FlatSpec with Matchers {
+class ToRefTreeSpec extends AnyFlatSpec with Matchers {
   it should "auto-derive ToRefTree instances" in {
     Person(3, "Nick").refTree should matchPattern {
       case RefTree.Ref(

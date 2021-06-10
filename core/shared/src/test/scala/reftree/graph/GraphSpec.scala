@@ -1,6 +1,5 @@
 package reftree.graph
 
-import org.scalatest.{Matchers, FlatSpec}
 import reftree.core._
 import reftree.diagram.{Animation, Diagram}
 import reftree.dot.NodeId
@@ -8,8 +7,10 @@ import reftree.dot.html._
 import reftree.geometry.Color
 import reftree.render.RenderingOptions
 import com.softwaremill.quicklens._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GraphSpec extends FlatSpec with Matchers {
+class GraphSpec extends AnyFlatSpec with Matchers {
   val red = Color.RGBA(1.0, 0, 0, 1.0)
   val blue = Color.RGBA(0, 0, 1.0, 1.0)
   val weakRed = red.opacify(0.25)
