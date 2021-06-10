@@ -1,10 +1,11 @@
 package reftree.geometry
 
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ColorSpec extends FlatSpec with Matchers with PropertyChecks {
+class ColorSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
   val e = 0.005
 
   def sameRgba(left: Color.RGBA, right: Color.RGBA) =

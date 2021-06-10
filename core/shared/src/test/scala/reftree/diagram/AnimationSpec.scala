@@ -1,10 +1,11 @@
 package reftree.diagram
 
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AnimationSpec extends FlatSpec with PropertyChecks with Matchers {
+class AnimationSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
   it should "correctly iterate to fixpoint" in {
     forAll(Gen.posNum[Int]) { seed ⇒
       val builder = Animation.startWith(seed).iterate(_ + 1).iterateToFixpoint(_ / 2)

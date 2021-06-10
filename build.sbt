@@ -53,8 +53,9 @@ val core = crossProject(JSPlatform, JVMPlatform)
       "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
       "com.github.julien-truffaut" %%% "monocle-macro" % "2.0.0",
       "com.outr" %%% "scribe" % "2.7.9",
-      "org.scalatest" %%% "scalatest" % "3.0.3" % Test,
-      "org.scalacheck" %%% "scalacheck" % "1.13.5" % Test
+      "org.scalatest" %%% "scalatest" % "3.1.4" % Test,
+      "org.scalacheck" %%% "scalacheck" % "1.14.3" % Test,
+      "org.scalatestplus" %%% "scalacheck-1-14" % "3.1.3.0" % Test
     )
   )
   .jvmSettings(
@@ -88,7 +89,7 @@ val demo = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" % "ammonite" % "1.8.0" % Test cross CrossVersion.full
+      "com.lihaoyi" % "ammonite" % "2.1.0" % Test cross CrossVersion.full
     )
   )
   .jsSettings(

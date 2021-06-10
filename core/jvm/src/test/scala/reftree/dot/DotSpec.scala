@@ -2,11 +2,11 @@ package reftree.dot
 
 import java.io.File
 
-import org.scalatest.FlatSpec
 import reftree.dot.html._
 import reftree.render.{DotRenderer, RenderingOptions}
+import org.scalatest.flatspec.AnyFlatSpec
 
-class DotSpec extends FlatSpec {
+class DotSpec extends AnyFlatSpec {
   it should "render valid dot" in {
     val node1 = Node(
       "x",
