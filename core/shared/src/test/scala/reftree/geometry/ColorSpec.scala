@@ -1,10 +1,12 @@
 package reftree.geometry
 
+import org.scalacheck.Gen
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class ColorSpec extends AnyFlatSpec with Matchers  {
-  /*val e = 0.005
+class ColorSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
+  val e = 0.005
 
   def sameRgba(left: Color.RGBA, right: Color.RGBA) =
     (Color.rgbaComponents.get(left) zip Color.rgbaComponents.get(right)) foreach {
@@ -54,5 +56,5 @@ class ColorSpec extends AnyFlatSpec with Matchers  {
 
   it should "convert from HSLA to RGBA and back" in {
     forAll(genHsla)(color ⇒ sameHsla(color, color.toRgba.toHsla))
-  }*/
+  }
 }
