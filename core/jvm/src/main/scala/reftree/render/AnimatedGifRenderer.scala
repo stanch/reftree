@@ -5,18 +5,17 @@ import java.io.{ByteArrayInputStream, StringWriter}
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import javax.xml.parsers.SAXParserFactory
-
-import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.nio.StreamingGifWriter
 import org.apache.batik.transcoder.{TranscoderInput, SVGAbstractTranscoder, TranscoderOutput}
 import org.apache.batik.transcoder.image.{ImageTranscoder, PNGTranscoder}
 import reftree.dot.Graph
 import reftree.svg.{OptimizedGraphAnimation, XmlSvgApi}
 import reftree.svg.animation.Frame
-
 import scala.sys.process.{Process, BasicIO}
 
 object AnimatedGifRenderer {
+
   case class RenderingException(message: String) extends Exception(message)
 
   private lazy val saxParserFactory = {
@@ -41,7 +40,7 @@ object AnimatedGifRenderer {
     XML.loadString(output.toString)
   }
 
-  private def renderImage(svg: xml.Node, options: RenderingOptions): Image = {
+  private def renderImage(svg: xml.Node, options: RenderingOptions): ImmutableImage = {
     var image: BufferedImage = null
     val transcoder = new PNGTranscoder {
       override def writeImage(img: BufferedImage, output: TranscoderOutput): Unit = image = img
@@ -51,14 +50,14 @@ object AnimatedGifRenderer {
       )
       addTranscodingHint(
         SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER,
-        new java.lang.Float(25.4 / options.density)
+        java.lang.Float.valueOf(25.4f / options.density)
       )
     }
     val inputStream = new ByteArrayInputStream(svg.toString().getBytes("UTF-8"))
     val transcoderInput = new TranscoderInput(inputStream)
     transcoder.transcode(transcoderInput, null)
     inputStream.close()
-    Image.fromAwt(image)
+    ImmutableImage.fromAwt(image)
   }
 
   def renderFrames(
@@ -67,7 +66,7 @@ object AnimatedGifRenderer {
     renderingOptions: RenderingOptions,
     animationOptions: AnimationOptions
   ): Unit = {
-    val writer = StreamingGifWriter(animationOptions.delay, animationOptions.loop)
+    val writer = new StreamingGifWriter(animationOptions.delay, animationOptions.loop)
     val stream = writer.prepareStream(output, BufferedImage.TYPE_INT_ARGB)
     frames.zipWithIndex foreach {
       case (Frame(svg, count), i) ⇒
@@ -79,9 +78,9 @@ object AnimatedGifRenderer {
         if (i % 10 == 0) {
           scribe.trace("Writing to file...")
         }
-        stream.writeFrame(image, animationOptions.delay * count)
+        stream.writeFrame(image, animationOptions.delay.multipliedBy(count))
     }
-    stream.finish()
+    stream.close()
   }
 
   private val animation = OptimizedGraphAnimation(XmlSvgApi)

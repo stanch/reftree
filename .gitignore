@@ -3,3 +3,7 @@ node_modules/
 .idea
 diagram.png
 slides/
+.vscode
+.metals
+.bloop
+.bsp

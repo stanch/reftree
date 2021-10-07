@@ -7,7 +7,8 @@ import reftree.graph.Graphs
 
 import org.scalajs.dom
 import reftree.svg.{OptimizedGraphAnimation, DomSvgApi}
-
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobalScope
 
@@ -109,11 +110,11 @@ case class Renderer(
         // we catch the IOOB exception rather than checking the bounds to avoid forcing the stream
         val currentFrame = frames(i)
         i += 1
-        js.timers.setTimeout(animationOptions.delay * currentFrame.repeat)(iteration())
+        js.timers.setTimeout(FiniteDuration(animationOptions.delay.multipliedBy(currentFrame.repeat).toNanos, TimeUnit.NANOSECONDS))(iteration())
         currentTarget = renderTo(currentTarget, currentFrame.frame)
         if (currentFrame.repeat > 1) {
           // preprocess a few frames if we are going to be waiting
-          js.timers.setTimeout(animationOptions.delay) {
+          js.timers.setTimeout(FiniteDuration(animationOptions.delay.toNanos, TimeUnit.NANOSECONDS)) {
             frames.take(i + currentFrame.repeat + 1).force
           }
         }
@@ -121,7 +122,7 @@ case class Renderer(
         case _: IndexOutOfBoundsException ⇒
           if (animationOptions.loop) {
             i = 0
-            js.timers.setTimeout(animationOptions.delay)(iteration())
+            js.timers.setTimeout(FiniteDuration(animationOptions.delay.toNanos, TimeUnit.NANOSECONDS))(iteration())
           }
       }
     }
@@ -133,7 +134,7 @@ case class Renderer(
     def render(
       target: dom.Node,
       tweak: RenderingOptions ⇒ RenderingOptions = identity
-    ) = self
+    ): Unit = self
       .tweakRendering(tweak)
       .render(target, diagram)
   }
@@ -144,7 +145,7 @@ case class Renderer(
       target: dom.Node,
       tweakRendering: RenderingOptions ⇒ RenderingOptions = identity,
       tweakAnimation: AnimationOptions ⇒ AnimationOptions = identity
-    ) = self
+    ): Unit = self
       .tweakRendering(tweakRendering)
       .tweakAnimation(tweakAnimation)
       .render(target, animation)

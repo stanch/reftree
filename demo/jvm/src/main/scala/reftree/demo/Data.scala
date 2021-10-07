@@ -2,14 +2,10 @@ package reftree.demo
 
 import reftree.core._
 import reftree.geometry.{Point, Polyline}
-
 import scala.language.higherKinds
-
 import monocle.PTraversal
-
-import scalaz.Applicative
-import scalaz.std.list._
-import scalaz.syntax.applicative._
+import cats.Applicative
+import cats.implicits._
 
 object Data {
   case class Employee(
@@ -69,12 +65,12 @@ object Data {
 
   val simpleTree = Tree(1, List(Tree(2), Tree(3), Tree(4), Tree(5, List(Tree(6), Tree(7)))))
 
-  def letterTraversal(predicate: Char ⇒ Boolean) = new PTraversal[String, String, Char, Char] {
+  def letterTraversal(predicate: Char ⇒ Boolean): PTraversal[String, String, Char, Char] = new PTraversal[String, String, Char, Char] {
     override def modifyF[F[_]: Applicative](f: Char ⇒ F[Char])(s: String): F[String] = {
-      Applicative[F].sequence(s.toList map {
+      s.toList.traverse {
         case x if predicate(x) ⇒ f(x)
         case x ⇒ Applicative[F].point(x)
-      }).map(_.mkString)
+      }.map(_.mkString)
     }
   }
 

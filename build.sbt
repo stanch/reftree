@@ -2,14 +2,11 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val commonSettings = Seq(
-  scalaVersion := "2.11.12",
-  crossScalaVersions := Seq("2.11.12", "2.12.7"),
-  scalacOptions ++= Seq(
-    "-feature", "-deprecation",
-    "-Xlint", "-Xfatal-warnings"
-  ),
-  scalacOptions in (Compile, compile) += "-Ywarn-unused-import",
-  scalacOptions in (Compile, doc) += "-no-link-warnings"
+  scalaVersion := "2.12.10",
+  crossScalaVersions := Seq("2.12.10"),
+  scalacOptions ++= Seq("-feature", "-deprecation", "-Xlint", "-Xfatal-warnings", "-Ypartial-unification"),
+  Compile / compile / scalacOptions  += "-Ywarn-unused-import",
+  Compile / doc / scalacOptions += "-no-link-warnings"
 ) ++ metadata ++ publishing
 
 lazy val metadata = Seq(
@@ -49,23 +46,24 @@ val core = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "reftree",
     libraryDependencies ++= Seq(
-      "com.chuusai" %%% "shapeless" % "2.3.2",
-      "com.lihaoyi" %%% "sourcecode" % "0.1.3",
-      "com.lihaoyi" %%% "fastparse" % "2.0.5",
+      "com.chuusai" %%% "shapeless" % "2.3.3",
+      "com.lihaoyi" %%% "sourcecode" % "0.2.7",
+      "com.lihaoyi" %%% "fastparse" % "2.3.0",
       "io.github.stanch" %%% "zipper" % "0.5.2",
       "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
-      "com.github.julien-truffaut" %%% "monocle-macro" % "1.4.0",
-      "com.outr" %%% "scribe" % "1.4.2",
-      "org.scalatest" %%% "scalatest" % "3.0.3" % Test,
-      "org.scalacheck" %%% "scalacheck" % "1.13.5" % Test
+      "com.github.julien-truffaut" %%% "monocle-macro" % "2.0.0",
+      "com.outr" %%% "scribe" % "2.7.9",
+      "org.scalatest" %%% "scalatest" % "3.1.4" % Test,
+      "org.scalacheck" %%% "scalacheck" % "1.14.3" % Test,
+      "org.scalatestplus" %%% "scalacheck-1-14" % "3.1.3.0" % Test
     )
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "org.apache.xmlgraphics" % "batik-transcoder" % "1.9",
-      "com.sksamuel.scrimage" %% "scrimage-core" % "3.0.0-alpha3",
-      "de.sciss" %% "fingertree" % "1.5.2"
+      "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+      "org.apache.xmlgraphics" % "batik-transcoder" % "1.14",
+      "com.sksamuel.scrimage" % "scrimage-core" % "4.0.18",
+      "de.sciss" %% "fingertree" % "1.5.5"
     )
   )
   .jsSettings(
@@ -91,7 +89,7 @@ val demo = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" % "ammonite" % "1.4.2" % Test cross CrossVersion.full
+      "com.lihaoyi" % "ammonite" % "2.1.0" % Test cross CrossVersion.full
     )
   )
   .jsSettings(
@@ -106,20 +104,20 @@ val site = project.in(file("site"))
   .dependsOn(demoJVM)
   .settings(commonSettings)
   .settings(
-    mappings in makeSite ++= Seq(
+    makeSite / mappings ++= Seq(
       file("images/teaser.gif") → "images/teaser.gif",
       file("images/queue.gif") → "images/queue.gif",
       file("images/finger.gif") → "images/finger.gif",
       file("images/tree+zipper.gif") → "images/tree+zipper.gif",
-      ((crossTarget in demoJS).value / "demo-opt.js") → "js/demo.js"
+      (( demoJS / crossTarget).value / "demo-opt.js") → "js/demo.js"
     ),
-    SiteScaladocPlugin.scaladocSettings(config("jvm"), mappings in (Compile, packageDoc) in coreJVM, "api/jvm"),
-    SiteScaladocPlugin.scaladocSettings(config("js"), mappings in (Compile, packageDoc) in coreJS, "api/js"),
+    SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, coreJVM / (Compile / packageDoc / mappings), "api/jvm"),
+    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js },  coreJS / (Compile/  packageDoc / mappings), "api/js"),
     tutNameFilter := """.*\.(md|json|css|html)""".r,
     tutTargetDirectory := target.value / "tut",
-    gitbookInstallDir in GitBook := Some(baseDirectory.value / "node_modules" / "gitbook"),
-    sourceDirectory in GitBook := tutTargetDirectory.value,
-    makeSite := makeSite.dependsOn(tutQuick).dependsOn(fullOptJS in Compile in demoJS).value,
+    GitBook / gitbookInstallDir := Some(baseDirectory.value / "node_modules" / "gitbook"),
+    GitBook / sourceDirectory := tutTargetDirectory.value,
+    makeSite := makeSite.dependsOn(tutQuick).dependsOn( demoJS/ ( Compile/ fullOptJS)).value,
     ghpagesNoJekyll := true,
     git.remoteRepo := "git@github.com:stanch/reftree.git"
   )
