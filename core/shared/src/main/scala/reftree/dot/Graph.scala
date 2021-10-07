@@ -38,6 +38,7 @@ object Node {
   case class Attrs(
     shape: Option[String] = None,
     tooltip: Option[String] = None,
+    URL: Option[String] = None,
     color: Option[Color] = None,
     fontName: Option[String] = None,
     fontColor: Option[Color] = None

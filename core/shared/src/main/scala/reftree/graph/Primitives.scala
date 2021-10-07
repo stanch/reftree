@@ -29,7 +29,7 @@ object Primitives {
     Seq(captionNode, captionEdge)
   }
 
-  def node(tree: RefTree, color: Color, anchorId: Option[String], namespace: Seq[String]): Node = {
+  def node(tree: RefTree, color: Color, anchorId: Option[String], namespace: Seq[String], url: Option[String], tip: Option[String]): Node = {
     val background = if (tree.highlight) color.opacify(0.2) else defaultBackground
     val labelContent: Seq[Row] = tree match {
       case ref: RefTree.Ref ⇒
@@ -51,9 +51,9 @@ object Primitives {
       cellSpacing = Some(0), cellPadding = Some(6), cellBorder = Some(0), columns = Some("*"),
       bgColor = Some(background), style = Some("rounded")
     ))
-    val tooltip = anchorId.map(a ⇒ s"anchor-$a")
+    val tooltip = tip.orElse(anchorId.map(a ⇒ s"anchor-$a"))
     val id = namespaced(tree.id, namespace)
-    Node(id, label, Node.Attrs(fontColor = Some(color), color = Some(color), tooltip = tooltip))
+    Node(id, label, Node.Attrs(fontColor = Some(color), color = Some(color), tooltip = tooltip, URL = url))
   }
 
   private def cellLabel(tree: RefTree, elideRefs: Boolean = false): Html = tree match {
