@@ -51,7 +51,7 @@ val core = crossProject(JSPlatform, JVMPlatform)
       "io.github.stanch" %%% "zipper" % "0.6.0",
       "com.softwaremill.quicklens" %%% "quicklens" % "1.9.7",
       "com.github.julien-truffaut" %%% "monocle-macro" % "2.1.0",
-      "com.outr" %%% "scribe" % "3.13.3",
+      "com.outr" %%% "scribe" % "3.13.4",
       "org.scalatest" %%% "scalatest" % "3.2.18" % Test,
       "org.scalacheck" %%% "scalacheck" % "1.17.0" % Test,
       "org.scalatestplus" %%% "scalacheck-1-17" % "3.2.18.0" % Test
