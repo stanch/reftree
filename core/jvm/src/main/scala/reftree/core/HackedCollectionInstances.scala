@@ -90,7 +90,7 @@ trait HackedCollectionInstances extends CollectionInstances {
     }
 
   private def redBlackTreeRefTree[A: ToRefTree, B: ToRefTree](
-    tree: RedBlackTree.Tree[A, B],
+    tree: NewRedBlackTree.Tree[A, B],
     includeValue: Boolean
   ): RefTree = {
     if (tree == null) RefTree.Null() else {
@@ -99,7 +99,7 @@ trait HackedCollectionInstances extends CollectionInstances {
       val left = redBlackTreeRefTree(tree.left, includeValue).toField
       val right = redBlackTreeRefTree(tree.right, includeValue).toField
       RefTree.Ref(tree, Seq(key) ++ value ++ Seq(left, right))
-        .copy(highlight = tree.isInstanceOf[RedBlackTree.RedTree[A, B]])
+        .copy(highlight = tree.isRed)
     }
   }
 
@@ -109,7 +109,7 @@ trait HackedCollectionInstances extends CollectionInstances {
       if (value.isEmpty) {
         RefTree.Ref(value, Seq.empty)
       } else {
-        val underlying = value.privateField[RedBlackTree.Tree[A, Unit]]("tree")
+        val underlying = value.privateField[NewRedBlackTree.Tree[A, Unit]]("tree")
         val children = redBlackTreeRefTree(underlying, includeValue = false).asInstanceOf[RefTree.Ref].children
         RefTree.Ref(value, children)
       }
@@ -121,7 +121,7 @@ trait HackedCollectionInstances extends CollectionInstances {
       if (value.isEmpty) {
         RefTree.Ref(value, Seq.empty)
       } else {
-        val underlying = value.privateField[RedBlackTree.Tree[A, B]]("tree")
+        val underlying = value.privateField[NewRedBlackTree.Tree[A, B]]("tree")
         val children = redBlackTreeRefTree(underlying, includeValue = true).asInstanceOf[RefTree.Ref].children
         RefTree.Ref(value, children)
       }

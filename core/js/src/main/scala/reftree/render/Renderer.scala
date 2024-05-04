@@ -1,12 +1,12 @@
 package reftree.render
 
-import org.scalajs.dom.raw.DOMParser
 import reftree.diagram.{Animation, Diagram}
 import reftree.dot.Graph
 import reftree.graph.Graphs
-
 import org.scalajs.dom
-import reftree.svg.{OptimizedGraphAnimation, DomSvgApi}
+import org.scalajs.dom.MIMEType
+import reftree.svg.{DomSvgApi, OptimizedGraphAnimation}
+
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.js
@@ -60,8 +60,8 @@ case class Renderer(
   def tweakAnimation(tweak: AnimationOptions ⇒ AnimationOptions) =
     copy(animationOptions = tweak(animationOptions))
 
-  private def renderSvg(graph: Graph) = (new DOMParser)
-    .parseFromString(VizFacade.Viz(graph.encode), "image/svg+xml")
+  private def renderSvg(graph: Graph) = (new dom.DOMParser)
+    .parseFromString(VizFacade.Viz(graph.encode), MIMEType.`image/svg+xml`)
     .documentElement
 
   private def renderTo(target: dom.Node, content: dom.Node) = {

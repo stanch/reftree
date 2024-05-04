@@ -66,7 +66,7 @@ object AnimatedGifRenderer {
     renderingOptions: RenderingOptions,
     animationOptions: AnimationOptions
   ): Unit = {
-    val writer = new StreamingGifWriter(animationOptions.delay, animationOptions.loop)
+    val writer = new StreamingGifWriter(animationOptions.delay, animationOptions.loop, false)
     val stream = writer.prepareStream(output, BufferedImage.TYPE_INT_ARGB)
     frames.zipWithIndex foreach {
       case (Frame(svg, count), i) ⇒

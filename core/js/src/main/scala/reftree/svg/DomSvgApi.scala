@@ -3,7 +3,6 @@ package reftree.svg
 import monocle.macros.GenPrism
 import monocle.{Getter, Lens, Optional}
 import org.scalajs.dom
-import org.scalajs.dom.ext.PimpedNodeList
 import reftree.svg.api.SimpleSvgApi
 
 /**
