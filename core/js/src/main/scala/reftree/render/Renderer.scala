@@ -13,7 +13,7 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobalScope
 
 /**
- * An interface to https://github.com/mdaines/viz.js/
+ * An interface to https://github.com/mdaines/viz-js/tree/v1.8.2
  */
 @js.native
 @JSGlobalScope

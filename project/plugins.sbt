@@ -8,6 +8,8 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.16.0")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2")
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
 
+libraryDependencies += "net.exoego" %% "scalajs-env-jsdom-nodejs" % "2.1.0"
+
 addSbtPlugin("com.github.sbt" % "sbt-site" % "1.7.0")
 addSbtPlugin("com.github.sbt" % "sbt-site-gitbook" % "1.7.0")
 

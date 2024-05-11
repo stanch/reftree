@@ -57,16 +57,9 @@ val core = crossProject(JSPlatform, JVMPlatform)
       "org.scalatestplus" %%% "scalacheck-1-17" % "3.2.18.0" % Test
     )
   )
-  .jsEnablePlugins(JSDependenciesPlugin)
-  .jsSettings(
-    libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "2.8.0"
-    ),
-    jsDependencies ++= Seq(
-      "org.webjars.npm" % "viz.js" % "1.7.0" / "1.7.0/viz.js"
-    )
-  )
-  .jvmSettings(
+
+lazy val coreJVM = core.jvm
+  .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
       "org.apache.xmlgraphics" % "batik-transcoder" % "1.17",
@@ -75,8 +68,20 @@ val core = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
-lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
+  .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang.modules" %%% "scala-collection-compat" % "2.12.0",
+      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
+      "org.scala-js" %%% "scalajs-java-time" % "1.0.0"
+    ),
+    packageJSDependencies / skip := false,
+    jsDependencies ++= Seq(
+      "org.webjars.npm" % "viz.js" % "1.8.2" / "1.8.2/viz.js"
+    ),
+    jsEnv := new net.exoego.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+  )
 
 val demo = crossProject(JSPlatform, JVMPlatform)
   .in(file("demo"))
@@ -87,17 +92,20 @@ val demo = crossProject(JSPlatform, JVMPlatform)
     publishLocal := {},
     publishArtifact := false
   )
-  .jvmSettings(
+
+lazy val demoJVM = demo.jvm
+  .settings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" % "ammonite" % "3.0.0-M1" % Test cross CrossVersion.full
     )
   )
-  .jsSettings(
-    scalaJSUseMainModuleInitializer := true
-  )
 
-lazy val demoJVM = demo.jvm
 lazy val demoJS = demo.js
+  .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
+  .settings(
+    scalaJSUseMainModuleInitializer := true,
+    jsEnv := new net.exoego.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+  )
 
 val site = project.in(file("site"))
   .enablePlugins(GitBookPlugin, GhpagesPlugin) //, TutPlugin)
