@@ -2,7 +2,6 @@ package reftree.demo
 
 import reftree.core._
 import reftree.geometry.{Point, Polyline}
-import scala.language.higherKinds
 import monocle.PTraversal
 import cats.Applicative
 import cats.implicits._
@@ -59,24 +58,25 @@ object Data {
 
   case class Tree(x: Int, c: List[Tree] = Nil)
 
-  implicit val treeDerivationConfig = ToRefTree.DerivationConfig[Tree]
-    .tweakField("x", _.withoutName)
-    .tweakField("c", _.withoutName)
+  implicit val treeDerivationConfig: ToRefTree.DerivationConfig[Tree] =
+    ToRefTree.DerivationConfig[Tree]
+      .tweakField("x", _.withoutName)
+      .tweakField("c", _.withoutName)
 
   val simpleTree = Tree(1, List(Tree(2), Tree(3), Tree(4), Tree(5, List(Tree(6), Tree(7)))))
 
-  def letterTraversal(predicate: Char ⇒ Boolean): PTraversal[String, String, Char, Char] = new PTraversal[String, String, Char, Char] {
-    override def modifyF[F[_]: Applicative](f: Char ⇒ F[Char])(s: String): F[String] = {
+  def letterTraversal(predicate: Char => Boolean): PTraversal[String, String, Char, Char] = new PTraversal[String, String, Char, Char] {
+    override def modifyF[F[_]: Applicative](f: Char => F[Char])(s: String): F[String] = {
       s.toList.traverse {
-        case x if predicate(x) ⇒ f(x)
-        case x ⇒ Applicative[F].point(x)
+        case x if predicate(x) => f(x)
+        case x => Applicative[F].point(x)
       }.map(_.mkString)
     }
   }
 
   val vowels = Set('A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u')
   val vowelTraversal = letterTraversal(vowels)
-  val consonantTraversal = letterTraversal(x ⇒ !vowels(x))
+  val consonantTraversal = letterTraversal(x => !vowels(x))
 
   val polyline1 = Polyline(Seq(Point(0, 10), Point(10, 20)))
   val polyline2 = Polyline(Seq(Point(20, 30), Point(40, 50)))

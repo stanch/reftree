@@ -4,9 +4,11 @@ import reftree.geometry._
 import reftree.svg.api.BaseSvgApi
 import reftree.util.Optics
 
+import scala.collection.compat.immutable.LazyList
+
 /** An animation frame, possibly repeated several times */
 case class Frame[Svg](frame: Svg, repeat: Int = 1) {
-  def map[A](f: Svg ⇒ A) = copy(f(frame))
+  def map[A](f: Svg => A) = copy(f(frame))
 }
 
 case class GraphInterpolation[Svg](api: BaseSvgApi[Svg]) {
@@ -65,13 +67,17 @@ case class GraphInterpolation[Svg](api: BaseSvgApi[Svg]) {
     )
 
   def interpolatePairwise(
-    svgs: Stream[Svg],
+    svgs: LazyList[Svg],
     keyFrames: Int,
     interpolationFrames: Int
-  ): Stream[Frame[Svg]] =
-    Frame(svgs.head, keyFrames) #:: svgs.sliding(2).toStream.flatMap {
-      case Seq(prev, next) ⇒
+  ): LazyList[Frame[Svg]] =
+    Frame(svgs.head, keyFrames) #:: svgs.sliding(2).to(LazyList).flatMap {
+      case Seq(prev, next, _@_*) =>
         interpolation.sample(prev, next, interpolationFrames, inclusive = false)
-          .map(Frame(_)) #::: Stream(Frame(next, keyFrames))
+          .map(Frame(_)) #::: LazyList(Frame(next, keyFrames))
+      case Seq(prev) =>
+        LazyList(Frame(prev, keyFrames))
+      case _ =>
+        LazyList.empty
     }
 }

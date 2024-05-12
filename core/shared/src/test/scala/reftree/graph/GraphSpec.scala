@@ -29,13 +29,13 @@ class GraphSpec extends AnyFlatSpec with Matchers {
         RowContent(Seq(
           Cell(Plain("Cons"), Cell.Attrs(Some("n"), Some(2), _)),
           Cell(Plain("1"), Cell.Attrs(None, Some(2), _)),
-          Cell(Raw("&middot;"), Cell.Attrs(Some("1"), Some(2), _))))), _) ⇒
+          Cell(Raw("&middot;"), Cell.Attrs(Some("1"), Some(2), _))))), _) =>
     }
 
     graph.nodes.last.label should matchPattern {
       case Table(Seq(
         RowContent(Seq(
-          Cell(Plain("Nil"), Cell.Attrs(Some("n"), Some(2), _))))), _) ⇒
+          Cell(Plain("Nil"), Cell.Attrs(Some("n"), Some(2), _))))), _) =>
     }
 
     graph.edges.head.from shouldEqual
@@ -63,7 +63,7 @@ class GraphSpec extends AnyFlatSpec with Matchers {
           Cell(Italic("capital"), Cell.Attrs(None, None, _)))),
         RowDivider,
         RowContent(Seq(
-          Cell(Raw("&middot;"), Cell.Attrs(Some("1"), None, _))))), _) ⇒
+          Cell(Raw("&middot;"), Cell.Attrs(Some("1"), None, _))))), _) =>
     }
   }
 
@@ -120,11 +120,11 @@ class GraphSpec extends AnyFlatSpec with Matchers {
       Seq(Some(`red`), Some(`red`), Some(`blue`))
 
     graph.nodes.map(_.label).collect {
-      case Table(Seq(RowContent(Seq(Cell(Plain(n), _), _*))), _) ⇒ n
+      case Table(Seq(RowContent(Seq(Cell(Plain(n), _), _*))), _) => n
     } shouldEqual Seq("Cons", "Nil", "Cons")
 
     graph.nodes.map(_.label).collect {
-      case Table(Seq(RowContent(Seq(_, Cell(Plain(n), _), _*))), _) ⇒ n
+      case Table(Seq(RowContent(Seq(_, Cell(Plain(n), _), _*))), _) => n
     } shouldEqual Seq("1", "0")
   }
 
@@ -155,7 +155,7 @@ class GraphSpec extends AnyFlatSpec with Matchers {
     def highlightCells(indexes: Set[Int]) = {
       val tree = array.refTree
         .modify(_.when[RefTree.Ref].children)
-        .using(_.zipWithIndex.map { case (c, i) ⇒ c.withTreeHighlight(indexes(i)) })
+        .using(_.zipWithIndex.map { case (c, i) => c.withTreeHighlight(indexes(i)) })
         .withHighlight(true)
       Diagram.Single(tree)
     }
@@ -170,7 +170,7 @@ class GraphSpec extends AnyFlatSpec with Matchers {
           Cell(_, Cell.Attrs(_, _, Some(`weakRed`))),
           Cell(_, Cell.Attrs(_, _, Some(`weakViolet`))),
           Cell(_, Cell.Attrs(_, _, Some(`weakBlue`)))))),
-        Table.Attrs(_, _, _, _, Some(`weakerViolet` ), _)) ⇒
+        Table.Attrs(_, _, _, _, Some(`weakerViolet` ), _)) =>
     }
   }
 }

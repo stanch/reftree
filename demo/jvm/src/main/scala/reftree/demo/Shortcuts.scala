@@ -94,14 +94,15 @@ object Shortcuts {
   def zipperControl[A](zipper: Zipper[A])(implicit toRefTree: ToRefTree[Zipper[A]]): Unit = {
     Iterator
       .continually(Console.in.read())
+      .map(_.toChar)
       .takeWhile(_ != 'q')
       .filter(Set('w', 'a', 's', 'd'))
       .foldLeft(tapRender(zipper)) {
-        case (z, 'w') ⇒ tapRender(z.tryMoveUp.orStay)
-        case (z, 'a') ⇒ tapRender(z.tryMoveLeft.orStay)
-        case (z, 's') ⇒ tapRender(z.tryMoveDownLeft.orStay)
-        case (z, 'd') ⇒ tapRender(z.tryMoveRight.orStay)
-        case (z, _) ⇒ z
+        case (z, 'w') => tapRender(z.tryMoveUp.orStay)
+        case (z, 'a') => tapRender(z.tryMoveLeft.orStay)
+        case (z, 's') => tapRender(z.tryMoveDownLeft.orStay)
+        case (z, 'd') => tapRender(z.tryMoveRight.orStay)
+        case (z, _) => z
       }
   }
 }

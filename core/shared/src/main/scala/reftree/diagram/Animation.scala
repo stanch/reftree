@@ -2,6 +2,8 @@ package reftree.diagram
 
 import reftree.core._
 
+import scala.collection.compat.immutable.LazyList
+
 /**
  * The central type for producing animations — sequences of diagrams
  *
@@ -32,30 +34,30 @@ import reftree.core._
  *   // Basic animation
  *   Animation
  *     .startWith(Queue(1))
- *     .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+ *     .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
  *     .build()
  *
  *   // Configure how the diagram for each frame is produced
  *   Animation
  *     .startWith(Queue(1))
- *     .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+ *     .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
  *     .build(Diagram(_).withCaption("My Queue").withColor(2))
  *
  *   // Adding anchors
  *   Animation
  *     .startWith(Queue(1))
- *     .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+ *     .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
  *     .build(Diagram(_).withAnchor("queue").withCaption("This node is anchored!"))
  *
  *   // Combining in parallel
  *   Animation
  *     .startWith(Queue(1))
- *     .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+ *     .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
  *     .build()
  *     .toNamespace("one") +
  *   Animation
  *     .startWith(Queue(10))
- *     .iterateWithIndex(2)((queue, i) ⇒ queue :+ (10 * (i + 1)))
+ *     .iterateWithIndex(2)((queue, i) => queue :+ (10 * (i + 1)))
  *     .build()
  *     .toNamespace("two")
  * }}}
@@ -63,7 +65,7 @@ import reftree.core._
 case class Animation(diagrams: Seq[Diagram]) {
   /** Combine with another animation in parallel */
   def +(that: Animation) = Animation {
-    diagrams.zipAll(that.diagrams, Diagram.empty, Diagram.empty).map { case (a, b) ⇒ a + b }
+    diagrams.zipAll(that.diagrams, Diagram.empty, Diagram.empty).map { case (a, b) => a + b }
   }
 
   /** Combine with another animation in sequence */
@@ -86,29 +88,33 @@ object Animation {
   /** A builder for animations */
   case class Builder[A: ToRefTree](frames: Vector[A]) {
     /** Add more frames by applying the provided iteration functions */
-    def iterate(iterations: (A ⇒ A)*) =
-      Builder(iterations.foldLeft(frames)((current, step) ⇒ current :+ step(current.last)))
+    def iterate(iterations: (A => A)*) =
+      Builder(iterations.foldLeft(frames)((current, step) => current :+ step(current.last)))
 
     /** Add more frames by applying the provided iteration function `n` times */
-    def iterate(n: Int)(iteration: A ⇒ A) =
-      Builder((1 to n).foldLeft(frames)((current, _) ⇒ current :+ iteration(current.last)))
+    def iterate(n: Int)(iteration: A => A) =
+      Builder((1 to n).foldLeft(frames)((current, _) => current :+ iteration(current.last)))
 
     /** Add more frames by applying the provided iteration function while `predicate` yields true */
-    def iterateWhile(predicate: A ⇒ Boolean)(iteration: A ⇒ A) =
-      Builder(frames.init ++ Stream.iterate(frames.last)(iteration).takeWhile(predicate))
+    def iterateWhile(predicate: A => Boolean)(iteration: A => A) =
+      Builder(frames.init ++ LazyList.iterate(frames.last)(iteration).takeWhile(predicate))
 
     /**
      * Add more frames by applying the provided iteration function while `predicate` yields true,
      * or the maximum number of iterations is reached.
      */
-    def iterateWhileAtMost(n: Int)(predicate: A ⇒ Boolean)(iteration: A ⇒ A) =
-      Builder(frames.init ++ Stream.iterate(frames.last)(iteration).takeWhile(predicate).take(n + 1))
+    def iterateWhileAtMost(n: Int)(predicate: A => Boolean)(iteration: A => A) =
+      Builder(frames.init ++ LazyList.iterate(frames.last)(iteration).takeWhile(predicate).take(n + 1))
 
     /** Add more frames by applying the provided iteration function to a fixpoint (f(x) == x) */
-    def iterateToFixpoint(iteration: A ⇒ A) = Builder {
-      val (intermediate, fixpoint) = Stream.iterate(frames.last)(iteration)
-        .sliding(2).toStream
-        .span { case Seq(prev, next) ⇒ prev != next }
+    def iterateToFixpoint(iteration: A => A) = Builder {
+      val (intermediate, fixpoint) = LazyList.iterate(frames.last)(iteration)
+        .sliding(2)
+        .to(LazyList)
+        .span {
+          case Seq(prev, next) => prev != next
+          case _ => true
+        }
 
       frames.init ++ intermediate.map(_.head) ++ fixpoint.headOption.map(_.head)
     }
@@ -117,37 +123,40 @@ object Animation {
      * Add more frames by applying the provided iteration function to a fixpoint (f(x) == x)
      * or a maximum number of iterations is reached
      */
-    def iterateToFixpointAtMost(n: Int)(iteration: A ⇒ A) = Builder {
-      val (intermediate, fixpoint) = Stream.iterate(frames.last)(iteration)
+    def iterateToFixpointAtMost(n: Int)(iteration: A => A) = Builder {
+      val (intermediate, fixpoint) = LazyList.iterate(frames.last)(iteration)
         .take(n + 2)
-        .sliding(2).toStream
-        .span { case Seq(prev, next) ⇒ prev != next }
+        .sliding(2).to(LazyList)
+        .span {
+          case Seq(prev, next) => prev != next
+          case _ => true
+        }
 
       frames.init ++ intermediate.map(_.head) ++ fixpoint.headOption.map(_.head)
     }
 
     /** Add more frames by applying the provided iteration function `n` times */
-    def iterateWithIndex(n: Int)(iteration: (A, Int) ⇒ A) =
-      Builder((1 to n).foldLeft(frames)((current, i) ⇒ current :+ iteration(current.last, i)))
+    def iterateWithIndex(n: Int)(iteration: (A, Int) => A) =
+      Builder((1 to n).foldLeft(frames)((current, i) => current :+ iteration(current.last, i)))
 
     /** Iterate on the builder itself */
-    def repeat(operations: (Builder[A] ⇒ Builder[A])*) =
-      operations.foldLeft(this)((current, operation) ⇒ operation(current))
+    def repeat(operations: (Builder[A] => Builder[A])*) =
+      operations.foldLeft(this)((current, operation) => operation(current))
 
     /** Iterate on the builder itself `n` times */
-    def repeat(n: Int)(operation: Builder[A] ⇒ Builder[A]) =
-      (1 to n).foldLeft(this)((current, _) ⇒ operation(current))
+    def repeat(n: Int)(operation: Builder[A] => Builder[A]) =
+      (1 to n).foldLeft(this)((current, _) => operation(current))
 
     /** Iterate on the builder itself `n` times */
-    def repeatWithIndex(n: Int)(operation: (Builder[A], Int) ⇒ Builder[A]) =
-      (1 to n).foldLeft(this)((current, i) ⇒ operation(current, i))
+    def repeatWithIndex(n: Int)(operation: (Builder[A], Int) => Builder[A]) =
+      (1 to n).foldLeft(this)((current, i) => operation(current, i))
 
     /** Build an animation, optionally specifying how to construct diagrams from data */
-    def build(diagram: A ⇒ Diagram = value ⇒ Diagram.toStringCaption(value)) =
+    def build(diagram: A => Diagram = value => Diagram.toStringCaption(value)) =
       Animation(frames.map(diagram))
 
     /** Build an animation, optionally specifying how to construct diagrams from data and frame numbers */
-    def buildWithIndex(diagram: (A, Int) ⇒ Diagram = (value, _) ⇒ Diagram.toStringCaption(value)) =
+    def buildWithIndex(diagram: (A, Int) => Diagram = (value, _) => Diagram.toStringCaption(value)) =
       Animation(frames.zipWithIndex.map(diagram.tupled))
   }
 }

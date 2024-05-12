@@ -1,7 +1,9 @@
 package reftree.svg
 
 import reftree.svg.animation._
-import reftree.svg.api.{SvgWrapper, OptimizedSvgApi, BaseSvgApi}
+import reftree.svg.api.{BaseSvgApi, OptimizedSvgApi, SvgWrapper}
+
+import scala.collection.compat.immutable.LazyList
 
 case class GraphAnimation[Svg](api: BaseSvgApi[Svg]) {
   val alignment = GraphAlignment(api)
@@ -9,9 +11,9 @@ case class GraphAnimation[Svg](api: BaseSvgApi[Svg]) {
   val accentuation = GraphAccentuation(api)
   val interpolation = GraphInterpolation(api)
 
-  def animate(keyFrames: Int, interpolationFrames: Int)(svgs: Seq[Svg]): Stream[Frame[Svg]] = {
+  def animate(keyFrames: Int, interpolationFrames: Int)(svgs: Seq[Svg]): LazyList[Frame[Svg]] = {
     if (svgs.length < 2) {
-      cleanup.cleanup(svgs.toStream).map(Frame(_))
+      cleanup.cleanup(svgs.to(LazyList)).map(Frame(_))
     } else {
       scribe.trace("Aligning...")
       val aligned = alignment.alignPairwise(svgs)
@@ -33,7 +35,7 @@ case class OptimizedGraphAnimation[Svg](api: BaseSvgApi[Svg]) {
   val optimizedApi = OptimizedSvgApi(api)
   val animation = GraphAnimation(optimizedApi)
 
-  def animate(keyFrames: Int, interpolationFrames: Int)(svgs: Seq[Svg]): Stream[Frame[Svg]] = {
+  def animate(keyFrames: Int, interpolationFrames: Int)(svgs: Seq[Svg]): LazyList[Frame[Svg]] = {
     scribe.trace("Optimizing...")
     val wrapped = svgs.map(SvgWrapper.wrap(api))
 

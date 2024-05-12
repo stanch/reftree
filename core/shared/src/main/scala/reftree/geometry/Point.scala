@@ -12,12 +12,12 @@ trait Translatable[A] {
 }
 
 object Translatable {
-  def apply[A](f: (A, Point) ⇒ A): Translatable[A] = new Translatable[A] {
+  def apply[A](f: (A, Point) => A): Translatable[A] = new Translatable[A] {
     def translate(value: A, delta: Point) = f(value, delta)
   }
 
   implicit def `List Translatable`[A](implicit t: Translatable[A]): Translatable[List[A]] =
-    Translatable((value, delta) ⇒ value.map(t.translate(_, delta)))
+    Translatable((value, delta) => value.map(t.translate(_, delta)))
 }
 
 /** A point on a plane */
@@ -44,23 +44,29 @@ object Point {
   def mean(points: Seq[Point]) = sum(points) * (1.0 / points.length)
 
   /** Parse an SVG point */
-  def fromString(string: String) = {
-    val Array(x, y) = string.split(" |,").map(_.toDouble)
-    Point(x, y)
+  def fromString(string: String): Option[Point] = {
+    string.split(" |,").map(_.toDouble) match {
+      case Array(x) =>
+        Some(Point(x, 0))
+      case Array(x, y) =>
+        Some(Point(x, y))
+      case _ =>
+        None
+    }
   }
 
   /** An isomorphism between (x, y) string pairs [[Point]] */
   val stringPairIso: Iso[(String, String), Point] =
     Iso[(String, String), Point] {
-      case (x, y) ⇒ Point(x.toDouble, y.toDouble)
-    } { point ⇒
+      case (x, y) => Point(x.toDouble, y.toDouble)
+    } { point =>
       (point.x.toString, point.y.toString)
     }
 
-  val interpolation = Interpolation[Point]((l, r, t) ⇒ l * (1 - t) + r * t)
+  val interpolation = Interpolation[Point]((l, r, t) => l * (1 - t) + r * t)
 
   /** Interpolate between two points on a cubic Bezier curve */
-  def bezierInterpolation(c1: Point, c2: Point) = Interpolation[Point] { (l, r, t) ⇒
+  def bezierInterpolation(c1: Point, c2: Point) = Interpolation[Point] { (l, r, t) =>
     l * Math.pow(1 - t, 3) +
     c1 * 3 * Math.pow(1 - t, 2) * t +
     c2 * 3 * Math.pow(t, 2) * (1 - t) +
@@ -77,16 +83,22 @@ case class Polyline(points: Seq[Point]) {
 
   def concatTailOf(that: Polyline) = Polyline(this.points ++ that.points.tail)
 
-  def length = points.sliding(2).foldLeft(0.0) { case (l, Seq(a, b)) ⇒ l + (a distance b) }
+  def length = points.sliding(2).foldLeft(0.0) {
+    case (l, Seq(a, b, _@_*)) => l + (a distance b)
+    case (l, Seq(a)) => l + a.norm
+    case (l, _) => l
+  }
 
   override def toString = points.mkString(",")
 }
 
 object Polyline {
   /** Parse an SVG polyline */
-  def fromString(string: String) = Polyline {
+  def fromString(string: String): Polyline = Polyline {
     string.split(" |,").map(_.toDouble).grouped(2).toSeq map {
-      case Array(x, y) ⇒ Point(x, y)
+      case Array(x, y, _@_*) => Point(x, y)
+      case Array(x) => Point(x, 0)
+      case _ => Point.zero
     }
   }
 
@@ -122,10 +134,15 @@ object Rectangle {
   def union(rectangles: Seq[Rectangle]) = rectangles.reduce(_ union _)
 
   /** Parse an SVG rectangle */
-  def fromString(string: String) = {
-    val Polyline(Seq(topLeft, widthHeight)) = Polyline.fromString(string)
-    Rectangle(topLeft, topLeft + widthHeight)
-  }
+  def fromString(string: String) =
+    Polyline.fromString(string) match {
+      case Polyline(Seq(topLeft, widthHeight, _@_*)) =>
+        Rectangle(topLeft, topLeft + widthHeight)
+      case Polyline(Seq(topLeft)) =>
+        Rectangle(topLeft, topLeft)
+      case Polyline(_) =>
+        Rectangle(Point.zero, Point.zero)
+    }
 
   implicit val `Rectangle Translatable`: Translatable[Rectangle] =
     Translatable(_ + _)

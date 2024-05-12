@@ -13,7 +13,7 @@ import java.time.Duration
  */
 case class RenderingOptions(
   verticalSpacing: Double = 0.8,
-  palette: IndexedSeq[Color] = Array(
+  palette: IndexedSeq[Color] = IndexedSeq[Color](
     Color.fromRgbaString("#104e8b"),
     Color.fromRgbaString("#228b22"),
     Color.fromRgbaString("#cd5b45")
@@ -24,7 +24,7 @@ case class RenderingOptions(
   def withVerticalSpacing(spacing: Double) = copy(verticalSpacing = spacing)
   def withFont(font: String) = copy(font = font)
   def withDensity(density: Int) = copy(density = density)
-  def mapPalette(f: Color ⇒ Color) = this.modify(_.palette.each).using(f)
+  def mapPalette(f: Color => Color) = this.modify(_.palette.each).using(f)
 }
 
 /**

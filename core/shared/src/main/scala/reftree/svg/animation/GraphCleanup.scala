@@ -3,6 +3,8 @@ package reftree.svg.animation
 import reftree.svg.api.BaseSvgApi
 import reftree.util.Optics
 
+import scala.collection.compat.immutable.LazyList
+
 case class GraphCleanup[Svg](api: BaseSvgApi[Svg]) {
   import api.svgUnzip
 
@@ -20,11 +22,11 @@ case class GraphCleanup[Svg](api: BaseSvgApi[Svg]) {
    * so we copy it from the sibling path node.
    */
   def fixTextColor(svg: Svg): Svg =
-    nodes.modify { node ⇒
+    nodes.modify { node =>
       val color = nodeColor.getOption(node)
-      color.fold(node)(c ⇒ texts.modify(api.fillColor.set(c))(node))
+      color.fold(node)(c => texts.modify(api.fillColor.set(c))(node))
     }(svg)
 
-  def cleanup(svgs: Stream[Svg]): Stream[Svg] = svgs
+  def cleanup(svgs: LazyList[Svg]): LazyList[Svg] = svgs
     .map(improveRendering).map(fixTextColor)
 }

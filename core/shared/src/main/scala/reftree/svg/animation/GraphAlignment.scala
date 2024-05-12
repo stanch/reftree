@@ -1,8 +1,10 @@
 package reftree.svg.animation
 
-import reftree.geometry.{Rectangle, Point}
+import reftree.geometry.{Point, Rectangle}
 import reftree.svg.api.BaseSvgApi
 import reftree.util.Optics
+
+import scala.collection.compat.immutable.LazyList
 
 case class GraphAlignment[Svg](api: BaseSvgApi[Svg]) {
   import api.svgUnzip
@@ -21,14 +23,14 @@ case class GraphAlignment[Svg](api: BaseSvgApi[Svg]) {
 
   private def groupByAnchor(nodes: Map[String, Svg]) =
     nodes.values.groupBy(nodeAnchor.getOption(_).flatten) flatMap {
-      case (Some(anchor), group) ⇒ Some((anchor, group.head))
-      case _ ⇒ None
+      case (Some(anchor), group) => Some((anchor, group.head))
+      case _ => None
     }
 
   private def mapDelta(prev: Map[String, Svg], next: Map[String, Svg]) = {
     val common = prev.keySet & next.keySet
     if (common.isEmpty) None else {
-      val deltas = common map { id ⇒
+      val deltas = common map { id =>
         nodePosition.getOption(prev(id)).get - nodePosition.getOption(next(id)).get
       }
       Some(Point.mean(deltas.toSeq))
@@ -62,12 +64,14 @@ case class GraphAlignment[Svg](api: BaseSvgApi[Svg]) {
   /** Align a sequence of animation frames pairwise */
   def alignPairwise(svgs: Seq[Svg]): Vector[Svg] =
     svgs.foldLeft(Vector(svgs.head)) {
-      case ((acc :+ prev), next) ⇒ acc :+ prev :+ align(prev, next)
+      case (acc :+ prev, next) => acc :+ prev :+ align(prev, next)
+      case (Vector(prev), next) => Vector(prev) :+ align(prev, next)
+      case (_, next) => Vector(next)
     }
 
   /** Set the viewbox of all frames to the smallest common viewbox */
-  def unifyDimensions(svgs: Vector[Svg]): Stream[Svg] = {
+  def unifyDimensions(svgs: Vector[Svg]): LazyList[Svg] = {
     val maxViewBox = Rectangle.union(svgs.map(api.viewBox.getOption(_).get))
-    svgs.toStream.map(api.viewBox.set(maxViewBox))
+    svgs.to(LazyList).map(api.viewBox.set(maxViewBox))
   }
 }

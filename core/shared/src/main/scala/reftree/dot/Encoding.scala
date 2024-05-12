@@ -1,7 +1,5 @@
 package reftree.dot
 
-import scala.language.higherKinds
-
 /**
  * A chunk obtained in the process of encoding
  */
@@ -32,7 +30,7 @@ object Chunk {
  * A typeclass for encoding values of type [[A]] into chunks
  */
 trait Encoding[A] {
-  def encoding: A ⇒ Chunk
+  def encoding: A => Chunk
 }
 
 /**

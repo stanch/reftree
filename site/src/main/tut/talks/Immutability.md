@@ -33,7 +33,7 @@ import reftree.render._
 import reftree.demo.Data._
 import scala.collection.immutable._
 import java.nio.file.Paths
-import Diagram.{sourceCodeCaption ⇒ diagram}
+import Diagram.{sourceCodeCaption => diagram}
 ```
 
 To start an interactive session, just run
@@ -145,7 +145,7 @@ makes it rare enough to yield great average (“ammortized”) performance:
 ```scala
 (Animation
   .startWith(Queue(1, 2, 3))
-  .repeat(3)(_.iterate(2)(q ⇒ q :+ (q.max + 1)).iterate(2)(_.tail))
+  .repeat(3)(_.iterate(2)(q => q :+ (q.max + 1)).iterate(2)(_.tail))
   .build(Diagram.toStringCaption(_).withAnchor("queue"))
   .render("queue"))
 ```
@@ -209,7 +209,7 @@ implicit val measure = Measure.Indexed
 
 Animation
   .startWith(FingerTree(1))
-  .iterateWithIndex(21)((t, i) ⇒ t :+ (i + 1))
+  .iterateWithIndex(21)((t, i) => t :+ (i + 1))
   .build(Diagram(_).withCaption("Finger Tree").withAnchor("tree"))
   .render("finger", _.withDensity(75).withVerticalSpacing(2))
 ```
@@ -492,7 +492,7 @@ and the parent zipper does not exist, since we are at the top level.
 One thing we can do right away is modify the focus:
 
 ```tut:silent
-val zipper2 = zipper1.update(focus ⇒ focus.copy(x = focus.x + 99))
+val zipper2 = zipper1.update(focus => focus.copy(x = focus.x + 99))
 ```
 
 ```tut:silent
@@ -627,7 +627,7 @@ val movement = Animation
   )
 
 val trees = movement
-  .build(z ⇒ Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
+  .build(z => Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
   .toNamespace("tree")
 
 val zippers = movement

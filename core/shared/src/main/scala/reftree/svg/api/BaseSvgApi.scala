@@ -15,8 +15,8 @@ abstract class BaseSvgApi[Svg] {
   def elementId: Getter[Svg, Option[String]]
   def elementClasses: Getter[Svg, Set[String]]
 
-  final def select(selector: String): Prism[Svg, Svg] = Optics.only { svg ⇒
-    Selector.fromString(selector).clauses.exists { clause ⇒
+  final def select(selector: String): Prism[Svg, Svg] = Optics.only { svg =>
+    Selector.fromString(selector).clauses.exists { clause =>
       clause.element.forall(_ == elementName.get(svg)) &&
       clause.classes.subsetOf(elementClasses.get(svg))
     }
@@ -31,20 +31,20 @@ abstract class BaseSvgApi[Svg] {
    * as well as when obtaining attributes that have coordinates inside.
    */
   private def translated[A <: Svg, B](optional: Optional[A, B])(implicit translatable: Translatable[B]) =
-    Optional[A, B] { svg ⇒
+    Optional[A, B] { svg =>
       val t = translation.getOption(svg).getOrElse(Point.zero)
       optional.getOption(svg).map(translatable.translate(_, t))
-    } { value ⇒ svg ⇒
+    } { value => svg =>
       val t = translation.getOption(svg).getOrElse(Point.zero)
       optional.set(translatable.translate(value, -t))(svg)
     }
 
   private implicit lazy val svgTranslatable: Translatable[Svg] =
-    Translatable((svg, delta) ⇒ translation.modify(_ + delta)(svg))
+    Translatable((svg, delta) => translation.modify(_ + delta)(svg))
 
   final def groupPosition(anchor: Optional[Svg, Point]): Optional[Svg, Point] =
-    Optional[Svg, Point](anchor.getOption) { position ⇒ svg ⇒
-      anchor.getOption(svg).fold(svg) { anchorPosition ⇒
+    Optional[Svg, Point](anchor.getOption) { position => svg =>
+      anchor.getOption(svg).fold(svg) { anchorPosition =>
         translation.modify(_ + position - anchorPosition)(svg)
       }
     }

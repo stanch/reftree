@@ -24,7 +24,7 @@ class ToRefTreeSpec extends AnyFlatSpec with Matchers {
           ), Some("name"), false)
         ),
         false
-      ) ⇒
+      ) =>
     }
   }
 
@@ -41,7 +41,7 @@ class ToRefTreeSpec extends AnyFlatSpec with Matchers {
           RefTree.Ref.Field(RefTree.Val(3, "3", true), Some("years"), false)
         ),
         false
-      ) ⇒
+      ) =>
     }
   }
 }

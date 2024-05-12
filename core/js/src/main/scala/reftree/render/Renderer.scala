@@ -51,13 +51,13 @@ object VizFacade extends js.Object {
 case class Renderer(
   renderingOptions: RenderingOptions = RenderingOptions(),
   animationOptions: AnimationOptions = AnimationOptions()
-) { self ⇒
+) { self =>
   /** Tweak the rendering options with the provided funciton */
-  def tweakRendering(tweak: RenderingOptions ⇒ RenderingOptions) =
+  def tweakRendering(tweak: RenderingOptions => RenderingOptions) =
     copy(renderingOptions = tweak(renderingOptions))
 
   /** Tweak the animation options with the provided funciton */
-  def tweakAnimation(tweak: AnimationOptions ⇒ AnimationOptions) =
+  def tweakAnimation(tweak: AnimationOptions => AnimationOptions) =
     copy(animationOptions = tweak(animationOptions))
 
   private def renderSvg(graph: Graph) = (new dom.DOMParser)
@@ -119,7 +119,7 @@ case class Renderer(
           }
         }
       } catch {
-        case _: IndexOutOfBoundsException ⇒
+        case _: IndexOutOfBoundsException =>
           if (animationOptions.loop) {
             i = 0
             js.timers.setTimeout(FiniteDuration(animationOptions.delay.toNanos, TimeUnit.NANOSECONDS))(iteration())
@@ -133,7 +133,7 @@ case class Renderer(
   implicit class DiagramRenderSyntax(diagram: Diagram) {
     def render(
       target: dom.Node,
-      tweak: RenderingOptions ⇒ RenderingOptions = identity
+      tweak: RenderingOptions => RenderingOptions = identity
     ): Unit = self
       .tweakRendering(tweak)
       .render(target, diagram)
@@ -143,8 +143,8 @@ case class Renderer(
   implicit class AnimationRenderSyntax(animation: Animation) {
     def render(
       target: dom.Node,
-      tweakRendering: RenderingOptions ⇒ RenderingOptions = identity,
-      tweakAnimation: AnimationOptions ⇒ AnimationOptions = identity
+      tweakRendering: RenderingOptions => RenderingOptions = identity,
+      tweakAnimation: AnimationOptions => AnimationOptions = identity
     ): Unit = self
       .tweakRendering(tweakRendering)
       .tweakAnimation(tweakAnimation)

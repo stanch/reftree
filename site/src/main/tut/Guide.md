@@ -165,7 +165,7 @@ The simplest way to create an animation is to use the builder API:
 ```tut:silent
 (Animation
   .startWith(Queue(1))
-  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+  .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
   .build()
   .render("animation-simple"))
 ```
@@ -177,7 +177,7 @@ You can also configure how the diagram for each frame is produced:
 ```tut:silent
 (Animation
   .startWith(Queue(1))
-  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+  .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
   .build(Diagram(_).withCaption("My Queue").withColor(2))
   .render("animation-captioned-red"))
 ```
@@ -192,7 +192,7 @@ while everything else is moving. You can achieve this via `withAnchor` method:
 ```tut:silent
 (Animation
   .startWith(Queue(1))
-  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+  .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
   .build(Diagram(_).withAnchor("queue").withCaption("This node is anchored!"))
   .render("animation-anchored"))
 ```
@@ -204,13 +204,13 @@ Finally, animations can be combined in sequence or in parallel, for example:
 ```tut:silent
 val queue1 = (Animation
   .startWith(Queue(1))
-  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (i + 1))
+  .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
   .build()
   .toNamespace("one"))
 
 val queue2 = (Animation
   .startWith(Queue(10))
-  .iterateWithIndex(2)((queue, i) ⇒ queue :+ (10 * (i + 1)))
+  .iterateWithIndex(2)((queue, i) => queue :+ (10 * (i + 1)))
   .build()
   .toNamespace("two"))
 

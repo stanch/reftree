@@ -45,13 +45,13 @@ case class Renderer(
   animationOptions: AnimationOptions = AnimationOptions(),
   directory: Path = Paths.get("."),
   format: String = "png"
-) { self ⇒
+) { self =>
   /** Tweak the rendering options with the provided funciton */
-  def tweakRendering(tweak: RenderingOptions ⇒ RenderingOptions) =
+  def tweakRendering(tweak: RenderingOptions => RenderingOptions) =
     copy(renderingOptions = tweak(renderingOptions))
 
   /** Tweak the animation options with the provided funciton */
-  def tweakAnimation(tweak: AnimationOptions ⇒ AnimationOptions) =
+  def tweakAnimation(tweak: AnimationOptions => AnimationOptions) =
     copy(animationOptions = tweak(animationOptions))
 
   /** Render a diagram to a file with the given name (do not include the extension) */
@@ -82,7 +82,7 @@ case class Renderer(
   implicit class DiagramRenderSyntax(diagram: Diagram) {
     def render(
       name: String,
-      tweak: RenderingOptions ⇒ RenderingOptions = identity
+      tweak: RenderingOptions => RenderingOptions = identity
     ) = self
       .tweakRendering(tweak)
       .render(name, diagram)
@@ -92,8 +92,8 @@ case class Renderer(
   implicit class AnimationRenderSyntax(animation: Animation) {
     def render(
       name: String,
-      tweakRendering: RenderingOptions ⇒ RenderingOptions = identity,
-      tweakAnimation: AnimationOptions ⇒ AnimationOptions = identity
+      tweakRendering: RenderingOptions => RenderingOptions = identity,
+      tweakAnimation: AnimationOptions => AnimationOptions = identity
     ) = self
       .tweakRendering(tweakRendering)
       .tweakAnimation(tweakAnimation)

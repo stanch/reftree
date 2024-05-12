@@ -32,18 +32,19 @@ object Primitives {
   def node(tree: RefTree, color: Color, anchorId: Option[String], namespace: Seq[String]): Node = {
     val background = if (tree.highlight) color.opacify(0.2) else defaultBackground
     val labelContent: Seq[Row] = tree match {
-      case ref: RefTree.Ref ⇒
+      case ref: RefTree.Ref =>
         val title = Cell(
           Plain(ref.name),
           Cell.Attrs(port = Some("n"), rowSpan = Some(2))
         )
-        Seq(true, false).map { firstRow ⇒
-          ref.children.zipWithIndex flatMap { case (c, i) ⇒ cell(c, i, color, firstRow) }
+        Seq(true, false).map { firstRow =>
+          ref.children.zipWithIndex flatMap { case (c, i) => cell(c, i, color, firstRow) }
         } match {
-          case Seq(row1, Seq()) ⇒ Seq(RowContent(title +: row1))
-          case Seq(row1, row2) ⇒ Seq(RowContent(title +: row1), RowDivider, RowContent(row2))
+          case Seq(row1, Seq()) => Seq(RowContent(title +: row1))
+          case Seq(row1, row2) => Seq(RowContent(title +: row1), RowDivider, RowContent(row2))
+          case _ => Seq()
         }
-      case _ ⇒
+      case _ =>
         val title = Cell(cellLabel(tree), Cell.Attrs(port = Some("n")))
         Seq(RowContent(Seq(title)))
     }
@@ -51,15 +52,15 @@ object Primitives {
       cellSpacing = Some(0), cellPadding = Some(6), cellBorder = Some(0), columns = Some("*"),
       bgColor = Some(background), style = Some("rounded")
     ))
-    val tooltip = anchorId.map(a ⇒ s"anchor-$a")
+    val tooltip = anchorId.map(a => s"anchor-$a")
     val id = namespaced(tree.id, namespace)
     Node(id, label, Node.Attrs(fontColor = Some(color), color = Some(color), tooltip = tooltip))
   }
 
   private def cellLabel(tree: RefTree, elideRefs: Boolean = false): Html = tree match {
-    case RefTree.Val(_, formattedValue, _) ⇒ Plain(formattedValue)
-    case _: RefTree.Null ⇒ Raw("&empty;")
-    case RefTree.Ref(_, id, _, _) ⇒
+    case RefTree.Val(_, formattedValue, _) => Plain(formattedValue)
+    case _: RefTree.Null => Raw("&empty;")
+    case RefTree.Ref(_, id, _, _) =>
       if (elideRefs) Raw("&hellip;") else Raw("&middot;")
   }
 
@@ -67,24 +68,24 @@ object Primitives {
     if (!firstRow && field.name.isEmpty) None else Some {
       val span = if (firstRow && field.name.isEmpty) Some(2) else None
       val label = (firstRow, field.name) match {
-        case (true, Some(name)) ⇒ Italic(name)
-        case _ ⇒ cellLabel(field.value, field.elideRefs)
+        case (true, Some(name)) => Italic(name)
+        case _ => cellLabel(field.value, field.elideRefs)
       }
       val port = (firstRow, field.name, field.value) match {
-        case (true, Some(_), _) ⇒ None
-        case (_, _, _: RefTree.Ref) ⇒ Some(i.toString)
-        case _ ⇒ None
+        case (true, Some(_), _) => None
+        case (_, _, _: RefTree.Ref) => Some(i.toString)
+        case _ => None
       }
       val background = (field.value, field.value.highlight) match {
-        case (_, false) | (_: RefTree.Ref, _) ⇒ defaultBackground
-        case _ ⇒ color.opacify(0.25)
+        case (_, false) | (_: RefTree.Ref, _) => defaultBackground
+        case _ => color.opacify(0.25)
       }
       Cell(label, Cell.Attrs(port, span, Some(background)))
     }
 
   def edge(id: String, tree: RefTree, i: Int, color: Color, namespace: Seq[String]): Option[Edge] =
     tree match {
-      case RefTree.Ref(_, refId, _, _) ⇒
+      case RefTree.Ref(_, refId, _, _) =>
         val sourceId = namespaced(id, namespace)
         val targetId = namespaced(refId, namespace)
         val edgeId = namespaced(s"$id-$i-$refId", namespace)
@@ -94,6 +95,6 @@ object Primitives {
           edgeId,
           Edge.Attrs(color = Some(color))
         ))
-      case _ ⇒ None
+      case _ => None
     }
 }

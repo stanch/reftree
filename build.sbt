@@ -1,8 +1,23 @@
 val commonSettings = Seq(
   scalaVersion := "2.12.19",
-  crossScalaVersions := Seq("2.12.19"),
-  scalacOptions ++= Seq("-feature", "-deprecation", "-Xlint", "-Xfatal-warnings", "-Ypartial-unification"),
-  Compile / compile / scalacOptions  += "-Ywarn-unused-import",
+  crossScalaVersions := Seq("2.12.19", "2.13.14"),
+  scalacOptions ++= {
+    val commonScalacOptions =
+      Seq("-feature", "-deprecation", "-Xlint", "-Xfatal-warnings")
+
+    scalaVersion.value match {
+      case v if v.startsWith("2.12") =>
+        commonScalacOptions ++
+          Seq(
+            "-Ypartial-unification",
+            "-Ywarn-unused-import",
+            "-language:higherKinds"
+          )
+      case _ =>
+        commonScalacOptions :+
+          "-Xlint:_,-implicit-recursion,-recurse-with-default,-unused,-byname-implicit" // scala/bug#12072
+    }
+  },
   Compile / doc / scalacOptions += "-no-link-warnings"
 ) ++ metadata ++ publishing
 
@@ -42,6 +57,7 @@ val core = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "reftree",
     libraryDependencies ++= Seq(
+      "org.scala-lang.modules" %%% "scala-collection-compat" % "2.12.0",
       "com.chuusai" %%% "shapeless" % "2.3.10",
       "com.lihaoyi" %%% "sourcecode" % "0.4.1",
       "com.lihaoyi" %%% "fastparse" % "3.1.0",
@@ -69,7 +85,6 @@ lazy val coreJS = core.js
   .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %%% "scala-collection-compat" % "2.12.0",
       "org.scala-js" %%% "scalajs-dom" % "2.8.0",
       "org.scala-js" %%% "scalajs-java-time" % "1.0.0"
     ),
@@ -93,7 +108,7 @@ val demo = crossProject(JSPlatform, JVMPlatform)
 lazy val demoJVM = demo.jvm
   .settings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" % "ammonite" % "3.0.0-M1" % Test cross CrossVersion.full
+      "com.lihaoyi" % "ammonite" % "3.0.0-M1-24-26133e66" % Test cross CrossVersion.full
     )
   )
 

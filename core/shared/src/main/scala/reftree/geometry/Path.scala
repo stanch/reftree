@@ -11,32 +11,32 @@ sealed trait PathSegment {
   def to: Point
 
   def +(delta: Point): PathSegment = this match {
-    case Move(to) ⇒ Move(to + delta)
-    case Line(from, to) ⇒ Line(from + delta, to + delta)
-    case Bezier(from, c1, c2, to) ⇒ Bezier(from + delta, c1 + delta, c2 + delta, to + delta)
+    case Move(to) => Move(to + delta)
+    case Line(from, to) => Line(from + delta, to + delta)
+    case Bezier(from, c1, c2, to) => Bezier(from + delta, c1 + delta, c2 + delta, to + delta)
   }
 
   def -(delta: Point): PathSegment = this match {
-    case Move(to) ⇒ Move(to - delta)
-    case Line(from, to) ⇒ Line(from - delta, to - delta)
-    case Bezier(from, c1, c2, to) ⇒ Bezier(from - delta, c1 - delta, c2 - delta, to - delta)
+    case Move(to) => Move(to - delta)
+    case Line(from, to) => Line(from - delta, to - delta)
+    case Bezier(from, c1, c2, to) => Bezier(from - delta, c1 - delta, c2 - delta, to - delta)
   }
 
   /** Estimate the length of this segment */
   def length: Double = this match {
-    case m: Move ⇒ 0
-    case Line(from, to) ⇒ from distance to
-    case b: Bezier ⇒ toPolyline(4).length // for splines we do a crude estimation
+    case m: Move => 0
+    case Line(from, to) => from distance to
+    case b: Bezier => toPolyline(4).length // for splines we do a crude estimation
   }
 
   /** Approximate the segment with a polyline using the given number of points */
   def toPolyline(points: Int): Polyline = this match {
-    case Move(to) ⇒ Polyline(Seq(to))
-    case Line(from, to) ⇒
+    case Move(to) => Polyline(Seq(to))
+    case Line(from, to) =>
       // Even though 2 points is enough, we want to use all the points,
       // so that this line can morph into a different shape uniformly.
       Polyline(Point.interpolation.sample(from, to, points, inclusive = true))
-    case Bezier(from, c1, c2, to) ⇒
+    case Bezier(from, c1, c2, to) =>
       Polyline(Point.bezierInterpolation(c1, c2).sample(from, to, points, inclusive = true))
   }
 }
@@ -66,7 +66,7 @@ case class Path(segments: Seq[PathSegment]) {
     val lengths = segments.map(_.length)
     val totalLength = lengths.sum
     // distribute the points proportionally to segment lengths
-    val pointDistribution = lengths.map(l ⇒ Math.max(points * l / totalLength, 1).toInt)
+    val pointDistribution = lengths.map(l => Math.max(points * l / totalLength, 1).toInt)
     val diff = pointDistribution.sum - points
     // we might be off by a few points...
     val compensatedPointDistribution = if (diff == 0) {
@@ -78,7 +78,7 @@ case class Path(segments: Seq[PathSegment]) {
       pointDistribution.patch(index, Seq(Math.max(max + diff, 0)), 1)
     }
     (segments zip compensatedPointDistribution) map {
-      case (e, p) ⇒ e.toPolyline(p)
+      case (e, p) => e.toPolyline(p)
     } reduceLeft (_ concatTailOf _)
   }
 
@@ -99,7 +99,9 @@ object Path {
   def fromPolyline(polyline: Polyline) = {
     val move = PathSegment.Move(polyline.points.head)
     val lines = polyline.points.sliding(2).toSeq map {
-      case Seq(a, b) ⇒ PathSegment.Line(a, b)
+      case Seq(a, b, _@_*) => PathSegment.Line(a, b)
+      case Seq(a) => PathSegment.Line(a, Point.zero)
+      case _ => PathSegment.Line(Point.zero, Point.zero)
     }
     Path(move +: lines)
   }
@@ -108,11 +110,11 @@ object Path {
   def polylineIso(points: Int): Iso[Path, Polyline] =
     Iso[Path, Polyline](_.simplify(points))(fromPolyline)
 
-  private def parser[_: P] = {
+  private def parser[A: P] = {
 
     def sep = P(" " | ",").rep(1)
     def double = P(CharIn("0-9\\-\\.").rep(1).!).map(_.toDouble)
-    def point = P(double ~ sep ~ double).map { case (x, y) ⇒ Point(x, y) }
+    def point = P(double ~ sep ~ double).map { case (x, y) => Point(x, y) }
 
     def moveSegment(acc: Path): P[Path] = point
       .map(PathSegment.Move.apply)
@@ -123,17 +125,17 @@ object Path {
       .map(acc + _)
 
     def bezierSegment(acc: Path): P[Path] = (point ~ sep ~ point ~ sep ~ point)
-      .map { case (c1, c2, to) ⇒ PathSegment.Bezier(acc.last, c1, c2, to) }
+      .map { case (c1, c2, to) => PathSegment.Bezier(acc.last, c1, c2, to) }
       .map(acc + _)
 
-    def cycle(acc: Path, p: Path ⇒ P[Path]): P[Path] =
-      p(acc).flatMap(acc2 ⇒ sep.? ~ cycle(acc2, p).?.map(_.getOrElse(acc2)))
+    def cycle(acc: Path, p: Path => P[Path]): P[Path] =
+      p(acc).flatMap(acc2 => sep.? ~ cycle(acc2, p).?.map(_.getOrElse(acc2)))
 
     def move(acc: Path): P[Path] = P("M" ~/ cycle(acc, moveSegment))
     def line(acc: Path): P[Path] = P("L" ~/ cycle(acc, lineSegment))
     def bezier(acc: Path): P[Path] = P("C" ~/ cycle(acc, bezierSegment))
 
-    cycle(Path.empty, acc ⇒ move(acc) | line(acc) | bezier(acc))
+    cycle(Path.empty, acc => move(acc) | line(acc) | bezier(acc))
   }
 
   /** Interpolate via a polyline approximation */

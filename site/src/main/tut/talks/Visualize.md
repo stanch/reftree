@@ -38,7 +38,7 @@ import reftree.demo.Data
 import reftree.demo.Shortcuts
 import scala.collection.immutable._
 import java.nio.file.Paths
-import Diagram.{sourceCodeCaption ⇒ diagram}
+import Diagram.{sourceCodeCaption => diagram}
 ```
 
 To start an interactive session, just run
@@ -117,7 +117,7 @@ features: animations.
 ```scala
 Animation
   .startWith(Queue(1, 2, 3))
-  .repeat(3)(_.iterate(2)(q ⇒ q :+ (q.max + 1)).iterate(2)(_.tail))
+  .repeat(3)(_.iterate(2)(q => q :+ (q.max + 1)).iterate(2)(_.tail))
   .build(Diagram.toStringCaption(_).withAnchor("queue"))
   .render("queue")
 ```
