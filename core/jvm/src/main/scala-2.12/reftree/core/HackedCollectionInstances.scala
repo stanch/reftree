@@ -47,14 +47,30 @@ trait HackedCollectionInstances extends CollectionInstances {
   implicit def `HashSet RefTree`[A: ToRefTree]: ToRefTree[HashSet[A]] =
     ToRefTree[HashSet[A]] {
       case leaf: HashSet.HashSet1[A] =>
-        val hash = RefTree.Val.formatted(leaf.privateField[Int]("hash"))(_.toHexString)
-          .toField.withName("hash")
-        val key = leaf.privateField[A]("key").refTree.toField
+        val hash =
+          RefTree.Val
+            .formatted(
+              leaf.packagePrivateField[Int](
+                "hash",
+                "scala.collection.immutable.HashSet$LeafHashSet"
+              )
+            )(_.toHexString)
+            .toField
+            .withName("hash")
+        val key = leaf.privateField[A]("key").refTree.toField.withName("key")
         RefTree.Ref(leaf, Seq(hash, key)).rename("HashSet.HashSet1")
       case collision: HashSet.HashSetCollision1[A] =>
-        val hash = RefTree.Val.formatted(collision.privateField[Int]("hash"))(_.toHexString)
-          .toField.withName("hash")
-        val ks = collision.privateField[ListSet[A]]("ks").refTree.toField
+        val hash =
+          RefTree.Val
+            .formatted(
+              collision.packagePrivateField[Int](
+                "hash",
+                "scala.collection.immutable.HashSet$LeafHashSet"
+              )
+            )(_.toHexString)
+            .toField
+            .withName("hash")
+        val ks = collision.ks.refTree.toField
         RefTree.Ref(collision, Seq(hash, ks)).rename("HashSet.HashSetCollision1")
       case trie: HashSet.HashTrieSet[A] =>
         val size = trie.privateField[Int]("size0").refTree.toField.withName("size")
