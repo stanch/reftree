@@ -1,6 +1,6 @@
 package reftree.util
 
-object Reflection {
+private[reftree] object Reflection {
   /** A utility for accessing private fields */
   implicit class PrivateFields[A](val value: A) extends AnyVal {
     def privateField[B](name: String): B = {
