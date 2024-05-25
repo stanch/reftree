@@ -1,7 +1,7 @@
 package scala.collection.immutable
 
 import reftree.core._
-import reftree.util.Reflection.PrivateFields
+import Reflection._
 
 import scala.util.Try
 
@@ -61,5 +61,59 @@ trait HackedCollectionInstances extends CollectionInstances {
       value,
       Seq(start, end, sliceCount) ++ layers
     )
+  }
+
+  implicit def `HashSet RefTree`[A: ToRefTree]: ToRefTree[HashSet[A]] = ToRefTree[HashSet[A]] { value =>
+    bitMapIndexedSetNodeRefTree[A](value.rootNode).rename("HashSet")
+  }
+
+  private def bitMapIndexedSetNodeRefTree[A: ToRefTree](node: BitmapIndexedSetNode[A]): RefTree.Ref = {
+    val size = node.size.refTree.toField.withName("size")
+    val arity = node.nodeArity.refTree.toField.withName("arity")
+    val hash =
+      RefTree.Val.formatted(node.cachedJavaKeySetHashCode)(_.toHexString)
+        .toField.withName("hash")
+
+    val content =
+      RefTree.Ref(
+          node.content,
+          hashSetArrayRefTree[A](node.content, node.nodeArity)
+        )
+        .rename("Array")
+        .toField
+
+    RefTree.Ref(
+      node,
+      Seq(size, arity, hash, content)
+    )
+  }
+
+  private def hashSetArrayRefTree[A: ToRefTree](content: Array[Any], arity: Int): Seq[RefTree.Ref.Field] =
+    if (arity > 0) {
+      content.map { x =>
+        if (x.isInstanceOf[BitmapIndexedSetNode[_]])
+          bitMapIndexedSetNodeRefTree[A](x.asInstanceOf[BitmapIndexedSetNode[A]])
+        else
+          x.asInstanceOf[A].refTree
+      }.map(_.toField).toIndexedSeq
+    } else
+      content.map(_.asInstanceOf[A].refTree).map(_.toField).toIndexedSeq
+}
+
+private[immutable] object Reflection {
+  /** A utility for accessing private fields */
+  implicit class PrivateFields[A](val value: A) extends AnyVal {
+    def privateField[B](name: String): B = {
+      val field = value.getClass.getDeclaredField(name)
+      field.setAccessible(true)
+      field.get(value).asInstanceOf[B]
+    }
+
+    def packagePrivateField[B](fieldName: String, className: String): B = {
+      val cl = Class.forName(className)
+      val field = cl.getDeclaredField(fieldName)
+      field.setAccessible(true)
+      field.get(value).asInstanceOf[B]
+    }
   }
 }

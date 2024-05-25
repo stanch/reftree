@@ -1,7 +1,7 @@
 package scala.collection.immutable
 
 import reftree.core._
-import reftree.util.Reflection.PrivateFields
+import Reflection._
 
 /**
  * [[ToRefTree]] instances for Scala immutable collections, which require access to private fields
@@ -142,4 +142,22 @@ trait HackedCollectionInstances extends CollectionInstances {
         RefTree.Ref(value, children)
       }
     }
+}
+
+private[immutable] object Reflection {
+  /** A utility for accessing private fields */
+  implicit class PrivateFields[A](val value: A) extends AnyVal {
+    def privateField[B](name: String): B = {
+      val field = value.getClass.getDeclaredField(name)
+      field.setAccessible(true)
+      field.get(value).asInstanceOf[B]
+    }
+
+    def packagePrivateField[B](fieldName: String, className: String): B = {
+      val cl = Class.forName(className)
+      val field = cl.getDeclaredField(fieldName)
+      field.setAccessible(true)
+      field.get(value).asInstanceOf[B]
+    }
+  }
 }
