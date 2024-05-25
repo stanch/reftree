@@ -68,11 +68,12 @@ trait HackedCollectionInstances extends CollectionInstances {
   }
 
   private def bitMapIndexedSetNodeRefTree[A: ToRefTree](node: BitmapIndexedSetNode[A]): RefTree.Ref = {
-    val size = node.size.refTree.toField.withName("size")
-    val arity = node.nodeArity.refTree.toField.withName("arity")
     val hash =
       RefTree.Val.formatted(node.cachedJavaKeySetHashCode)(_.toHexString)
         .toField.withName("hash")
+    val size = node.size.refTree.toField.withName("size")
+    val nodeArity = node.nodeArity.refTree.toField.withName("nodeArity")
+    val payloadArity = node.payloadArity.refTree.toField.withName("payloadArity")
 
     val content =
       RefTree.Ref(
@@ -84,7 +85,7 @@ trait HackedCollectionInstances extends CollectionInstances {
 
     RefTree.Ref(
       node,
-      Seq(size, arity, hash, content)
+      Seq(hash, size, nodeArity, payloadArity, content)
     )
   }
 

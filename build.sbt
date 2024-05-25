@@ -1,5 +1,5 @@
 val commonSettings = Seq(
-  scalaVersion := "2.12.19",
+  scalaVersion := "2.13.14",
   crossScalaVersions := Seq("2.12.19", "2.13.14"),
   scalacOptions ++= {
     val commonScalacOptions =
