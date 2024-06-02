@@ -97,9 +97,16 @@ trait HackedCollectionInstances extends CollectionInstances {
         RefTree.Ref(collision, Seq(hash, kvs)).rename("HashMap.HashMapCollision1")
       case trie: HashMap.HashTrieMap[A, B] =>
         val size = trie.privateField[Int]("size0").refTree.toField.withName("size")
-        val elems = trie.privateField[Array[HashMap[A, B]]]("elems").refTree.toField
-        val bitmap = RefTree.Val.formatted(trie.privateField[Int]("bitmap"))(_.toBinaryString)
-          .toField.withName("bitmap")
+        val elems =
+          trie.packagePrivateField[Array[HashMap[A, B]]](
+            "elems0", "scala.collection.immutable.HashMap$HashTrieMap"
+          ).refTree.toField
+        val bitmap =
+          RefTree.Val.formatted(
+            trie.packagePrivateField[Int](
+              "bitmap0", "scala.collection.immutable.HashMap$HashTrieMap"
+            )
+          )(_.toBinaryString).toField.withName("bitmap")
         RefTree.Ref(trie, Seq(size, bitmap, elems)).rename("HashMap.HashTrieMap")
       case empty =>
         RefTree.Ref(empty, Seq.empty).rename("HashMap.EmptyHashMap")
