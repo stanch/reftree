@@ -1,5 +1,7 @@
 package reftree.core
 
+import reftree.core.RefTree.Ref
+
 import scala.annotation.implicitNotFound
 import scala.collection.immutable.{CollectionInstances, HackedCollectionInstances}
 
@@ -139,4 +141,15 @@ object ToRefTree extends CollectionInstances with HackedCollectionInstances with
   implicit def `String RefTree`: ToRefTree[String] = ToRefTree[String] { value =>
     RefTree.Ref(value, value.map(RefTree.Val(_).toField))
   }
+
+  implicit def `Tuple2 RefTree`[A: ToRefTree, B: ToRefTree]: ToRefTree[(A, B)] =
+    ToRefTree[(A, B)] { value =>
+      RefTree.Ref(
+        value,
+        Seq(
+          Ref.Field(value._1.refTree, name = Option("_1")),
+          Ref.Field(value._2.refTree, name = Option("_2"))
+        )
+      )
+    }
 }
