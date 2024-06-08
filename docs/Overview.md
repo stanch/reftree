@@ -78,11 +78,11 @@ libraryDependencies += "io.github.stanch" %%% "reftree" % "latest-version"
 
 ### Minimal example
 
-```tut:invisible
+```mdoc:invisible
 val ImagePath = "site/target/tut/images"
 ```
 
-```tut:silent
+```mdoc:silent
 import reftree.render.{Renderer, RenderingOptions}
 import reftree.diagram.Diagram
 import java.nio.file.Paths

@@ -1,6 +1,7 @@
 val commonSettings = Seq(
   scalaVersion := "2.13.14",
   crossScalaVersions := Seq("2.12.19", "2.13.14"),
+  version := "1.4.0",
   scalacOptions ++= {
     val commonScalacOptions =
       Seq("-feature", "-deprecation", "-Xlint", "-Xfatal-warnings")
@@ -119,11 +120,25 @@ lazy val demoJS = demo.js
     jsEnv := new net.exoego.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
 
-val site = project.in(file("site"))
-  .enablePlugins(GitBookPlugin, GhpagesPlugin) //, TutPlugin)
+val site = project.in(file("site-gen"))
+  .enablePlugins(
+    BuildInfoPlugin,
+    GitBookPlugin,
+    GhpagesPlugin,
+    MdocPlugin,
+    SitePreviewPlugin
+  )
   .dependsOn(demoJVM)
   .settings(commonSettings)
   .settings(
+    name := "reftree-site",
+    moduleName := "reftree-site",
+    (publish / skip) := true,
+    mdoc := (Compile / run).evaluated,
+    (Compile / mainClass) := Some("reftree.Docs"),
+    (Compile / resources) ++= {
+      List((ThisBuild / baseDirectory).value / "docs")
+    },
     makeSite / mappings ++= Seq(
       file("images/teaser.gif") -> "images/teaser.gif",
       file("images/queue.gif") -> "images/queue.gif",
@@ -132,14 +147,15 @@ val site = project.in(file("site"))
       (( demoJS / crossTarget).value / "demo-opt.js") -> "js/demo.js"
     ),
     SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, coreJVM / (Compile / packageDoc / mappings), "api/jvm"),
-    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js },  coreJS / (Compile/  packageDoc / mappings), "api/js"),
+    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js },  coreJS / (Compile /  packageDoc / mappings), "api/js"),
     // NameFilter := """.*\.(md|json|css|html)""".r,
-    // tutTargetDirectory := target.value / "tut",
     GitBook / gitbookInstallDir := Some(baseDirectory.value / "node_modules" / "gitbook"),
-    // GitBook / sourceDirectory := tutTargetDirectory.value,
-    // makeSite := makeSite.dependsOn(tutQuick).dependsOn( demoJS/ ( Compile/ fullOptJS)).value,
+    GitBook / sourceDirectory := mdocOut.value,
+    makeSite := makeSite.dependsOn(mdoc.toTask("")).dependsOn(demoJS / ( Compile / fullOptJS)).value,
     ghpagesNoJekyll := true,
-    git.remoteRepo := "git@github.com:stanch/reftree.git"
+    git.remoteRepo := "git@github.com:stanch/reftree.git",
+    buildInfoKeys := Seq[BuildInfoKey](version),
+    buildInfoPackage := "reftree.build"
   )
 
 lazy val root = project.in(file("."))

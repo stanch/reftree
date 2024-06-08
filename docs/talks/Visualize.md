@@ -21,7 +21,7 @@ Here is an overview:
 Throughout this page we will assume the following
 declarations (each section might add its own):
 
-```tut:silent
+```mdoc:silent
 import reftree.core._
 import reftree.diagram._
 import reftree.render._
@@ -55,11 +55,11 @@ already has all the necessary imports in scope.*
 
 ## Introducing `reftree`
 
-```tut:invisible
+```mdoc:invisible
 val ImagePath = "site/target/tut/images"
 ```
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
@@ -126,7 +126,7 @@ Animation
 
 ## Inside `reftree`
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 import reftree.contrib.SimplifiedInstances.{option, seq, list}
 
@@ -199,7 +199,7 @@ Ouch! A sane functional approach would definitely help here :)
 
 ## Functional animation
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
@@ -434,7 +434,7 @@ This goes to show the flexibility and usefulness of optics.
 
 ## Zipping it up
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
