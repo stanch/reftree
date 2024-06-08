@@ -115,19 +115,21 @@ trait HackedCollectionInstances extends CollectionInstances {
   private def redBlackTreeRefTree[A: ToRefTree, B: ToRefTree](
     tree: NewRedBlackTree.Tree[A, B],
     includeValue: Boolean
-  ): RefTree = {
-    if (tree == null) RefTree.Null() else {
+  ): RefTree =
+    if (tree != null) {
       val key = tree.key.refTree.toField
       val value = if (includeValue) Seq(tree.value.refTree.toField) else Seq.empty
       val left = redBlackTreeRefTree(tree.left, includeValue).toField
       val right = redBlackTreeRefTree(tree.right, includeValue).toField
+
       RefTree.Ref(tree, Seq(key) ++ value ++ Seq(left, right))
         .copy(highlight = tree.isInstanceOf[NewRedBlackTree.Tree[A, B]])
-    }
-  }
+    } else
+      RefTree.Null()
 
-  implicit def `TreeSet RefTree`[A: ToRefTree]: ToRefTree[TreeSet[A]] = {
-    implicit val unit = ToRefTree[Unit](_ => RefTree.Null())
+  private implicit val unit: ToRefTree[Unit] = ToRefTree.const[Unit](RefTree.Null())
+
+  implicit def `TreeSet RefTree`[A: ToRefTree]: ToRefTree[TreeSet[A]] =
     ToRefTree[TreeSet[A]] { value =>
       if (value.isEmpty) {
         RefTree.Ref(value, Seq.empty)
@@ -137,7 +139,6 @@ trait HackedCollectionInstances extends CollectionInstances {
         RefTree.Ref(value, children)
       }
     }
-  }
 
   implicit def `TreeMap RefTree`[A: ToRefTree, B: ToRefTree]: ToRefTree[TreeMap[A, B]] =
     ToRefTree[TreeMap[A, B]] { value =>
