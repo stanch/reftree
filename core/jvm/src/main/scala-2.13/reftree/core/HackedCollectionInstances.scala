@@ -173,6 +173,16 @@ trait HackedCollectionInstances extends CollectionInstances {
         RefTree.Ref(value, Seq.empty)
     }
 
+  implicit def `TreeMap RefTree`[A: ToRefTree, B: ToRefTree]: ToRefTree[TreeMap[A, B]] =
+    ToRefTree[TreeMap[A, B]] { value =>
+      if (value.nonEmpty) {
+        val underlying = value.privateField[RedBlackTree.Tree[A, B]]("tree")
+        val children = redBlackTreeRefTree(underlying, includeValue = true).asInstanceOf[RefTree.Ref].children
+        RefTree.Ref(value, children)
+      } else
+        RefTree.Ref(value, Seq.empty)
+    }
+
   private def redBlackTreeRefTree[A: ToRefTree, B: ToRefTree](
     tree: RedBlackTree.Tree[A, B],
     includeValue: Boolean
