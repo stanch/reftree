@@ -160,6 +160,33 @@ trait HackedCollectionInstances extends CollectionInstances {
 
     keysBuilder.result().zip(valuesBuilder.result()).map(_.refTree.toField)
   }
+
+  private implicit val unit: ToRefTree[Unit] = ToRefTree.const[Unit](RefTree.Null())
+
+  implicit def `TreeSet RefTree`[A: ToRefTree]: ToRefTree[TreeSet[A]] =
+    ToRefTree[TreeSet[A]] { value =>
+      if (value.nonEmpty) {
+        val underlying = value.privateField[RedBlackTree.Tree[A, Unit]]("tree")
+        val children = redBlackTreeRefTree(underlying, includeValue = false).asInstanceOf[RefTree.Ref].children
+        RefTree.Ref(value, children)
+      } else
+        RefTree.Ref(value, Seq.empty)
+    }
+
+  private def redBlackTreeRefTree[A: ToRefTree, B: ToRefTree](
+    tree: RedBlackTree.Tree[A, B],
+    includeValue: Boolean
+  ): RefTree =
+    if (tree != null) {
+      val key = tree.key.refTree.toField
+      val value = if (includeValue) Seq(tree.value.refTree.toField) else Seq.empty
+      val left = redBlackTreeRefTree(tree.left, includeValue).toField
+      val right = redBlackTreeRefTree(tree.right, includeValue).toField
+
+      RefTree.Ref(tree, Seq(key) ++ value ++ Seq(left, right))
+        .copy(highlight = tree.isInstanceOf[RedBlackTree.Tree[A, B]])
+    } else
+      RefTree.Null()
 }
 
 private[immutable] object Reflection {

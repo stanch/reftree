@@ -131,10 +131,14 @@ trait ToRefTree[A] { self =>
 }
 
 object ToRefTree extends CollectionInstances with HackedCollectionInstances with GenericInstances {
+
   /** A shorthand method for creating [[ToRefTree]] instances */
   def apply[A](toRefTree: A => RefTree): ToRefTree[A] = new ToRefTree[A] {
     def refTree(value: A) = toRefTree(value)
   }
+
+  def const[A](refTree: => RefTree): ToRefTree[A] =
+    (_: A) => refTree
 
   implicit def `AnyVal RefTree`[A <: AnyVal]: ToRefTree[A] = ToRefTree[A](RefTree.Val.apply)
 
