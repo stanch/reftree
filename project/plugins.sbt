@@ -2,8 +2,6 @@ addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.3")
 
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.5.2")
 
-// addSbtPlugin("io.get-coursier" % "sbt-coursier" % "2.1.4")
-
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.16.0")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.2")
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
