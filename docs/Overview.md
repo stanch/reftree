@@ -79,7 +79,7 @@ libraryDependencies += "io.github.stanch" %%% "reftree" % "latest-version"
 ### Minimal example
 
 ```mdoc:invisible
-val ImagePath = "site/target/tut/images"
+val ImagePath = "site/target/mdoc/images"
 ```
 
 ```mdoc:silent

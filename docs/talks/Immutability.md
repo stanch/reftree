@@ -68,7 +68,7 @@ import renderer._
 We’ll start with one of the simplest structures: a list.
 It consists of a number of cells pointing to each other:
 
-```tut
+```mdoc
 val list = List(1, 2, 3)
 ```
 
@@ -83,7 +83,7 @@ because we can share the same cells across several lists.
 This would not be possible with a mutable list,
 since modifying the shared part would modify every data structure making use of it.
 
-```tut
+```mdoc
 val add = 0 :: list
 val remove = list.tail
 ```
@@ -125,7 +125,7 @@ This certainly does not look efficient compared to adding elements at the front:
 If we want to add elements on both sides efficiently, we need a different data structure: a queue.
 The queue below, also known as a “Banker’s Queue”, has two lists: one for prepending and one for appending.
 
-```tut
+```mdoc
 val queue1 = Queue(1, 2, 3)
 val queue2 = (queue1 :+ 4).tail
 ```
@@ -167,7 +167,7 @@ be stored is limited by 2^31).
 The internal 32-element arrays form the basic structural sharing blocks.
 For small vectors they will be recreated on most operations:
 
-```tut
+```mdoc
 val vector1 = (1 to 20).toVector
 val vector2 = vector1 :+ 21
 ```
@@ -180,7 +180,7 @@ val vector2 = vector1 :+ 21
 
 However as more layers leap into action, a huge chunk of the data can be shared:
 
-```tut
+```mdoc
 val vector1 = (1 to 100).toVector
 val vector2 = vector1 :+ 21
 ```
@@ -230,7 +230,7 @@ case class Employee(
 )
 ```
 
-```tut
+```mdoc
 employee
 val raisedEmployee = employee.copy(salary = employee.salary + 10)
 ```
@@ -251,7 +251,7 @@ case class Startup(
 )
 ```
 
-```tut
+```mdoc
 startup
 val raisedFounder = startup.copy(
   founder = startup.founder.copy(
@@ -286,7 +286,7 @@ It’s called a lens because it focuses on some part of the data and allows to u
 For example, here is a lens that focuses on an employee’s salary
 (using the excellent [Monocle library](https://github.com/julien-truffaut/Monocle)):
 
-```tut
+```mdoc
 import monocle.macros.GenLens
 
 val salaryLens = GenLens[Employee](_.salary)
@@ -303,7 +303,7 @@ diagram(OpticFocus(salaryLens, startup.founder)).render("salaryLens")
 
 We can also define a lens that focuses on the startup’s founder:
 
-```tut
+```mdoc
 val founderLens = GenLens[Startup](_.founder)
 
 founderLens.get(startup)
@@ -317,7 +317,7 @@ diagram(OpticFocus(founderLens, startup)).render("founderLens")
 
 It’s not apparent yet how this would help, but the trick is that lenses can be composed:
 
-```tut
+```mdoc
 val founderSalaryLens = founderLens composeLens salaryLens
 
 founderSalaryLens.get(startup)
@@ -341,7 +341,7 @@ diagram(OpticFocus(vowelTraversal, "example")).render("vowelTraversal")
 
 We can use it to give our founder a funny name:
 
-```tut
+```mdoc
 val employeeNameLens = GenLens[Employee](_.name)
 val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
 
@@ -360,7 +360,7 @@ However most of the time our goal is just to update data.
 In Scala there is a great library called [quicklens](https://github.com/adamw/quicklens)
 that allows to do exactly that, creating all the necessary lenses under the hood:
 
-```tut
+```mdoc
 import com.softwaremill.quicklens._
 
 val raisedCeo = startup.modify(_.founder.salary).using(s => s + 10)
@@ -370,7 +370,7 @@ You might think this is approaching the syntax for updating mutable data,
 but actually we have already surpassed it, since lenses are much more flexible:
 
 
-```tut
+```mdoc
 val raisedEveryone = startup.modifyAll(_.founder.salary, _.team.each.salary).using(s => s + 10)
 ```
 
@@ -452,7 +452,7 @@ case class Tree(x: Int, c: List[Tree] = List.empty)
 
 and a simple tree:
 
-```tut
+```mdoc
 simpleTree
 ```
 
