@@ -19,11 +19,14 @@ jobs:
         with:
           repository: 'adobe-fonts/source-code-pro'
           ref: 'release'
-          path: '/usr/share/fonts/source-code-pro'
+          path: 'fonts/source-code-pro'
       - name: Install the source-code-pro font
         run: |
-          sudo rm -rf /usr/share/fonts/source-code-pro/.git
-          sudo fc-cache -fv /usr/share/fonts/source-code-pro
+          fonts_path_from='${{ github.workspace }}/fonts/source-code-pro'
+          fonts_path_to='/usr/share/fonts/source-code-pro'
+          sudo mv "$fonts_path_from" "$fonts_path_to"
+          sudo rm -rf "$fonts_path_to/.git"
+          sudo fc-cache -fv "$fonts_path_to"
       - uses: coursier/cache-action@v6
       - name: Run tests
         run: |
