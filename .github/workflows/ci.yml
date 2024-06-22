@@ -14,6 +14,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y fontconfig
+          sudo npm install jsdom --save-dev
       - name: Checkout the adobe-fonts/source-code-pro
         uses: actions/checkout@v4
         with:
