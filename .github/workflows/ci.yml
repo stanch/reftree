@@ -27,6 +27,8 @@ jobs:
           sudo mv "$fonts_path_from" "$fonts_path_to"
           sudo rm -rf "$fonts_path_to/.git"
           sudo fc-cache -fv "$fonts_path_to"
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v2
       - uses: coursier/cache-action@v6
       - name: Run tests
         run: |
