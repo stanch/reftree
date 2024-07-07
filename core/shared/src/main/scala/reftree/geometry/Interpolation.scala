@@ -49,9 +49,7 @@ trait SemiInterpolation[A] { self =>
 }
 
 object SemiInterpolation {
-  def apply[A](f: (A, Double) => A): SemiInterpolation[A] = new SemiInterpolation[A] {
-    def apply(value: A, t: Double) = f(value, t)
-  }
+  def apply[A](f: (A, Double) => A): SemiInterpolation[A] = (value: A, t: Double) => f(value, t)
 }
 
 /**
@@ -213,9 +211,8 @@ trait Interpolation[A] { self =>
 
 object Interpolation {
   /** A shorthand for constructing interpolations */
-  def apply[A](f: (A, A, Double) => A): Interpolation[A] = new Interpolation[A] {
-    def apply(left: A, right: A, t: Double): A = f(left, right, t)
-  }
+  def apply[A](f: (A, A, Double) => A): Interpolation[A] =
+    (left: A, right: A, t: Double) => f(left, right, t)
 
   /** A basic linear interpolation for doubles */
   val double = Interpolation[Double]((l, r, t) => l * (1 - t) + r * t)
