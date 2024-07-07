@@ -194,7 +194,7 @@ trait HackedCollectionInstances extends CollectionInstances {
       val right = redBlackTreeRefTree(tree.right, includeValue).toField
 
       RefTree.Ref(tree, Seq(key) ++ value ++ Seq(left, right))
-        .copy(highlight = tree.isInstanceOf[RedBlackTree.Tree[A, B]])
+        .copy(highlight = tree.isRed)
     } else
       RefTree.Null()
 }
