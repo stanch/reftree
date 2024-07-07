@@ -12,9 +12,7 @@ trait Translatable[A] {
 }
 
 object Translatable {
-  def apply[A](f: (A, Point) => A): Translatable[A] = new Translatable[A] {
-    def translate(value: A, delta: Point) = f(value, delta)
-  }
+  def apply[A](f: (A, Point) => A): Translatable[A] = (value: A, delta: Point) => f(value, delta)
 
   implicit def `List Translatable`[A](implicit t: Translatable[A]): Translatable[List[A]] =
     Translatable((value, delta) => value.map(t.translate(_, delta)))
