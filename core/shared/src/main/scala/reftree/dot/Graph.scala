@@ -15,8 +15,8 @@ case class Graph(
 ) {
   def encode = DotEncoding.encode(this)
 
-  def nodes = statements collect { case n: Node ⇒ n }
-  def edges = statements collect { case e: Edge ⇒ e }
+  def nodes = statements collect { case n: Node => n }
+  def edges = statements collect { case e: Edge => e }
 }
 
 object Graph {

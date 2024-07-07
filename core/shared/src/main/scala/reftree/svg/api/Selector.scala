@@ -13,12 +13,12 @@ object Selector {
   /** A single selector clause */
   case class Clause(element: Option[String], classes: Set[String])
 
-  private def parser[_: P] = {
+  private def parser[A: P] = {
 
     def id = CharPred(_.isLetterOrDigit).rep(1).!
 
-    def clause = (id ~ ("." ~ id).rep(0)).map { case (el, cls) ⇒ Clause(Some(el), cls.toSet) } |
-      ("." ~ id).rep(1).map { cls ⇒ Clause(None, cls.toSet) }
+    def clause = (id ~ ("." ~ id).rep(0)).map { case (el, cls) => Clause(Some(el), cls.toSet) } |
+      ("." ~ id).rep(1).map { cls => Clause(None, cls.toSet) }
 
     clause.rep(1, sep = " ".rep ~ "," ~ " ".rep).map(_.toSet).map(Selector.apply)
   }

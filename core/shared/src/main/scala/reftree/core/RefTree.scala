@@ -1,5 +1,7 @@
 package reftree.core
 
+import reftree.core.RefTree.Ref
+
 import scala.annotation.implicitNotFound
 import scala.collection.immutable.{CollectionInstances, HackedCollectionInstances}
 
@@ -32,9 +34,9 @@ sealed trait RefTree {
 
   /** Add or remove highlighting */
   def withHighlight(highlight: Boolean) = this match {
-    case tree: RefTree.Val ⇒ tree.copy(highlight = highlight)
-    case tree: RefTree.Null ⇒ tree.copy(highlight = highlight)
-    case tree: RefTree.Ref ⇒ tree.copy(highlight = highlight)
+    case tree: RefTree.Val => tree.copy(highlight = highlight)
+    case tree: RefTree.Null => tree.copy(highlight = highlight)
+    case tree: RefTree.Ref => tree.copy(highlight = highlight)
   }
 
   /** Convert to a field usable in other trees */
@@ -64,7 +66,7 @@ object RefTree {
     def apply(value: AnyVal): Val = Val(value, value.toString.replace(' ', '_'), highlight = false)
 
     /** Construct a [[RefTree]] for a value with a custom formatter */
-    def formatted[A <: AnyVal](value: A)(formatter: A ⇒ String): Val =
+    def formatted[A <: AnyVal](value: A)(formatter: A => String): Val =
       Val(value, formatter(value), highlight = false)
   }
 
@@ -112,7 +114,7 @@ object RefTree {
     def apply(value: AnyRef, children: Seq[Ref.Field]): Ref = Ref(
       // getSimpleName sometimes does not work, see https://issues.scala-lang.org/browse/SI-5425
       try { value.getClass.getSimpleName }
-      catch { case _: InternalError ⇒ value.getClass.getName.replaceAll("^.+\\$", "") },
+      catch { case _: InternalError => value.getClass.getName.replaceAll("^.+\\$", "") },
       s"${value.getClass.getName}${System.identityHashCode(value)}",
       children,
       highlight = false
@@ -124,19 +126,34 @@ object RefTree {
  * A typeclass for mapping data to [[RefTree]] representations
  */
 @implicitNotFound("To render a diagram for type ${A}, implement an instance of reftree.core.ToRefTree[${A}]")
-trait ToRefTree[A] { self ⇒
+trait ToRefTree[A] { self =>
   def refTree(value: A): RefTree
 }
 
 object ToRefTree extends CollectionInstances with HackedCollectionInstances with GenericInstances {
+
   /** A shorthand method for creating [[ToRefTree]] instances */
-  def apply[A](toRefTree: A ⇒ RefTree): ToRefTree[A] = new ToRefTree[A] {
+  def apply[A](toRefTree: A => RefTree): ToRefTree[A] = new ToRefTree[A] {
     def refTree(value: A) = toRefTree(value)
   }
 
+  def const[A](refTree: => RefTree): ToRefTree[A] =
+    (_: A) => refTree
+
   implicit def `AnyVal RefTree`[A <: AnyVal]: ToRefTree[A] = ToRefTree[A](RefTree.Val.apply)
 
-  implicit def `String RefTree`: ToRefTree[String] = ToRefTree[String] { value ⇒
+  implicit def `String RefTree`: ToRefTree[String] = ToRefTree[String] { value =>
     RefTree.Ref(value, value.map(RefTree.Val(_).toField))
   }
+
+  implicit def `Tuple2 RefTree`[A: ToRefTree, B: ToRefTree]: ToRefTree[(A, B)] =
+    ToRefTree[(A, B)] { value =>
+      RefTree.Ref(
+        value,
+        Seq(
+          Ref.Field(value._1.refTree, name = Option("_1")),
+          Ref.Field(value._2.refTree, name = Option("_2"))
+        )
+      )
+    }
 }

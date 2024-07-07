@@ -1,11 +1,24 @@
-// shadow sbt-scalajs' crossProject and CrossType from Scala.js 0.6.x
-import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
-
 val commonSettings = Seq(
-  scalaVersion := "2.12.10",
-  crossScalaVersions := Seq("2.12.10"),
-  scalacOptions ++= Seq("-feature", "-deprecation", "-Xlint", "-Xfatal-warnings", "-Ypartial-unification"),
-  Compile / compile / scalacOptions  += "-Ywarn-unused-import",
+  scalaVersion := "2.13.14",
+  crossScalaVersions := Seq("2.12.19", "2.13.14"),
+  version := "1.4.0",
+  scalacOptions ++= {
+    val commonScalacOptions =
+      Seq("-feature", "-deprecation", "-Xlint", "-Xfatal-warnings")
+
+    scalaVersion.value match {
+      case v if v.startsWith("2.12") =>
+        commonScalacOptions ++
+          Seq(
+            "-Ypartial-unification",
+            "-Ywarn-unused-import",
+            "-language:higherKinds"
+          )
+      case _ =>
+        commonScalacOptions :+
+          "-Xlint:_,-implicit-recursion,-recurse-with-default,-unused,-byname-implicit" // scala/bug#12072
+    }
+  },
   Compile / doc / scalacOptions += "-no-link-warnings"
 ) ++ metadata ++ publishing
 
@@ -26,7 +39,6 @@ lazy val metadata = Seq(
 )
 
 lazy val publishing = Seq(
-  useGpg := false,
   usePgpKeyHex("8ED74E385203BEB1"),
   pgpPublicRing := baseDirectory.value.getParentFile.getParentFile / ".gnupg" / "pubring.gpg",
   pgpSecretRing := baseDirectory.value.getParentFile.getParentFile / ".gnupg" / "secring.gpg",
@@ -46,37 +58,43 @@ val core = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "reftree",
     libraryDependencies ++= Seq(
-      "com.chuusai" %%% "shapeless" % "2.3.3",
-      "com.lihaoyi" %%% "sourcecode" % "0.2.7",
-      "com.lihaoyi" %%% "fastparse" % "2.3.0",
-      "io.github.stanch" %%% "zipper" % "0.5.2",
-      "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
-      "com.github.julien-truffaut" %%% "monocle-macro" % "2.0.0",
-      "com.outr" %%% "scribe" % "2.7.9",
-      "org.scalatest" %%% "scalatest" % "3.1.4" % Test,
-      "org.scalacheck" %%% "scalacheck" % "1.14.3" % Test,
-      "org.scalatestplus" %%% "scalacheck-1-14" % "3.1.3.0" % Test
-    )
-  )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
-      "org.apache.xmlgraphics" % "batik-transcoder" % "1.14",
-      "com.sksamuel.scrimage" % "scrimage-core" % "4.0.18",
-      "de.sciss" %% "fingertree" % "1.5.5"
-    )
-  )
-  .jsSettings(
-    libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.9.1"
-    ),
-    jsDependencies ++= Seq(
-      "org.webjars.npm" % "viz.js" % "1.7.0" / "1.7.0/viz.js"
+      "org.scala-lang.modules" %%% "scala-collection-compat" % "2.12.0",
+      "com.chuusai" %%% "shapeless" % "2.3.10",
+      "com.lihaoyi" %%% "sourcecode" % "0.4.1",
+      "com.lihaoyi" %%% "fastparse" % "3.1.0",
+      "io.github.stanch" %%% "zipper" % "0.6.0",
+      "com.softwaremill.quicklens" %%% "quicklens" % "1.9.7",
+      "com.github.julien-truffaut" %%% "monocle-macro" % "2.1.0",
+      "com.outr" %%% "scribe" % "3.13.4",
+      "org.scalatest" %%% "scalatest" % "3.2.18" % Test,
+      "org.scalacheck" %%% "scalacheck" % "1.17.0" % Test,
+      "org.scalatestplus" %%% "scalacheck-1-17" % "3.2.18.0" % Test
     )
   )
 
 lazy val coreJVM = core.jvm
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
+      "org.apache.xmlgraphics" % "batik-transcoder" % "1.17",
+      "com.sksamuel.scrimage" % "scrimage-core" % "4.1.3",
+      "de.sciss" %% "fingertree" % "1.5.5"
+    )
+  )
+
 lazy val coreJS = core.js
+  .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
+      "org.scala-js" %%% "scalajs-java-time" % "1.0.0"
+    ),
+    packageJSDependencies / skip := false,
+    jsDependencies ++= Seq(
+      "org.webjars.npm" % "viz.js" % "1.8.2" / "1.8.2/viz.js"
+    ),
+    jsEnv := new net.exoego.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+  )
 
 val demo = crossProject(JSPlatform, JVMPlatform)
   .in(file("demo"))
@@ -87,39 +105,57 @@ val demo = crossProject(JSPlatform, JVMPlatform)
     publishLocal := {},
     publishArtifact := false
   )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.lihaoyi" % "ammonite" % "2.1.0" % Test cross CrossVersion.full
-    )
-  )
-  .jsSettings(
-    scalaJSUseMainModuleInitializer := true
-  )
 
 lazy val demoJVM = demo.jvm
-lazy val demoJS = demo.js
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" % "ammonite" % "3.0.0-M1-24-26133e66" % Test cross CrossVersion.full
+    )
+  )
 
-val site = project.in(file("site"))
-  .enablePlugins(TutPlugin, GitBookPlugin, GhpagesPlugin)
+lazy val demoJS = demo.js
+  .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
+  .settings(
+    scalaJSUseMainModuleInitializer := true,
+    jsEnv := new net.exoego.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+  )
+
+val site = project.in(file("site-gen"))
+  .enablePlugins(
+    BuildInfoPlugin,
+    GitBookPlugin,
+    GhpagesPlugin,
+    MdocPlugin,
+    SitePreviewPlugin
+  )
   .dependsOn(demoJVM)
   .settings(commonSettings)
   .settings(
+    name := "reftree-site",
+    moduleName := "reftree-site",
+    (publish / skip) := true,
+    mdoc := (Compile / run).evaluated,
+    (Compile / mainClass) := Some("reftree.Docs"),
+    (Compile / resources) ++= {
+      List((ThisBuild / baseDirectory).value / "docs")
+    },
     makeSite / mappings ++= Seq(
-      file("images/teaser.gif") → "images/teaser.gif",
-      file("images/queue.gif") → "images/queue.gif",
-      file("images/finger.gif") → "images/finger.gif",
-      file("images/tree+zipper.gif") → "images/tree+zipper.gif",
-      (( demoJS / crossTarget).value / "demo-opt.js") → "js/demo.js"
+      file("images/teaser.gif") -> "images/teaser.gif",
+      file("images/queue.gif") -> "images/queue.gif",
+      file("images/finger.gif") -> "images/finger.gif",
+      file("images/tree+zipper.gif") -> "images/tree+zipper.gif",
+      (( demoJS / crossTarget).value / "demo-opt.js") -> "js/demo.js"
     ),
     SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, coreJVM / (Compile / packageDoc / mappings), "api/jvm"),
-    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js },  coreJS / (Compile/  packageDoc / mappings), "api/js"),
-    tutNameFilter := """.*\.(md|json|css|html)""".r,
-    tutTargetDirectory := target.value / "tut",
+    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js },  coreJS / (Compile /  packageDoc / mappings), "api/js"),
+    // NameFilter := """.*\.(md|json|css|html)""".r,
     GitBook / gitbookInstallDir := Some(baseDirectory.value / "node_modules" / "gitbook"),
-    GitBook / sourceDirectory := tutTargetDirectory.value,
-    makeSite := makeSite.dependsOn(tutQuick).dependsOn( demoJS/ ( Compile/ fullOptJS)).value,
+    GitBook / sourceDirectory := mdocOut.value,
+    makeSite := makeSite.dependsOn(mdoc.toTask("")).dependsOn(demoJS / ( Compile / fullOptJS)).value,
     ghpagesNoJekyll := true,
-    git.remoteRepo := "git@github.com:stanch/reftree.git"
+    git.remoteRepo := "git@github.com:stanch/reftree.git",
+    buildInfoKeys := Seq[BuildInfoKey](version),
+    buildInfoPackage := "reftree.build"
   )
 
 lazy val root = project.in(file("."))

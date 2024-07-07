@@ -2,7 +2,6 @@ package reftree.demo
 
 import reftree.diagram.Animation
 import reftree.render.Renderer
-
 import org.scalajs.dom
 
 object JsDemo {

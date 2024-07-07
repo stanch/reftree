@@ -18,7 +18,7 @@ object Queues extends App {
 
   Animation
     .startWith(Queue(1, 2, 3))
-    .repeat(3)(_.iterate(2)(q ⇒ q :+ (q.max + 1)).iterate(2)(_.tail))
+    .repeat(3)(_.iterate(2)(q => q :+ (q.max + 1)).iterate(2)(_.tail))
     .build(Diagram.toStringCaption(_).withAnchor("queue"))
     .render("queue")
 }
@@ -26,7 +26,7 @@ object Queues extends App {
 object FingerTrees extends App {
   Logger.root.withHandler(LogHandler(minimumLevel = Some(Level.Trace)))
   import reftree.contrib.FingerTreeInstances._
-  implicit val measure = Measure.Indexed
+  implicit val measure: Measure[Any, Int] = Measure.Indexed
 
   val renderer = Renderer(
     renderingOptions = RenderingOptions(verticalSpacing = 2, density = 75),
@@ -36,7 +36,7 @@ object FingerTrees extends App {
 
   Animation
     .startWith(FingerTree(1))
-    .iterate(21)(t ⇒ t :+ (t.measure + 1))
+    .iterate(21)(t => t :+ (t.measure + 1))
     .build(Diagram(_).withCaption("Finger Tree").withAnchor("tree"))
     .render("finger")
 }
@@ -69,7 +69,7 @@ object Zippers extends App {
     .toNamespace("zipper")
 
   val trees = movement
-    .build(z ⇒ Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
+    .build(z => Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
     .toNamespace("tree")
 
   (zippers + trees).render("tree+zipper")

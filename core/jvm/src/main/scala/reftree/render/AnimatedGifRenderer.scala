@@ -31,7 +31,7 @@ object AnimatedGifRenderer {
     val process = Process("dot", args)
     val output = new StringWriter
     val error = new StringWriter
-    val io = BasicIO.standard { stream ⇒
+    val io = BasicIO.standard { stream =>
       stream.write(graph.encode.getBytes(StandardCharsets.UTF_8))
       stream.close()
     }.withOutput(BasicIO.processFully(output)).withError(BasicIO.processFully(error))
@@ -66,10 +66,10 @@ object AnimatedGifRenderer {
     renderingOptions: RenderingOptions,
     animationOptions: AnimationOptions
   ): Unit = {
-    val writer = new StreamingGifWriter(animationOptions.delay, animationOptions.loop)
+    val writer = new StreamingGifWriter(animationOptions.delay, animationOptions.loop, false)
     val stream = writer.prepareStream(output, BufferedImage.TYPE_INT_ARGB)
     frames.zipWithIndex foreach {
-      case (Frame(svg, count), i) ⇒
+      case (Frame(svg, count), i) =>
         if (i % 10 == 0) {
           scribe.trace(s"Processing frame ${i + 1}...")
           scribe.trace("Rasterizing...")

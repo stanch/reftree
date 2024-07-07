@@ -22,7 +22,7 @@ object DotRenderer {
     )
     val process = Process("dot", args)
     val error = new StringWriter
-    val io = BasicIO.standard { stream ⇒
+    val io = BasicIO.standard { stream =>
       stream.write(graph.encode.getBytes(StandardCharsets.UTF_8))
       stream.close()
     }.withError(BasicIO.processFully(error))

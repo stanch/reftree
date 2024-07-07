@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 
 class AnimationSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
   it should "correctly iterate to fixpoint" in {
-    forAll(Gen.posNum[Int]) { seed ⇒
+    forAll(Gen.posNum[Int]) { seed =>
       val builder = Animation.startWith(seed).iterate(_ + 1).iterateToFixpoint(_ / 2)
       val expectedSize = (math.log(seed + 1) / math.log(2)) + 3
 
@@ -16,7 +16,7 @@ class AnimationSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChe
   }
 
   it should "correctly iterate to fixpoint or max, when specified" in {
-    forAll(Gen.posNum[Int]) { seed ⇒
+    forAll(Gen.posNum[Int]) { seed =>
       val max = 5
       val builder = Animation.startWith(seed).iterate(_ + 1).iterateToFixpointAtMost(max)(_ / 2)
       val expectedSize = math.min(max + 2, (math.log(seed + 1) / math.log(2)) + 3)

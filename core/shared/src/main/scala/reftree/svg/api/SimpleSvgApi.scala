@@ -23,12 +23,14 @@ trait SimpleSvgApi[Node] extends BaseSvgApi[Node] {
   lazy val translation = select("g, path, polygon, text, a") composeOptional
     optAttr("transform") composeIso
     Iso[Option[String], Point] {
-      case None ⇒ Point.zero
-      case Some(transform) ⇒
-        Point.fromString("translate\\((.+)\\)".r.findFirstMatchIn(transform).get.group(1))
+      case None => Point.zero
+      case Some(transform) =>
+        Point
+          .fromString("translate\\((.+)\\)".r.findFirstMatchIn(transform).get.group(1))
+          .getOrElse(Point.zero)
     } {
-      case Point.`zero` ⇒ None
-      case t ⇒ Some(s"translate($t)")
+      case Point.`zero` => None
+      case t => Some(s"translate($t)")
     }
 
   val shapeRendering = optAttr("shape-rendering")
@@ -40,13 +42,13 @@ trait SimpleSvgApi[Node] extends BaseSvgApi[Node] {
     optAttr("height")
   ) composeIso
     Iso[(String, Option[String], Option[String]), Rectangle] {
-      case (box, _, _) ⇒ Rectangle.fromString(box)
-    } { viewBox ⇒
+      case (box, _, _) => Rectangle.fromString(box)
+    } { viewBox =>
       (s"$viewBox", Some(s"${viewBox.width}pt"), Some(s"${viewBox.height}pt"))
     }
 
   val opacity = optAttr("opacity") composeIso
-    Iso[Option[String], Double](_.fold(1.0)(_.toDouble))(o ⇒ Some(o.toString))
+    Iso[Option[String], Double](_.fold(1.0)(_.toDouble))(o => Some(o.toString))
 
   private def color(fillOrStroke: String) =
     Optics.tupleOptionalLeft(
@@ -54,18 +56,18 @@ trait SimpleSvgApi[Node] extends BaseSvgApi[Node] {
       optAttr(s"$fillOrStroke-opacity")
     ) composeIso
     Iso[(Option[String], Option[String]), Option[Color]] {
-      case (Some("none"), _) | (None, _) ⇒ None
-      case (Some(color), alpha) ⇒ Some(Color.fromRgbaString(color, alpha.fold(1.0)(_.toDouble)))
+      case (Some("none"), _) | (None, _) => None
+      case (Some(color), alpha) => Some(Color.fromRgbaString(color, alpha.fold(1.0)(_.toDouble)))
     } {
-      case None ⇒ (Some("none"), None)
-      case Some(color) ⇒ (Some(color.toRgbString), Some(color.a.toString))
+      case None => (Some("none"), None)
+      case Some(color) => (Some(color.toRgbString), Some(color.a.toString))
     }
 
   val fillColor = color("fill")
   val strokeColor = color("stroke")
 
   val strokeWidth = optAttr("stroke-width") composeIso
-    Iso[Option[String], Double](_.fold(1.0)(_.toDouble))(t ⇒ Some(t.toString))
+    Iso[Option[String], Double](_.fold(1.0)(_.toDouble))(t => Some(t.toString))
 
   val polygonPoints = polygons composeOptional
     attr("points") composeIso Polyline.stringIso

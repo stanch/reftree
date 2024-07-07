@@ -12,13 +12,13 @@ object Optics {
     optionalA: Optional[S, A],
     optionalB: Optional[S, B]
   ): Optional[S, (A, B)] =
-    Optional[S, (A, B)] { s ⇒
+    Optional[S, (A, B)] { s =>
       for {
-        a ← optionalA.getOption(s)
-        b ← optionalB.getOption(s)
+        a <- optionalA.getOption(s)
+        b <- optionalB.getOption(s)
       } yield (a, b)
     } {
-      case (a, b) ⇒ s ⇒ optionalB.set(b)(optionalA.set(a)(s))
+      case (a, b) => s => optionalB.set(b)(optionalA.set(a)(s))
     }
 
   /** Tuple three optionals with a common source type */
@@ -27,19 +27,19 @@ object Optics {
     optionalB: Optional[S, B],
     optionalC: Optional[S, C]
   ): Optional[S, (A, B, C)] =
-    Optional[S, (A, B, C)] { s ⇒
+    Optional[S, (A, B, C)] { s =>
       for {
-        a ← optionalA.getOption(s)
-        b ← optionalB.getOption(s)
-        c ← optionalC.getOption(s)
+        a <- optionalA.getOption(s)
+        b <- optionalB.getOption(s)
+        c <- optionalC.getOption(s)
       } yield (a, b, c)
     } {
-      case (a, b, c) ⇒ s ⇒ optionalC.set(c)(optionalB.set(b)(optionalA.set(a)(s)))
+      case (a, b, c) => s => optionalC.set(c)(optionalB.set(b)(optionalA.set(a)(s)))
     }
 
   /** A prism that matches values satisfying a predicate */
-  def only[A](pred: A ⇒ Boolean): Prism[A, A] =
-    Prism[A, A] { value ⇒
+  def only[A](pred: A => Boolean): Prism[A, A] =
+    Prism[A, A] { value =>
       if (pred(value)) Some(value) else None
     }(identity)
 
@@ -54,7 +54,7 @@ object Optics {
 
   /** Extra flattening for Lenses that point to optional values */
   implicit class RichLens[A, B](val lens: Lens[A, Option[B]]) extends AnyVal {
-    def asFlatOptional = Optional[A, B](lens.get)(b ⇒ lens.set(Some(b)))
+    def asFlatOptional = Optional[A, B](lens.get)(b => lens.set(Some(b)))
   }
 
   /**
@@ -62,10 +62,10 @@ object Optics {
    * focuses on the projection of the first (projectable) element within that structure.
    */
   private def collectOne[A: Unzip, B](projection: Optional[A, B], move: Zipper.Move[A]): Optional[A, B] = {
-    Optional[A, B] { value ⇒
+    Optional[A, B] { value =>
       Zipper(value).tryRepeatWhileNot(projection.nonEmpty, move)
         .toOption.map(_.focus).flatMap(projection.getOption)
-    } { collected ⇒ value ⇒
+    } { collected => value =>
       Zipper(value).tryRepeatWhileNot(projection.nonEmpty, move)
         .toOption.fold(value)(_.update(projection.set(collected)).commit)
     }
@@ -109,22 +109,22 @@ object Optics {
    * On update, elements with missing keys will be deleted, and projections with new keys
    * will be inserted at the root of the structure.
    */
-  def collectLeftByKey[A: Unzip, K, V](projection: Prism[A, V])(key: A ⇒ K): Lens[A, ListMap[K, V]] = {
+  def collectLeftByKey[A: Unzip, K, V](projection: Prism[A, V])(key: A => K): Lens[A, ListMap[K, V]] = {
     Lens[A, ListMap[K, V]] {
-      Zipper(_).loopAccum(ListMap.empty[K, V]) { (z, m) ⇒
+      Zipper(_).loopAccum(ListMap.empty[K, V]) { (z, m) =>
         projection.getOption(z.focus) match {
-          case Some(focus) ⇒ (z.tryAdvanceRightDepthFirst, m.updated(key(z.focus), focus))
-          case None ⇒ (z.tryAdvanceRightDepthFirst, m)
+          case Some(focus) => (z.tryAdvanceRightDepthFirst, m.updated(key(z.focus), focus))
+          case None => (z.tryAdvanceRightDepthFirst, m)
         }
       }._2
-    } { children ⇒ node ⇒
-      val (zipper, remaining) = Zipper(node).loopAccum(children) { (z, m) ⇒
+    } { children => node =>
+      val (zipper, remaining) = Zipper(node).loopAccum(children) { (z, m) =>
         projection.getOption(z.focus) match {
-          case Some(focus) ⇒
+          case Some(focus) =>
             val i = key(z.focus)
             if (m contains i) (z.set(projection.reverseGet(m(i))).tryAdvanceRightDepthFirst, m - i)
             else (z.tryDeleteAndAdvanceRightDepthFirst, m)
-          case None ⇒
+          case None =>
             (z.tryAdvanceRightDepthFirst, m)
         }
       }
@@ -140,17 +140,17 @@ object Optics {
    */
   def collectLeftByIndex[A: Unzip, B](projection: Optional[A, B]): Lens[A, List[B]] = {
     Lens[A, List[B]] {
-      Zipper(_).loopAccum(List.empty[B]) { (z, s) ⇒
+      Zipper(_).loopAccum(List.empty[B]) { (z, s) =>
         projection.getOption(z.focus) match {
-          case Some(focus) ⇒ (z.tryAdvanceRightDepthFirst, focus :: s)
-          case None ⇒ (z.tryAdvanceRightDepthFirst, s)
+          case Some(focus) => (z.tryAdvanceRightDepthFirst, focus :: s)
+          case None => (z.tryAdvanceRightDepthFirst, s)
         }
       }._2.reverse
-    } { children ⇒
-      Zipper(_).loopAccum(children) { (z, s) ⇒
+    } { children =>
+      Zipper(_).loopAccum(children) { (z, s) =>
         projection.getOption(z.focus) match {
-          case Some(focus) ⇒ (z.update(projection.set(s.head)).tryAdvanceRightDepthFirst, s.tail)
-          case None ⇒ (z.tryAdvanceRightDepthFirst, s)
+          case Some(focus) => (z.update(projection.set(s.head)).tryAdvanceRightDepthFirst, s.tail)
+          case None => (z.tryAdvanceRightDepthFirst, s)
         }
       }._1.commit
     }

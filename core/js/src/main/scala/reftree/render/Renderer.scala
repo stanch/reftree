@@ -1,19 +1,19 @@
 package reftree.render
 
-import org.scalajs.dom.raw.DOMParser
 import reftree.diagram.{Animation, Diagram}
 import reftree.dot.Graph
 import reftree.graph.Graphs
-
 import org.scalajs.dom
-import reftree.svg.{OptimizedGraphAnimation, DomSvgApi}
+import org.scalajs.dom.MIMEType
+import reftree.svg.{DomSvgApi, OptimizedGraphAnimation}
+
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobalScope
 
 /**
- * An interface to https://github.com/mdaines/viz.js/
+ * An interface to https://github.com/mdaines/viz-js/tree/v1.8.2
  */
 @js.native
 @JSGlobalScope
@@ -51,17 +51,17 @@ object VizFacade extends js.Object {
 case class Renderer(
   renderingOptions: RenderingOptions = RenderingOptions(),
   animationOptions: AnimationOptions = AnimationOptions()
-) { self ⇒
+) { self =>
   /** Tweak the rendering options with the provided funciton */
-  def tweakRendering(tweak: RenderingOptions ⇒ RenderingOptions) =
+  def tweakRendering(tweak: RenderingOptions => RenderingOptions) =
     copy(renderingOptions = tweak(renderingOptions))
 
   /** Tweak the animation options with the provided funciton */
-  def tweakAnimation(tweak: AnimationOptions ⇒ AnimationOptions) =
+  def tweakAnimation(tweak: AnimationOptions => AnimationOptions) =
     copy(animationOptions = tweak(animationOptions))
 
-  private def renderSvg(graph: Graph) = (new DOMParser)
-    .parseFromString(VizFacade.Viz(graph.encode), "image/svg+xml")
+  private def renderSvg(graph: Graph) = (new dom.DOMParser)
+    .parseFromString(VizFacade.Viz(graph.encode), MIMEType.`image/svg+xml`)
     .documentElement
 
   private def renderTo(target: dom.Node, content: dom.Node) = {
@@ -119,7 +119,7 @@ case class Renderer(
           }
         }
       } catch {
-        case _: IndexOutOfBoundsException ⇒
+        case _: IndexOutOfBoundsException =>
           if (animationOptions.loop) {
             i = 0
             js.timers.setTimeout(FiniteDuration(animationOptions.delay.toNanos, TimeUnit.NANOSECONDS))(iteration())
@@ -133,7 +133,7 @@ case class Renderer(
   implicit class DiagramRenderSyntax(diagram: Diagram) {
     def render(
       target: dom.Node,
-      tweak: RenderingOptions ⇒ RenderingOptions = identity
+      tweak: RenderingOptions => RenderingOptions = identity
     ): Unit = self
       .tweakRendering(tweak)
       .render(target, diagram)
@@ -143,8 +143,8 @@ case class Renderer(
   implicit class AnimationRenderSyntax(animation: Animation) {
     def render(
       target: dom.Node,
-      tweakRendering: RenderingOptions ⇒ RenderingOptions = identity,
-      tweakAnimation: AnimationOptions ⇒ AnimationOptions = identity
+      tweakRendering: RenderingOptions => RenderingOptions = identity,
+      tweakAnimation: AnimationOptions => AnimationOptions = identity
     ): Unit = self
       .tweakRendering(tweakRendering)
       .tweakAnimation(tweakAnimation)

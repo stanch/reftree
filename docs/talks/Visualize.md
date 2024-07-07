@@ -21,7 +21,7 @@ Here is an overview:
 Throughout this page we will assume the following
 declarations (each section might add its own):
 
-```tut:silent
+```mdoc:silent
 import reftree.core._
 import reftree.diagram._
 import reftree.render._
@@ -38,7 +38,7 @@ import reftree.demo.Data
 import reftree.demo.Shortcuts
 import scala.collection.immutable._
 import java.nio.file.Paths
-import Diagram.{sourceCodeCaption ⇒ diagram}
+import Diagram.{sourceCodeCaption => diagram}
 ```
 
 To start an interactive session, just run
@@ -55,11 +55,11 @@ already has all the necessary imports in scope.*
 
 ## Introducing `reftree`
 
-```tut:invisible
+```mdoc:invisible
 val ImagePath = "site/target/tut/images"
 ```
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
@@ -72,7 +72,7 @@ import renderer._
 
 Let’s look at a quick usage example:
 
-```tut
+```mdoc
 case class Person(firstName: String, age: Int)
 
 val bob = Person("Bob", 42)
@@ -84,7 +84,7 @@ diagram(bob).render("bob")
 
 That’s it! You can configure the visualization as you like:
 
-```tut
+```mdoc
 // render strings as a single box
 import reftree.contrib.SimplifiedInstances.string
 
@@ -117,7 +117,7 @@ features: animations.
 ```scala
 Animation
   .startWith(Queue(1, 2, 3))
-  .repeat(3)(_.iterate(2)(q ⇒ q :+ (q.max + 1)).iterate(2)(_.tail))
+  .repeat(3)(_.iterate(2)(q => q :+ (q.max + 1)).iterate(2)(_.tail))
   .build(Diagram.toStringCaption(_).withAnchor("queue"))
   .render("queue")
 ```
@@ -126,7 +126,7 @@ Animation
 
 ## Inside `reftree`
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 import reftree.contrib.SimplifiedInstances.{option, seq, list}
 
@@ -148,7 +148,7 @@ For case classes this is done automagically, using
 Given our friend `bob`, *shapeless* would provide a generic representation,
 which includes the field names (at the type level!) and the values (as a heterogeneous list):
 
-```tut
+```mdoc
 Shortcuts.generic(bob)
 
 diagram(Shortcuts.generic(bob)).render("generic")
@@ -160,7 +160,7 @@ This information is enough to auto-generate a `RefTree`.
 Now, what does it look like? The best way to find out is to visualize a `RefTree`
 of a `RefTree`!
 
-```tut
+```mdoc
 diagram(Shortcuts.refTree(bob)).render("reftree")
 ```
 
@@ -172,13 +172,13 @@ How do we get from `RefTree` to an image though?
 This is where [GraphViz](http://www.graphviz.org/) comes in.
 From a `RefTree` we can obtain a graph definition that can be rendered by GraphViz:
 
-```tut
+```mdoc
 Shortcuts.graph(bob).encode
 ```
 
 Going even further, we can ask GraphViz for an [SVG](https://en.wikipedia.org/wiki/Scalable_Vector_Graphics) output:
 
-```tut
+```mdoc
 Shortcuts.svg(bob)
 ```
 
@@ -199,7 +199,7 @@ Ouch! A sane functional approach would definitely help here :)
 
 ## Functional animation
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
@@ -226,7 +226,7 @@ as many intermediate frames as we want! But how do we construct this instance?
 Consider a lowly floating point number (it can represent an *x* coordinate of some element in our SVG, for example).
 There is an obvious way to implement `Interpolation[Double]`, which `reftree` already defines as `Interpolation.double`:
 
-```tut
+```mdoc
 val numbers = Interpolation.double.sample(0, 10, 5).toList
 
 diagram(numbers).render("numbers")
@@ -236,7 +236,7 @@ diagram(numbers).render("numbers")
 
 Now if you think about a point in 2D space, it’s just two numbers joined together:
 
-```tut
+```mdoc
 val point = Point(0, 10)
 
 diagram(point).render("point")
@@ -253,7 +253,7 @@ inside a data structure of type `A` and provide read-write access to it.
 We will use the excellent [*Monocle* library](https://github.com/julien-truffaut/Monocle)
 to create lenses and other optics along the way:
 
-```tut
+```mdoc
 import monocle.macros.GenLens
 
 val x = GenLens[Point](_.x)
@@ -267,7 +267,7 @@ val y = GenLens[Point](_.y)
 
 Lenses provide several methods to manipulate data:
 
-```tut
+```mdoc
 x.get(point)
 y.set(20)(point)
 y.modify(_ + 20)(point)
@@ -278,7 +278,7 @@ and update the point field by field.
 We do this by piping `Interpolation.double` through `x` and `y` lenses
 and combining the resulting interpolations:
 
-```tut
+```mdoc
 val pointInterpolation = (
   x.interpolateWith(Interpolation.double) +
   y.interpolateWith(Interpolation.double))
@@ -295,7 +295,7 @@ Of course, `reftree` already defines this as `Point.interpolation`.
 Using the same approach, we can build a polyline interpolator
 (assuming the polylines being interpolated consist of equal number of points):
 
-```tut
+```mdoc
 Data.polyline1
 Data.polyline2
 
@@ -322,7 +322,7 @@ An edge is drawn with an [SVG path](https://developer.mozilla.org/en-US/docs/Web
 which consists of several commands, e.g. “move to”, “line to”, “bezier curve to”.
 Here is a minimized SVG snippet for an actual edge:
 
-```tut
+```mdoc
 Data.edge1
 
 diagram(Data.edge1).render("edge")
@@ -340,7 +340,7 @@ First, let’s get to the `path` element. `reftree` implements a few things that
 * An optic that focuses on an element deep inside XML or any other recursive data structure: `Optics.collectFirst`.
   It is actually an `Optional`, not a `Lens`, since the element might be missing.
 
-```tut
+```mdoc
 val edgePathElement = Optics.collectFirst(XmlSvgApi.select("path"))
 
 diagram(OpticFocus(edgePathElement, Data.edge1)).render("edgePathElement")
@@ -351,7 +351,7 @@ diagram(OpticFocus(edgePathElement, Data.edge1)).render("edgePathElement")
 Next, we need to “descend” to the `d` attribute. Here is where optics really shine:
 we can compose `Optional[A, B]` with `Optional[B, C]` to get an `Optional[A, C]`:
 
-```tut
+```mdoc
 val d = XmlSvgApi.attr("d")
 val edgePathString = edgePathElement composeOptional d
 
@@ -363,7 +363,7 @@ diagram(OpticFocus(edgePathString, Data.edge1)).render("edgePathString")
 Next, we will use an isomorphism, another kind of optic, to view
 the string as a nice case class:
 
-```tut
+```mdoc
 Path.stringIso
 
 val edgePath = edgePathString composeIso Path.stringIso
@@ -377,7 +377,7 @@ And finally, another isomorphism takes us from a `Path` to its sampled represent
 as a `Polyline`. (*Purists will say that this is not really an isomorphism because
 it’s not reversible, but with a lot of points you can get pretty close ;)*)
 
-```tut
+```mdoc
 Path.polylineIso(points = 4)
 
 def edgePolyline(points: Int) = edgePath composeIso Path.polylineIso(points)
@@ -389,7 +389,7 @@ diagram(edgePolyline(4).getOption(Data.edge1)).render("edgePolyline")
 
 Let’s interpolate!
 
-```tut
+```mdoc
 def edgeInterpolation(points: Int) = edgePolyline(points).interpolateWith(Polyline.interpolation)
 
 def edges(points: Int, frames: Int) = (Data.edge1 +:
@@ -434,7 +434,7 @@ This goes to show the flexibility and usefulness of optics.
 
 ## Zipping it up
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
@@ -463,7 +463,7 @@ which can be automatically derived in many cases.
 
 Consider a simple XML tree:
 
-```tut
+```mdoc
 Data.simpleXml
 
 diagram(Data.simpleXml).render("simpleXml")
@@ -473,7 +473,7 @@ diagram(Data.simpleXml).render("simpleXml")
 
 When we wrap a Zipper around this tree, it does not look very interesting yet:
 
-```tut
+```mdoc
 import zipper.Zipper
 
 val zipper1 = Zipper(Data.simpleXml)
@@ -490,7 +490,7 @@ and the parent zipper does not exist, since we are at the top level.
 To move down the tree, we “unzip” it, separating the child nodes into
 the focused node and its left and right siblings:
 
-```tut
+```mdoc
 val zipper2 = zipper1.moveDownLeft
 
 (diagram(zipper1) + diagram(zipper2)).render("zipper1+2")
@@ -503,7 +503,7 @@ which will allow us to return to the root of the tree when we are done applying 
 This link however prevents us from seeing the picture clearly.
 Let’s look at the second zipper alone:
 
-```tut
+```mdoc
 diagram(zipper2).render("zipper2b")
 ```
 
@@ -511,7 +511,7 @@ diagram(zipper2).render("zipper2b")
 
 Great! We have `2` in focus and `3, 4, 5` as right siblings. What happens if we move right a bit?
 
-```tut
+```mdoc
 val zipper3 = zipper2.moveRightBy(2)
 
 diagram(zipper3).render("zipper3")
@@ -525,7 +525,7 @@ adjacent to the focus is always at the head of the list.
 
 This also allows us to insert new siblings easily:
 
-```tut
+```mdoc
 val zipper4 = zipper3.insertLeft(<fruit/>)
 
 diagram(zipper4).render("zipper4")
@@ -535,7 +535,7 @@ diagram(zipper4).render("zipper4")
 
 And, as you might know, we can delete nodes and update the focus:
 
-```tut
+```mdoc
 val zipper5 = zipper4.deleteAndMoveRight.set(<worm/>)
 
 diagram(zipper5).render("zipper5")
@@ -546,7 +546,7 @@ diagram(zipper5).render("zipper5")
 Finally, when we move up, the siblings at the current level are “zipped”
 together and their parent node is updated:
 
-```tut
+```mdoc
 val zipper6 = zipper5.moveUp
 
 diagram(zipper6).render("zipper6")
@@ -558,7 +558,7 @@ When we are done editing, the `.commit` shorthand can be used for going
 all the way up (applying all the changes) and returning the focus.
 Notice how all the unchanged nodes are shared between the old and the new XML.
 
-```tut
+```mdoc
 val notSoSimpleXml = zipper6.commit
 
 (diagram(Data.simpleXml) + diagram(notSoSimpleXml)).render("notSoSimpleXml")

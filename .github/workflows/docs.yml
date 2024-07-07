@@ -1,0 +1,19 @@
+name: docs
+on: [push]
+jobs:
+  docs:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: coursier/cache-action@v6
+      - run: sbt site/run
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          enable_jekyll: true
+          publish_dir: ./site-gen/target/mdoc/.

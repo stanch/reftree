@@ -26,14 +26,14 @@ Here is an overview:
 Throughout this page we will assume the following
 declarations (each section might add its own):
 
-```tut:silent
+```mdoc:silent
 import reftree.core._
 import reftree.diagram._
 import reftree.render._
 import reftree.demo.Data._
 import scala.collection.immutable._
 import java.nio.file.Paths
-import Diagram.{sourceCodeCaption ⇒ diagram}
+import Diagram.{sourceCodeCaption => diagram}
 ```
 
 To start an interactive session, just run
@@ -50,11 +50,11 @@ already has all the necessary imports in scope.*
 
 ## Immutable data structures
 
-```tut:invisible
+```mdoc:invisible
 val ImagePath = "site/target/tut/images"
 ```
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
@@ -68,11 +68,11 @@ import renderer._
 We’ll start with one of the simplest structures: a list.
 It consists of a number of cells pointing to each other:
 
-```tut
+```mdoc
 val list = List(1, 2, 3)
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(list).render("list")
 ```
 
@@ -83,12 +83,12 @@ because we can share the same cells across several lists.
 This would not be possible with a mutable list,
 since modifying the shared part would modify every data structure making use of it.
 
-```tut
+```mdoc
 val add = 0 :: list
 val remove = list.tail
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(list) + diagram(add) + diagram(remove)).render("lists")
 ```
 
@@ -98,7 +98,7 @@ However we can’t easily add elements at the end of the list, since the last ce
 is pointing to the empty list (`Nil`) and is immutable, i.e. cannot be changed.
 Thus we are forced to create a new list every time:
 
-```tut:silent
+```mdoc:silent
 (Animation
   .startWith(List(1))
   .iterate(_ :+ 2, _ :+ 3, _ :+ 4)
@@ -110,7 +110,7 @@ Thus we are forced to create a new list every time:
 
 This certainly does not look efficient compared to adding elements at the front:
 
-```tut:silent
+```mdoc:silent
 (Animation
   .startWith(List(1))
   .iterate(2 :: _, 3 :: _, 4 :: _)
@@ -125,12 +125,12 @@ This certainly does not look efficient compared to adding elements at the front:
 If we want to add elements on both sides efficiently, we need a different data structure: a queue.
 The queue below, also known as a “Banker’s Queue”, has two lists: one for prepending and one for appending.
 
-```tut
+```mdoc
 val queue1 = Queue(1, 2, 3)
 val queue2 = (queue1 :+ 4).tail
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(queue1) + diagram(queue2)).render("queues", _.withVerticalSpacing(1.2))
 ```
 
@@ -145,7 +145,7 @@ makes it rare enough to yield great average (“ammortized”) performance:
 ```scala
 (Animation
   .startWith(Queue(1, 2, 3))
-  .repeat(3)(_.iterate(2)(q ⇒ q :+ (q.max + 1)).iterate(2)(_.tail))
+  .repeat(3)(_.iterate(2)(q => q :+ (q.max + 1)).iterate(2)(_.tail))
   .build(Diagram.toStringCaption(_).withAnchor("queue"))
   .render("queue"))
 ```
@@ -167,12 +167,12 @@ be stored is limited by 2^31).
 The internal 32-element arrays form the basic structural sharing blocks.
 For small vectors they will be recreated on most operations:
 
-```tut
+```mdoc
 val vector1 = (1 to 20).toVector
 val vector2 = vector1 :+ 21
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(vector1) + diagram(vector2)).render("vectors", _.withVerticalSpacing(2))
 ```
 
@@ -180,12 +180,12 @@ val vector2 = vector1 :+ 21
 
 However as more layers leap into action, a huge chunk of the data can be shared:
 
-```tut
+```mdoc
 val vector1 = (1 to 100).toVector
 val vector2 = vector1 :+ 21
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(vector1) + diagram(vector2)).render("big-vectors", _.withVerticalSpacing(2))
 ```
 
@@ -209,7 +209,7 @@ implicit val measure = Measure.Indexed
 
 Animation
   .startWith(FingerTree(1))
-  .iterateWithIndex(21)((t, i) ⇒ t :+ (i + 1))
+  .iterateWithIndex(21)((t, i) => t :+ (i + 1))
   .build(Diagram(_).withCaption("Finger Tree").withAnchor("tree"))
   .render("finger", _.withDensity(75).withVerticalSpacing(2))
 ```
@@ -230,7 +230,7 @@ case class Employee(
 )
 ```
 
-```tut
+```mdoc
 employee
 val raisedEmployee = employee.copy(salary = employee.salary + 10)
 ```
@@ -251,7 +251,7 @@ case class Startup(
 )
 ```
 
-```tut
+```mdoc
 startup
 val raisedFounder = startup.copy(
   founder = startup.founder.copy(
@@ -260,7 +260,7 @@ val raisedFounder = startup.copy(
 )
 ```
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 import reftree.contrib.SimplifiedInstances.list
 import reftree.contrib.OpticInstances._
@@ -272,7 +272,7 @@ val renderer = Renderer(
 import renderer._
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(startup) + diagram(raisedFounder)).render("startup")
 ```
 
@@ -286,7 +286,7 @@ It’s called a lens because it focuses on some part of the data and allows to u
 For example, here is a lens that focuses on an employee’s salary
 (using the excellent [Monocle library](https://github.com/julien-truffaut/Monocle)):
 
-```tut
+```mdoc
 import monocle.macros.GenLens
 
 val salaryLens = GenLens[Employee](_.salary)
@@ -295,7 +295,7 @@ salaryLens.get(startup.founder)
 salaryLens.modify(s => s + 10)(startup.founder)
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(OpticFocus(salaryLens, startup.founder)).render("salaryLens")
 ```
 
@@ -303,13 +303,13 @@ diagram(OpticFocus(salaryLens, startup.founder)).render("salaryLens")
 
 We can also define a lens that focuses on the startup’s founder:
 
-```tut
+```mdoc
 val founderLens = GenLens[Startup](_.founder)
 
 founderLens.get(startup)
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(OpticFocus(founderLens, startup)).render("founderLens")
 ```
 
@@ -317,14 +317,14 @@ diagram(OpticFocus(founderLens, startup)).render("founderLens")
 
 It’s not apparent yet how this would help, but the trick is that lenses can be composed:
 
-```tut
+```mdoc
 val founderSalaryLens = founderLens composeLens salaryLens
 
 founderSalaryLens.get(startup)
 founderSalaryLens.modify(s => s + 10)(startup)
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(OpticFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 ```
 
@@ -333,7 +333,7 @@ diagram(OpticFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 One interesting thing is that lenses can focus on anything, not just direct attributes of the data.
 Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
-```tut:silent
+```mdoc:silent
 diagram(OpticFocus(vowelTraversal, "example")).render("vowelTraversal")
 ```
 
@@ -341,14 +341,14 @@ diagram(OpticFocus(vowelTraversal, "example")).render("vowelTraversal")
 
 We can use it to give our founder a funny name:
 
-```tut
+```mdoc
 val employeeNameLens = GenLens[Employee](_.name)
 val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
 
 founderVowelTraversal.modify(v => v.toUpper)(startup)
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(OpticFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
 ```
 
@@ -360,7 +360,7 @@ However most of the time our goal is just to update data.
 In Scala there is a great library called [quicklens](https://github.com/adamw/quicklens)
 that allows to do exactly that, creating all the necessary lenses under the hood:
 
-```tut
+```mdoc
 import com.softwaremill.quicklens._
 
 val raisedCeo = startup.modify(_.founder.salary).using(s => s + 10)
@@ -370,7 +370,7 @@ You might think this is approaching the syntax for updating mutable data,
 but actually we have already surpassed it, since lenses are much more flexible:
 
 
-```tut
+```mdoc
 val raisedEveryone = startup.modifyAll(_.founder.salary, _.team.each.salary).using(s => s + 10)
 ```
 
@@ -400,7 +400,7 @@ case class Company(
 The `Hierarchy` class refers to itself.
 Let’s grab a company object and display its hierarchy as a tree:
 
-```tut:silent
+```mdoc:silent
 // extra declarations for this section
 import zipper._
 import reftree.contrib.SimplifiedInstances.option
@@ -413,7 +413,7 @@ val renderer = Renderer(
 import renderer._
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(company.hierarchy).render("company")
 ```
 
@@ -431,11 +431,11 @@ All the changes made to the tree can be committed, yielding a new modified versi
 
 Here is how we would insert a new employee into the hierarchy:
 
-```tut:silent
+```mdoc:silent
 val updatedHierarchy = Zipper(company.hierarchy).moveDownRight.moveDownRight.insertRight(newHire).commit
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(company.hierarchy) + diagram(updatedHierarchy)).render("updatedHierarchy")
 ```
 
@@ -452,11 +452,11 @@ case class Tree(x: Int, c: List[Tree] = List.empty)
 
 and a simple tree:
 
-```tut
+```mdoc
 simpleTree
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(simpleTree).render("simpleTree")
 ```
 
@@ -464,11 +464,11 @@ diagram(simpleTree).render("simpleTree")
 
 When we wrap a Zipper around this tree, it does not look very interesting yet:
 
-```tut:silent
+```mdoc:silent
 val zipper1 = Zipper(simpleTree)
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(simpleTree) + diagram(zipper1)).render("zipper1")
 ```
 
@@ -491,11 +491,11 @@ and the parent zipper does not exist, since we are at the top level.
 
 One thing we can do right away is modify the focus:
 
-```tut:silent
-val zipper2 = zipper1.update(focus ⇒ focus.copy(x = focus.x + 99))
+```mdoc:silent
+val zipper2 = zipper1.update(focus => focus.copy(x = focus.x + 99))
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(simpleTree) + diagram(zipper1) + diagram(zipper2)).render("zipper2")
 ```
 
@@ -503,11 +503,11 @@ val zipper2 = zipper1.update(focus ⇒ focus.copy(x = focus.x + 99))
 
 We just created a new tree! To obtain it, we have to commit the changes:
 
-```tut:silent
+```mdoc:silent
 val tree2 = zipper2.commit
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(simpleTree) + diagram(tree2)).render("tree2")
 ```
 
@@ -517,7 +517,7 @@ If you were following closely,
 you would notice that nothing spectacular happened yet:
 we could’ve easily obtained the same result by modifying the tree directly:
 
-```tut:silent
+```mdoc:silent
 val tree2b = simpleTree.copy(x = simpleTree.x + 99)
 
 assert(tree2b == tree2)
@@ -527,11 +527,11 @@ The power of Zipper becomes apparent when we go one or more levels deep.
 To move down the tree, we “unzip” it, separating the child nodes into
 the focused node and its left and right siblings:
 
-```tut:silent
+```mdoc:silent
 val zipper2 = zipper1.moveDownLeft
 ```
 
-```tut:silent
+```mdoc:silent
 (diagram(zipper1) + diagram(zipper2)).render("zipper1+2")
 ```
 
@@ -542,7 +542,7 @@ which will allow us to return to the root of the tree when we are done applying 
 This link however prevents us from seeing the picture clearly.
 Let’s look at the second zipper alone:
 
-```tut:silent
+```mdoc:silent
 diagram(zipper2).render("zipper2b")
 ```
 
@@ -550,11 +550,11 @@ diagram(zipper2).render("zipper2b")
 
 Great! We have `2` in focus and `3, 4, 5` as right siblings. What happens if we move right a bit?
 
-```tut:silent
+```mdoc:silent
 val zipper3 = zipper2.moveRightBy(2)
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(zipper3).render("zipper3")
 ```
 
@@ -566,11 +566,11 @@ adjacent to the focus is always at the head of the list.
 
 This also allows us to insert new siblings easily:
 
-```tut:silent
+```mdoc:silent
 val zipper4 = zipper3.insertLeft(Tree(34))
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(zipper4).render("zipper4")
 ```
 
@@ -578,11 +578,11 @@ diagram(zipper4).render("zipper4")
 
 And, as you might know, we can delete nodes and update the focus:
 
-```tut:silent
+```mdoc:silent
 val zipper5 = zipper4.deleteAndMoveRight.set(Tree(45))
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(zipper5).render("zipper5")
 ```
 
@@ -591,11 +591,11 @@ diagram(zipper5).render("zipper5")
 Finally, when we move up, the siblings at the current level are “zipped”
 together and their parent node is updated:
 
-```tut:silent
+```mdoc:silent
 val zipper6 = zipper5.moveUp
 ```
 
-```tut:silent
+```mdoc:silent
 diagram(zipper6).render("zipper6")
 ```
 
@@ -604,7 +604,7 @@ diagram(zipper6).render("zipper6")
 You can probably guess by now that `.commit` is a shorthand for going
 all the way up (applying all the changes) and returning the focus:
 
-```tut:silent
+```mdoc:silent
 val tree3a = zipper5.moveUp.focus
 val tree3b = zipper5.commit
 
@@ -627,7 +627,7 @@ val movement = Animation
   )
 
 val trees = movement
-  .build(z ⇒ Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
+  .build(z => Diagram(ZipperFocus(z, Data.simpleTree)).withCaption("Tree").withAnchor("tree"))
   .toNamespace("tree")
 
 val zippers = movement
