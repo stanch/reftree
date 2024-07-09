@@ -121,41 +121,16 @@ lazy val demoJS = demo.js
   )
 
 val site = project.in(file("site-gen"))
-  .enablePlugins(
-    BuildInfoPlugin,
-    GitBookPlugin,
-    GhpagesPlugin,
-    MdocPlugin,
-    SitePreviewPlugin
-  )
+  .enablePlugins(MdocPlugin, DocusaurusPlugin)
   .dependsOn(demoJVM)
   .settings(commonSettings)
   .settings(
     name := "reftree-site",
     moduleName := "reftree-site",
-    (publish / skip) := true,
-    mdoc := (Compile / run).evaluated,
-    (Compile / mainClass) := Some("reftree.Docs"),
-    (Compile / resources) ++= {
-      List((ThisBuild / baseDirectory).value / "docs")
-    },
-    makeSite / mappings ++= Seq(
-      file("images/teaser.gif") -> "images/teaser.gif",
-      file("images/queue.gif") -> "images/queue.gif",
-      file("images/finger.gif") -> "images/finger.gif",
-      file("images/tree+zipper.gif") -> "images/tree+zipper.gif",
-      (( demoJS / crossTarget).value / "demo-opt.js") -> "js/demo.js"
+    mdocVariables := Map(
+      "VERSION" -> version.value
     ),
-    SiteScaladocPlugin.scaladocSettings( { val Jvm = config("jvm"); Jvm }, coreJVM / (Compile / packageDoc / mappings), "api/jvm"),
-    SiteScaladocPlugin.scaladocSettings( { val Js =  config("js"); Js },  coreJS / (Compile /  packageDoc / mappings), "api/js"),
-    // NameFilter := """.*\.(md|json|css|html)""".r,
-    GitBook / gitbookInstallDir := Some(baseDirectory.value / "node_modules" / "gitbook"),
-    GitBook / sourceDirectory := mdocOut.value,
-    makeSite := makeSite.dependsOn(mdoc.toTask("")).dependsOn(demoJS / ( Compile / fullOptJS)).value,
-    ghpagesNoJekyll := true,
-    git.remoteRepo := "git@github.com:stanch/reftree.git",
-    buildInfoKeys := Seq[BuildInfoKey](version),
-    buildInfoPackage := "reftree.build"
+    (publish / skip) := true
   )
 
 lazy val root = project.in(file("."))

@@ -43,5 +43,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v2
       - uses: coursier/cache-action@v6
-      - run: sbt site/run
+      - run: sbt site/mdoc

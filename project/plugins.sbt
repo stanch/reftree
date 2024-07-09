@@ -8,12 +8,6 @@ addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
 
 libraryDependencies += "net.exoego" %% "scalajs-env-jsdom-nodejs" % "2.1.0"
 
-addSbtPlugin("com.github.sbt" % "sbt-site" % "1.7.0")
-addSbtPlugin("com.github.sbt" % "sbt-site-gitbook" % "1.7.0")
-addSbtPlugin("com.github.sbt" % "sbt-ghpages" % "0.8.0")
-
 addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.0.1")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.10.0")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")
-
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.12.0")

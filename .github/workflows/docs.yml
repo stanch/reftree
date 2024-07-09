@@ -10,10 +10,33 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - uses: actions/setup-node@v4
+      - name: Set up environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fontconfig
+      - name: Checkout the adobe-fonts/source-code-pro
+        uses: actions/checkout@v4
+        with:
+          repository: 'adobe-fonts/source-code-pro'
+          ref: 'release'
+          path: 'fonts/source-code-pro'
+      - name: Install the source-code-pro font
+        run: |
+          fonts_path_from='${{ github.workspace }}/fonts/source-code-pro'
+          fonts_path_to='/usr/share/fonts/source-code-pro'
+          sudo mv "$fonts_path_from" "$fonts_path_to"
+          sudo rm -rf "$fonts_path_to/.git"
+          sudo fc-cache -fv "$fonts_path_to"
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v2
       - uses: coursier/cache-action@v6
-      - run: sbt site/run
+      - run: sbt site/mdoc
+      - name: Build Docusaurus
+        working-directory: site
+        run: npm install && npm run build
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          enable_jekyll: true
-          publish_dir: ./site-gen/target/mdoc/.
+          enable_jekyll: false
+          publish_dir: ./site/build/.

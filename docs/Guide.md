@@ -1,4 +1,8 @@
-# Guide
+---
+sidebar_position: 3
+---
+
+# User guide
 
 ## Trees
 
@@ -13,23 +17,24 @@ as these instances are readily available or generated on the fly.
 
 You can configure the automatically generated instances like so:
 
-```mdoc:silent
+```scala mdoc:silent
 import reftree.core.ToRefTree
 
 case class Tree(size: Int, value: Int, children: List[Tree])
 
-implicit val treeDerivationConfig = (ToRefTree.DerivationConfig[Tree]
-  .rename("MyTree")                                // display as “MyTree”
-  .tweakField("size", _.withName("s"))             // label the field “s”, instead of “size”
-  .tweakField("value", _.withTreeHighlight(true))  // highlight the value
-  .tweakField("children", _.withoutName))          // do not label the “children” field
+implicit val treeDerivationConfig: ToRefTree.DerivationConfig[Tree] =
+  ToRefTree.DerivationConfig[Tree]
+    .rename("MyTree")                                // display as “MyTree”
+    .tweakField("size", _.withName("s"))             // label the field “s”, instead of “size”
+    .tweakField("value", _.withTreeHighlight(true))  // highlight the value
+    .tweakField("children", _.withoutName)           // do not label the “children” field
 
 implicitly[ToRefTree[Tree]] // auto-derivation will use the configuration above
 ```
 
 For something custom, manual derivation is the way to go, for example:
 
-```mdoc:silent
+```scala mdoc:silent
 import reftree.core._
 
 implicit def treeInstance: ToRefTree[Tree] = ToRefTree[Tree] { tree =>
@@ -50,11 +55,11 @@ To render diagrams and animations, you will need a `Renderer`.
 
 **For JVM:**
 
-```mdoc:invisible
-val ImagePath = "site/target/tut/images"
+```scala mdoc:invisible
+val ImagePath = "site-gen/target/mdoc/images"
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 import reftree.render._
 import reftree.diagram._
 import java.nio.file.Paths
@@ -84,7 +89,7 @@ There are two ways to use renderers:
 
 **JVM**
 
-```mdoc:silent
+```scala mdoc:silent
 import scala.collection.immutable.Queue
 
 // Option 1: using the `render` method
@@ -110,7 +115,7 @@ Diagram(List(1)).render(dom.document.getElementById("diagram"))
 
 You can set various options, for example:
 
-```mdoc:silent
+```scala mdoc:silent
 // using the `render` method
 renderer.tweakRendering(_.withVerticalSpacing(2)).render("queue", Diagram(Queue(1)))
 
@@ -122,35 +127,35 @@ Diagram(Queue(1)).render("queue", _.withVerticalSpacing(2))
 
 Diagrams can be created and combined into bigger diagrams using the following API:
 
-```mdoc:silent
+```scala mdoc:silent
 // no caption
 Diagram(Queue(1)).render("caption-none")
 ```
 
 ![caption-none](images/guide/caption-none.png)
 
-```mdoc:silent
+```scala mdoc:silent
 // automatically set caption to "Queue(1) :+ 2"
 Diagram.sourceCodeCaption(Queue(1) :+ 2).render("caption-source")
 ```
 
 ![caption-source](images/guide/caption-source.png)
 
-```mdoc:silent
+```scala mdoc:silent
 // use toString to get the caption, i.e. "Queue(1, 2)"
 Diagram.toStringCaption(Queue(1) :+ 2).render("caption-tostring")
 ```
 
 ![caption-tostring](images/guide/caption-tostring.png)
 
-```mdoc:silent
+```scala mdoc:silent
 // merge two diagrams, set captions manually
 (Diagram(Queue(1)).withCaption("one") + Diagram(Queue(2)).withCaption("two")).render("one-two")
 ```
 
 ![one-two](images/guide/one-two.png)
 
-```mdoc:silent
+```scala mdoc:silent
 // isolate each diagram in its own namespace (graph nodes will not be shared across them)
 (Diagram(Queue(1)).toNamespace("one") + Diagram(Queue(2)).toNamespace("two")).render("namespaced")
 ```
@@ -162,7 +167,7 @@ Diagram.toStringCaption(Queue(1) :+ 2).render("caption-tostring")
 Animation is essentially a sequence of diagrams, which can be rendered to an animated GIF.
 The simplest way to create an animation is to use the builder API:
 
-```mdoc:silent
+```scala mdoc:silent
 (Animation
   .startWith(Queue(1))
   .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
@@ -174,7 +179,7 @@ The simplest way to create an animation is to use the builder API:
 
 You can also configure how the diagram for each frame is produced:
 
-```mdoc:silent
+```scala mdoc:silent
 (Animation
   .startWith(Queue(1))
   .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
@@ -189,7 +194,7 @@ all tree nodes across animation frames. Sometimes you want to “anchor”
 the root of the data structure instead, to force it to stay still
 while everything else is moving. You can achieve this via `withAnchor` method:
 
-```mdoc:silent
+```scala mdoc:silent
 (Animation
   .startWith(Queue(1))
   .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))
@@ -201,7 +206,7 @@ while everything else is moving. You can achieve this via `withAnchor` method:
 
 Finally, animations can be combined in sequence or in parallel, for example:
 
-```mdoc:silent
+```scala mdoc:silent
 val queue1 = (Animation
   .startWith(Queue(1))
   .iterateWithIndex(2)((queue, i) => queue :+ (i + 1))

@@ -1,32 +1,35 @@
+---
+sidebar_position: 1
+description: "This talk takes advantage of reftree to observe several immutable data structures in action and uncover their inner beauty. Having surfaced immutability’s crucial tricks, we move our focus to lenses and zippers — handy tools that combine the convenience of the “mutable world” with the expressiveness of functional programming."
+---
+
 # Unzipping Immutability
 
 This page contains the materials for my talk “Unzipping Immutability”.
-Here are some past presentations:
 
-* [LX Scala, April 2016](http://www.lxscala.com/schedule/#session-2) ([video](https://vimeo.com/162214356)).
-* [Pixels Camp, October 2016](https://github.com/PixelsCamp/talks/blob/master/unzipping-immutability_nick-stanchenko.md) ([video](https://www.youtube.com/watch?v=yeMvhuD689A)).
-* [Scala By The Bay, November 2016](http://sched.co/7iTv) ([video](https://www.youtube.com/watch?v=dOj-wk5MQ3k)).
+```mdx-code-block
+import ReactPlayer from 'react-player'
+```
 
-{% youtube %}
-https://www.youtube.com/watch?v=dOj-wk5MQ3k
-{% endyoutube %}
+<ReactPlayer controls style={{marginBottom: '1em'}} url="https://www.youtube.com/watch?v=dOj-wk5MQ3k" />
+
+<details>
+<summary>Older videos</summary>
+
+* LX Scala, April 2016: https://vimeo.com/162214356
+* Pixels Camp, October 2016: https://www.youtube.com/watch?v=yeMvhuD689A
+
+</details>
 
 You can use this page in two ways:
 
 * as a reference/refresher on the concepts covered in the talk;
 * as an interactive playground where you can try the same commands I presented.
 
-Here is an overview:
-
-* [Immutable data structures](#immutable-data-structures)
-* [Lenses](#lenses)
-* [Zippers](#zippers)
-* [Useful resources](#useful-resources)
-
 Throughout this page we will assume the following
 declarations (each section might add its own):
 
-```mdoc:silent
+```scala mdoc:silent
 import reftree.core._
 import reftree.diagram._
 import reftree.render._
@@ -50,15 +53,15 @@ already has all the necessary imports in scope.*
 
 ## Immutable data structures
 
-```mdoc:invisible
-val ImagePath = "site/target/tut/images"
+```scala mdoc:invisible
+val ImagePath = "site-gen/target/mdoc/images"
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 // extra declarations for this section
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
-  directory = Paths.get(ImagePath, "immutability", "data")
+  directory = Paths.get(ImagePath, "immutability")
 )
 import renderer._
 ```
@@ -68,37 +71,37 @@ import renderer._
 We’ll start with one of the simplest structures: a list.
 It consists of a number of cells pointing to each other:
 
-```mdoc
+```scala mdoc
 val list = List(1, 2, 3)
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 diagram(list).render("list")
 ```
 
-![list](../images/immutability/data/list.png)
+![list](../images/immutability/list.png)
 
 Elements can be added to or removed from the front of the list with no effort,
 because we can share the same cells across several lists.
 This would not be possible with a mutable list,
 since modifying the shared part would modify every data structure making use of it.
 
-```mdoc
+```scala mdoc
 val add = 0 :: list
 val remove = list.tail
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 (diagram(list) + diagram(add) + diagram(remove)).render("lists")
 ```
 
-![lists](../images/immutability/data/lists.png)
+![lists](../images/immutability/lists.png)
 
 However we can’t easily add elements at the end of the list, since the last cell
 is pointing to the empty list (`Nil`) and is immutable, i.e. cannot be changed.
 Thus we are forced to create a new list every time:
 
-```mdoc:silent
+```scala mdoc:silent
 (Animation
   .startWith(List(1))
   .iterate(_ :+ 2, _ :+ 3, _ :+ 4)
@@ -106,11 +109,11 @@ Thus we are forced to create a new list every time:
   .render("list-append", tweakAnimation = _.withOnionSkinLayers(3)))
 ```
 
-![list-append](../images/immutability/data/list-append.gif)
+![list-append](../images/immutability/list-append.gif)
 
 This certainly does not look efficient compared to adding elements at the front:
 
-```mdoc:silent
+```scala mdoc:silent
 (Animation
   .startWith(List(1))
   .iterate(2 :: _, 3 :: _, 4 :: _)
@@ -118,23 +121,23 @@ This certainly does not look efficient compared to adding elements at the front:
   .render("list-prepend"))
 ```
 
-![list-prepend](../images/immutability/data/list-prepend.gif)
+![list-prepend](../images/immutability/list-prepend.gif)
 
 ### Queues
 
 If we want to add elements on both sides efficiently, we need a different data structure: a queue.
 The queue below, also known as a “Banker’s Queue”, has two lists: one for prepending and one for appending.
 
-```mdoc
+```scala mdoc
 val queue1 = Queue(1, 2, 3)
 val queue2 = (queue1 :+ 4).tail
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 (diagram(queue1) + diagram(queue2)).render("queues", _.withVerticalSpacing(1.2))
 ```
 
-![queues](../images/immutability/data/queues.png)
+![queues](../images/immutability/queues.png)
 
 This way we can add and remove elements very easily at both ends.
 Except when we try to remove an element and the respective list is empty!
@@ -167,29 +170,29 @@ be stored is limited by 2^31).
 The internal 32-element arrays form the basic structural sharing blocks.
 For small vectors they will be recreated on most operations:
 
-```mdoc
+```scala mdoc:to-string
 val vector1 = (1 to 20).toVector
 val vector2 = vector1 :+ 21
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 (diagram(vector1) + diagram(vector2)).render("vectors", _.withVerticalSpacing(2))
 ```
 
-![vectors](../images/immutability/data/vectors.png)
+![vectors](../images/immutability/vectors.png)
 
 However as more layers leap into action, a huge chunk of the data can be shared:
 
-```mdoc
-val vector1 = (1 to 100).toVector
-val vector2 = vector1 :+ 21
+```scala mdoc:to-string
+val vector3 = (1 to 100).toVector
+val vector4 = vector3 :+ 21
 ```
 
-```mdoc:silent
-(diagram(vector1) + diagram(vector2)).render("big-vectors", _.withVerticalSpacing(2))
+```scala mdoc:silent
+(diagram(vector3) + diagram(vector4)).render("big-vectors", _.withVerticalSpacing(2))
 ```
 
-![big-vectors](../images/immutability/data/big-vectors.png)
+![big-vectors](../images/immutability/big-vectors.png)
 
 If you want to know more, this structure is covered in great detail by Jean Niklas L’orange
 [in his blog](http://hypirion.com/musings/understanding-persistent-vector-pt-1).
@@ -230,7 +233,7 @@ case class Employee(
 )
 ```
 
-```mdoc
+```scala mdoc
 employee
 val raisedEmployee = employee.copy(salary = employee.salary + 10)
 ```
@@ -251,7 +254,7 @@ case class Startup(
 )
 ```
 
-```mdoc
+```scala mdoc
 startup
 val raisedFounder = startup.copy(
   founder = startup.founder.copy(
@@ -260,23 +263,17 @@ val raisedFounder = startup.copy(
 )
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 // extra declarations for this section
-import reftree.contrib.SimplifiedInstances.list
+import reftree.contrib.SimplifiedInstances.{list => listInstance}
 import reftree.contrib.OpticInstances._
-
-val renderer = Renderer(
-  renderingOptions = RenderingOptions(density = 75),
-  directory = Paths.get(ImagePath, "immutability", "lenses")
-)
-import renderer._
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 (diagram(startup) + diagram(raisedFounder)).render("startup")
 ```
 
-![startup](../images/immutability/lenses/startup.png)
+![startup](../images/immutability/startup.png)
 
 Ouch!
 
@@ -286,7 +283,7 @@ It’s called a lens because it focuses on some part of the data and allows to u
 For example, here is a lens that focuses on an employee’s salary
 (using the excellent [Monocle library](https://github.com/julien-truffaut/Monocle)):
 
-```mdoc
+```scala mdoc
 import monocle.macros.GenLens
 
 val salaryLens = GenLens[Employee](_.salary)
@@ -295,64 +292,64 @@ salaryLens.get(startup.founder)
 salaryLens.modify(s => s + 10)(startup.founder)
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 diagram(OpticFocus(salaryLens, startup.founder)).render("salaryLens")
 ```
 
-![salaryLens](../images/immutability/lenses/salaryLens.png)
+![salaryLens](../images/immutability/salaryLens.png)
 
 We can also define a lens that focuses on the startup’s founder:
 
-```mdoc
+```scala mdoc
 val founderLens = GenLens[Startup](_.founder)
 
 founderLens.get(startup)
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 diagram(OpticFocus(founderLens, startup)).render("founderLens")
 ```
 
-![founderLens](../images/immutability/lenses/founderLens.png)
+![founderLens](../images/immutability/founderLens.png)
 
 It’s not apparent yet how this would help, but the trick is that lenses can be composed:
 
-```mdoc
+```scala mdoc
 val founderSalaryLens = founderLens composeLens salaryLens
 
 founderSalaryLens.get(startup)
 founderSalaryLens.modify(s => s + 10)(startup)
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 diagram(OpticFocus(founderSalaryLens, startup)).render("founderSalaryLens")
 ```
 
-![founderSalaryLens](../images/immutability/lenses/founderSalaryLens.png)
+![founderSalaryLens](../images/immutability/founderSalaryLens.png)
 
 One interesting thing is that lenses can focus on anything, not just direct attributes of the data.
 Here is a traversal — a more generic kind of lens — that focuses on all vowels in a string:
 
-```mdoc:silent
+```scala mdoc:silent
 diagram(OpticFocus(vowelTraversal, "example")).render("vowelTraversal")
 ```
 
-![vowelTraversal](../images/immutability/lenses/vowelTraversal.png)
+![vowelTraversal](../images/immutability/vowelTraversal.png)
 
 We can use it to give our founder a funny name:
 
-```mdoc
+```scala mdoc
 val employeeNameLens = GenLens[Employee](_.name)
 val founderVowelTraversal = founderLens composeLens employeeNameLens composeTraversal vowelTraversal
 
 founderVowelTraversal.modify(v => v.toUpper)(startup)
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 diagram(OpticFocus(founderVowelTraversal, startup)).render("founderVowelTraversal")
 ```
 
-![founderVowelTraversal](../images/immutability/lenses/founderVowelTraversal.png)
+![founderVowelTraversal](../images/immutability/founderVowelTraversal.png)
 
 So far we have replaced the `copy` boilerplate with a number of lens declarations.
 However most of the time our goal is just to update data.
@@ -360,7 +357,7 @@ However most of the time our goal is just to update data.
 In Scala there is a great library called [quicklens](https://github.com/adamw/quicklens)
 that allows to do exactly that, creating all the necessary lenses under the hood:
 
-```mdoc
+```scala mdoc
 import com.softwaremill.quicklens._
 
 val raisedCeo = startup.modify(_.founder.salary).using(s => s + 10)
@@ -370,7 +367,7 @@ You might think this is approaching the syntax for updating mutable data,
 but actually we have already surpassed it, since lenses are much more flexible:
 
 
-```mdoc
+```scala mdoc
 val raisedEveryone = startup.modifyAll(_.founder.salary, _.team.each.salary).using(s => s + 10)
 ```
 
@@ -400,24 +397,18 @@ case class Company(
 The `Hierarchy` class refers to itself.
 Let’s grab a company object and display its hierarchy as a tree:
 
-```mdoc:silent
+```scala mdoc:silent
 // extra declarations for this section
 import zipper._
 import reftree.contrib.SimplifiedInstances.option
 import reftree.contrib.ZipperInstances._
-
-val renderer = Renderer(
-  renderingOptions = RenderingOptions(density = 100),
-  directory = Paths.get(ImagePath, "immutability", "zippers")
-)
-import renderer._
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 diagram(company.hierarchy).render("company")
 ```
 
-![company](../images/immutability/zippers/company.png)
+![company](../images/immutability/company.png)
 
 What if we want to navigate through this tree and modify it along the way?
 We can use [lenses](#lenses), but the recursive nature of the tree allows for a better solution.
@@ -431,15 +422,15 @@ All the changes made to the tree can be committed, yielding a new modified versi
 
 Here is how we would insert a new employee into the hierarchy:
 
-```mdoc:silent
+```scala mdoc:silent
 val updatedHierarchy = Zipper(company.hierarchy).moveDownRight.moveDownRight.insertRight(newHire).commit
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 (diagram(company.hierarchy) + diagram(updatedHierarchy)).render("updatedHierarchy")
 ```
 
-![updatedHierarchy](../images/immutability/zippers/updatedHierarchy.png)
+![updatedHierarchy](../images/immutability/updatedHierarchy.png)
 
 My [zipper library](https://github.com/stanch/zipper#zipper--an-implementation-of-huets-zipper)
 provides a few useful movements and operations.
@@ -452,27 +443,27 @@ case class Tree(x: Int, c: List[Tree] = List.empty)
 
 and a simple tree:
 
-```mdoc
+```scala mdoc
 simpleTree
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 diagram(simpleTree).render("simpleTree")
 ```
 
-![simpleTree](../images/immutability/zippers/simpleTree.png)
+![simpleTree](../images/immutability/simpleTree.png)
 
 When we wrap a Zipper around this tree, it does not look very interesting yet:
 
-```mdoc:silent
+```scala mdoc:silent
 val zipper1 = Zipper(simpleTree)
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 (diagram(simpleTree) + diagram(zipper1)).render("zipper1")
 ```
 
-![zipper1](../images/immutability/zippers/zipper1.png)
+![zipper1](../images/immutability/zipper1.png)
 
 We can see that it just points to the original tree and has some other empty fields.
 More specifically, a Zipper consists of four pointers:
@@ -491,33 +482,33 @@ and the parent zipper does not exist, since we are at the top level.
 
 One thing we can do right away is modify the focus:
 
-```mdoc:silent
+```scala mdoc:silent
 val zipper2 = zipper1.update(focus => focus.copy(x = focus.x + 99))
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 (diagram(simpleTree) + diagram(zipper1) + diagram(zipper2)).render("zipper2")
 ```
 
-![zipper2](../images/immutability/zippers/zipper2.png)
+![zipper2](../images/immutability/zipper2.png)
 
 We just created a new tree! To obtain it, we have to commit the changes:
 
-```mdoc:silent
+```scala mdoc:silent
 val tree2 = zipper2.commit
 ```
 
-```mdoc:silent
+```scala mdoc:silent
 (diagram(simpleTree) + diagram(tree2)).render("tree2")
 ```
 
-![tree2](../images/immutability/zippers/tree2.png)
+![tree2](../images/immutability/tree2.png)
 
 If you were following closely,
 you would notice that nothing spectacular happened yet:
 we could’ve easily obtained the same result by modifying the tree directly:
 
-```mdoc:silent
+```scala mdoc:silent
 val tree2b = simpleTree.copy(x = simpleTree.x + 99)
 
 assert(tree2b == tree2)
@@ -527,38 +518,38 @@ The power of Zipper becomes apparent when we go one or more levels deep.
 To move down the tree, we “unzip” it, separating the child nodes into
 the focused node and its left and right siblings:
 
-```mdoc:silent
-val zipper2 = zipper1.moveDownLeft
+```scala mdoc:silent
+val zipper3 = zipper1.moveDownLeft
 ```
 
-```mdoc:silent
-(diagram(zipper1) + diagram(zipper2)).render("zipper1+2")
+```scala mdoc:silent
+(diagram(zipper1) + diagram(zipper3)).render("zipper1+3")
 ```
 
-![zipper1+2](../images/immutability/zippers/zipper1+2.png)
+![zipper1+3](../images/immutability/zipper1+3.png)
 
 The new Zipper links to the old one,
 which will allow us to return to the root of the tree when we are done applying changes.
 This link however prevents us from seeing the picture clearly.
 Let’s look at the second zipper alone:
 
-```mdoc:silent
-diagram(zipper2).render("zipper2b")
-```
-
-![zipper2b](../images/immutability/zippers/zipper2b.png)
-
-Great! We have `2` in focus and `3, 4, 5` as right siblings. What happens if we move right a bit?
-
-```mdoc:silent
-val zipper3 = zipper2.moveRightBy(2)
-```
-
-```mdoc:silent
+```scala mdoc:silent
 diagram(zipper3).render("zipper3")
 ```
 
-![zipper3](../images/immutability/zippers/zipper3.png)
+![zipper3](../images/immutability/zipper3.png)
+
+Great! We have `2` in focus and `3, 4, 5` as right siblings. What happens if we move right a bit?
+
+```scala mdoc:silent
+val zipper4 = zipper3.moveRightBy(2)
+```
+
+```scala mdoc:silent
+diagram(zipper4).render("zipper4")
+```
+
+![zipper4](../images/immutability/zipper4.png)
 
 This is interesting! Notice that the left siblings are “inverted”.
 This allows to move left and right in constant time, because the sibling
@@ -566,47 +557,47 @@ adjacent to the focus is always at the head of the list.
 
 This also allows us to insert new siblings easily:
 
-```mdoc:silent
-val zipper4 = zipper3.insertLeft(Tree(34))
+```scala mdoc:silent
+val zipper5 = zipper4.insertLeft(Tree(34))
 ```
 
-```mdoc:silent
-diagram(zipper4).render("zipper4")
-```
-
-![zipper4](../images/immutability/zippers/zipper4.png)
-
-And, as you might know, we can delete nodes and update the focus:
-
-```mdoc:silent
-val zipper5 = zipper4.deleteAndMoveRight.set(Tree(45))
-```
-
-```mdoc:silent
+```scala mdoc:silent
 diagram(zipper5).render("zipper5")
 ```
 
-![zipper5](../images/immutability/zippers/zipper5.png)
+![zipper5](../images/immutability/zipper5.png)
+
+And, as you might know, we can delete nodes and update the focus:
+
+```scala mdoc:silent
+val zipper6 = zipper5.deleteAndMoveRight.set(Tree(45))
+```
+
+```scala mdoc:silent
+diagram(zipper6).render("zipper6")
+```
+
+![zipper6](../images/immutability/zipper6.png)
 
 Finally, when we move up, the siblings at the current level are “zipped”
 together and their parent node is updated:
 
-```mdoc:silent
-val zipper6 = zipper5.moveUp
+```scala mdoc:silent
+val zipper7 = zipper6.moveUp
 ```
 
-```mdoc:silent
-diagram(zipper6).render("zipper6")
+```scala mdoc:silent
+diagram(zipper7).render("zipper7")
 ```
 
-![zipper6](../images/immutability/zippers/zipper6.png)
+![zipper7](../images/immutability/zipper7.png)
 
 You can probably guess by now that `.commit` is a shorthand for going
 all the way up (applying all the changes) and returning the focus:
 
-```mdoc:silent
-val tree3a = zipper5.moveUp.focus
-val tree3b = zipper5.commit
+```scala mdoc:silent
+val tree3a = zipper6.moveUp.focus
+val tree3b = zipper6.commit
 
 assert(tree3a == tree3b)
 ```

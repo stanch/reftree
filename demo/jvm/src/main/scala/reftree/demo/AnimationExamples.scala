@@ -13,7 +13,7 @@ import scala.collection.immutable._
 
 object Queues extends App {
   Logger.root.withHandler(LogHandler(minimumLevel = Some(Level.Trace)))
-  val renderer = Renderer(directory = Paths.get("images"))
+  val renderer = Renderer(directory = Paths.get("docs", "images"))
   import renderer._
 
   Animation
@@ -30,7 +30,7 @@ object FingerTrees extends App {
 
   val renderer = Renderer(
     renderingOptions = RenderingOptions(verticalSpacing = 2, density = 75),
-    directory = Paths.get("images")
+    directory = Paths.get("docs", "images")
   )
   import renderer._
 
@@ -48,7 +48,7 @@ object Zippers extends App {
 
   val renderer = Renderer(
     renderingOptions = RenderingOptions(density = 75),
-    directory = Paths.get("images")
+    directory = Paths.get("docs", "images")
   )
   import renderer._
 
@@ -80,7 +80,7 @@ object Teaser extends App {
   import reftree.contrib.OpticInstances._
   import reftree.contrib.ZipperInstances._
 
-  val renderer = Renderer(directory = Paths.get("images"))
+  val renderer = Renderer(directory = Paths.get("docs", "images"))
   import renderer._
 
   val queues = Animation

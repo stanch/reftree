@@ -2,7 +2,7 @@ Behold, automatically generated diagrams and animations for your data!
 `reftree` is a *Scala* and *Scala.js* library that allows you to
 create data structure visualizations with very little effort.
 
-![teaser](images/teaser.gif)
+![teaser](docs/images/teaser.gif)
 
 There are a few ways you can use `reftree`:
 
