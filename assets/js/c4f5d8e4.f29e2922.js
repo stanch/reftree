@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkreftree=self.webpackChunkreftree||[]).push([[634],{192:(e,r,s)=>{s.r(r),s.d(r,{default:()=>f});s(6540);var t=s(6347),c=s(4848);const f=()=>(0,c.jsx)(c.Fragment,{children:(0,c.jsx)(t.rd,{to:"/reftree/docs"})})}}]);
