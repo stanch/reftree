@@ -14,5 +14,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - uses: coursier/cache-action@v6
-      - run: |
-          sbt "+publishSigned; sonatypeReleaseAll"
+      - run: sbt ci-release
+        env:
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

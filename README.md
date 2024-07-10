@@ -7,7 +7,7 @@ create data structure visualizations with very little effort.
 There are a few ways you can use `reftree`:
 
 * [improving the documentation of your projects](https://stanch.github.io/zipper/);
-* [live-coding demos and talks](https://stanch.github.io/reftree/Talks.html);
+* [live-coding demos and talks](https://stanch.github.io/reftree/docs/talks);
 * exploring how things work;
 * anywhere you need diagrams of your Scala data structures.
 

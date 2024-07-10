@@ -1,7 +1,6 @@
 val commonSettings = Seq(
   scalaVersion := "2.13.14",
   crossScalaVersions := Seq("2.12.19", "2.13.14"),
-  version := "1.4.0",
   scalacOptions ++= {
     val commonScalacOptions =
       Seq("-feature", "-deprecation", "-Xlint", "-Xfatal-warnings")
@@ -20,7 +19,7 @@ val commonSettings = Seq(
     }
   },
   Compile / doc / scalacOptions += "-no-link-warnings"
-) ++ metadata ++ publishing
+) ++ metadata
 
 lazy val metadata = Seq(
   organization := "io.github.stanch",
@@ -36,20 +35,6 @@ lazy val metadata = Seq(
     url=url("https://github.com/stanch")
   )),
   licenses := Seq(("GPL-3.0", url("http://www.gnu.org/licenses/gpl-3.0.en.html")))
-)
-
-lazy val publishing = Seq(
-  usePgpKeyHex("8ED74E385203BEB1"),
-  pgpPublicRing := baseDirectory.value.getParentFile.getParentFile / ".gnupg" / "pubring.gpg",
-  pgpSecretRing := baseDirectory.value.getParentFile.getParentFile / ".gnupg" / "secring.gpg",
-  pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray),
-  credentials += Credentials(
-    "Sonatype Nexus Repository Manager",
-    "oss.sonatype.org",
-    sys.env.getOrElse("SONATYPE_USER", ""),
-    sys.env.getOrElse("SONATYPE_PASS", "")
-  ),
-  publishTo := Some(Opts.resolver.sonatypeStaging)
 )
 
 val core = crossProject(JSPlatform, JVMPlatform)
@@ -128,7 +113,7 @@ val site = project.in(file("site-gen"))
     name := "reftree-site",
     moduleName := "reftree-site",
     mdocVariables := Map(
-      "VERSION" -> version.value
+      "VERSION" -> version.value.split('+').head
     ),
     (publish / skip) := true
   )
