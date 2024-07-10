@@ -53,17 +53,29 @@ implicit def treeInstance: ToRefTree[Tree] = ToRefTree[Tree] { tree =>
 
 To render diagrams and animations, you will need a `Renderer`.
 
-**For JVM:**
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
 
 ```scala mdoc:invisible
 val ImagePath = "site-gen/target/mdoc/images"
 ```
 
+<Tabs groupId="platform">
+  <TabItem value="jvm" label="JVM" default>
+
 ```scala mdoc:silent
 import reftree.render._
 import reftree.diagram._
 import java.nio.file.Paths
+```
 
+```scala
+val ImagePath = "images"
+```
+
+```scala mdoc:silent
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 75),
   directory = Paths.get(ImagePath, "guide")
@@ -74,7 +86,8 @@ You can also pass a `format` parameter as a String to the `Renderer` constructor
 to specify the format you require. The default is `png`. You can specify any
 file type supported by `dot -T`.
 
-**For Scala.js:**
+  </TabItem>
+  <TabItem value="js" label="Scala.js">
 
 ```scala
 import reftree.render._
@@ -85,9 +98,13 @@ val renderer = Renderer(
 )
 ```
 
+  </TabItem>
+</Tabs>
+
 There are two ways to use renderers:
 
-**JVM**
+<Tabs groupId="platform">
+  <TabItem value="jvm" label="JVM" default>
 
 ```scala mdoc:silent
 import scala.collection.immutable.Queue
@@ -100,7 +117,8 @@ import renderer._
 Diagram(Queue(1)).render("queue")
 ```
 
-**Scala.js**
+  </TabItem>
+  <TabItem value="js" label="Scala.js">
 
 ```scala
 import org.scalajs.dom
@@ -112,6 +130,9 @@ renderer.render(dom.document.getElementById("diagram"), Diagram(List(1)))
 import renderer._
 Diagram(List(1)).render(dom.document.getElementById("diagram"))
 ```
+
+  </TabItem>
+</Tabs>
 
 You can set various options, for example:
 

@@ -26,13 +26,27 @@ $ sbt demo
 
 You can depend on the library by adding these lines to your `build.sbt`:
 
-```scala
-// JVM
-libraryDependencies += "io.github.stanch" %% "reftree" % "@VERSION@"
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
 
-// Scala.js
+<Tabs groupId="platform">
+  <TabItem value="jvm" label="JVM" default>
+
+```scala
+libraryDependencies += "io.github.stanch" %% "reftree" % "@VERSION@"
+```
+
+  </TabItem>
+  <TabItem value="js" label="Scala.js">
+
+```scala
 libraryDependencies += "io.github.stanch" %%% "reftree" % "@VERSION@"
 ```
+
+  </TabItem>
+</Tabs>
 
 ## Minimal example
 
@@ -44,7 +58,13 @@ val ImagePath = "site-gen/target/mdoc/images"
 import reftree.render.{Renderer, RenderingOptions}
 import reftree.diagram.Diagram
 import java.nio.file.Paths
+```
 
+```scala
+val ImagePath = "images"
+```
+
+```scala mdoc:silent
 val renderer = Renderer(
   renderingOptions = RenderingOptions(density = 100),
   directory = Paths.get(ImagePath, "overview")
@@ -55,6 +75,8 @@ case class Person(firstName: String, age: Int)
 
 Diagram.sourceCodeCaption(Person("Bob", 42)).render("example")
 ```
+
+This generates `images/overview/example.png` with the following image:
 
 ![bob](images/overview/example.png)
 
