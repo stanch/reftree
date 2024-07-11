@@ -24,7 +24,7 @@ $ sbt demo
 
 ## Including in your project
 
-You can depend on the library by adding these lines to your `build.sbt`:
+`reftree` is available for Scala 2.12 and 2.13. You can depend on the library by adding these lines to your `build.sbt`:
 
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
