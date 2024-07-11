@@ -39,7 +39,7 @@ libraryDependencies += "io.github.stanch" %% "reftree" % "@VERSION@"
 ```
 
   </TabItem>
-  <TabItem value="js" label="Scala.js">
+  <TabItem value="js" label="Scala.js 1.16+">
 
 ```scala
 libraryDependencies += "io.github.stanch" %%% "reftree" % "@VERSION@"
