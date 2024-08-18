@@ -122,6 +122,7 @@ lazy val root = project.in(file("."))
   .aggregate(coreJVM, coreJS, demoJVM, demoJS)
   .settings(commonSettings)
   .settings(
+    name := "reftree-root",
     publish := {},
     publishLocal := {},
     publishArtifact := false
